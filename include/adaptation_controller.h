@@ -40,9 +40,15 @@ typedef enum {
 } adapt_speed_t;
 
 typedef struct {
-    float max_speed;
+    float cruise_altitude;
     float safety_radius;
     float mode_v;
+    float attraction_gain;
+    float max_speed;
+    float max_yaw_rate;
+    float landing_descent_rate;
+    float landing_threshold_xy;
+    float landing_threshold_z;
     float platform_vel_est[3];
 } adapt_flight_params_t;
 
@@ -53,12 +59,11 @@ typedef struct {
     float current_pos[3];
     float current_vel[3];
     float current_rpy[3];
-    float target_pos[3];
     float yaw_rate;
     float agl;
-    
-    float last_vel_cmd[3];
+    float target_pos[3];
     float control_output[5]; // vx, vy, vz, total_speed, yaw_rate_cmd
+    float last_vel_cmd[3];
     
     bool landing_phase;
     bool descent_phase;
@@ -67,9 +72,9 @@ typedef struct {
     bool collision_detected;
     bool target_reached;
     
-    float clutter_density;
-    float local_navigability;
-    float collision_risk_score;
+    float clutter_density;      // PSMSL result
+    float local_navigability;   // PSMSL result
+    float collision_risk_score; // PSMSL result
     
     float convergence;
     bool converged;
@@ -97,7 +102,7 @@ typedef struct {
 adaptation_controller_t* adapt_init();
 void adapt_free(adaptation_controller_t *controller);
 void adapt_reset(adaptation_controller_t *controller);
-void adapt_set_flight_params(adaptation_controller_t *controller, float max_speed, float safety_radius, float mode_v, const float platform_vel_est[3]);
+void adapt_set_flight_params(adaptation_controller_t *controller, const adapt_flight_params_t *params);
 void adapt_set_mode(adaptation_controller_t *controller, adapt_mode_t mode);
 void adapt_set_speed(adaptation_controller_t *controller, adapt_speed_t speed);
 void adapt_set_target_pos(adaptation_controller_t *controller, const float target_pos[3]);

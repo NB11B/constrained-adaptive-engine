@@ -64,8 +64,9 @@ def run_trial(engine, terrain_id, seed=0, max_steps=1500):
         # Process sensor data and update engine
         engine.process_sensor_data(
             current_pos, current_vel, current_rpy, target_pos, 
-            yaw_rate, agl, obstacles, num_obstacles
-        )
+            yaw_rate, agl, obstacles)
+        
+        # Trigger the control logic update
         engine.update()
         
         # Get control output from engine

@@ -38,19 +38,30 @@ static void calculate_potential_gradient(adaptation_controller_t *ctrl,
     gradient[1] = 0.0f;
     gradient[2] = 0.0f;
 
-    float k_att = 5.0f;
-    float d_clip = 1.5f;
+    // --- Dynamic Adaptation via PSMSL Metrics (Breathing Profiles) ---
+    // The "breathing" factor expands in clutter and contracts in open space.
+    // We incorporate navigability_score (lower is worse) to expand margins in complex geometry.
+    float clutter_impact = ctrl->state.clutter_density * 5.0f;
+    float nav_impact = (1.0f - ctrl->state.local_navigability) * 2.0f;
+    float breathing_factor = fminf(3.0f, 1.0f + clutter_impact + nav_impact);
+    
+    // Adaptive gains: safety prioritized in high-clutter
+    float k_att = ctrl->params.attraction_gain / breathing_factor;
+    float k_repu_base = ctrl->params.mode_v * breathing_factor;
+
     float dx_tgt = current_pos[0] - target_pos[0];
     float dy_tgt = current_pos[1] - target_pos[1];
-    float d_xy = sqrtf(dx_tgt * dx_tgt + dy_tgt * dy_tgt + 1e-8f);
+    float att_norm = sqrtf(dx_tgt * dx_tgt + dy_tgt * dy_tgt + 1e-8f);
+    
+    // Attraction force (normalized)
+    gradient[0] += k_att * (dx_tgt / att_norm) * 4.0f;
+    gradient[1] += k_att * (dy_tgt / att_norm) * 4.0f;
 
-    if (d_xy < d_clip) {
-        gradient[0] += k_att * dx_tgt;
-        gradient[1] += k_att * dy_tgt;
-    } else {
-        gradient[0] += (k_att * d_clip * dx_tgt) / d_xy;
-        gradient[1] += (k_att * d_clip * dy_tgt) / d_xy;
-    }
+    // Velocity-aware safety: buffer expands based on current speed
+    float speed_current = sqrtf(ctrl->state.current_vel[0]*ctrl->state.current_vel[0] + 
+                                ctrl->state.current_vel[1]*ctrl->state.current_vel[1] + 
+                                ctrl->state.current_vel[2]*ctrl->state.current_vel[2] + 1e-8f);
+    float dynamic_safety_buffer = ctrl->params.safety_radius * (1.0f + 0.25f * speed_current);
 
     for (int i = 0; i < num_obstacles; i++) {
         float ox = obstacles[i][0];
@@ -60,23 +71,35 @@ static void calculate_potential_gradient(adaptation_controller_t *ctrl,
 
         if (oz >= 990.0f || (ox == 0.0f && oy == 0.0f && oz == 0.0f)) continue;
 
+        // Don't repel from obstacles that are extremely close to the target pad
         float obs_to_tgt_xy = sqrtf((ox - target_pos[0]) * (ox - target_pos[0]) +
                                     (oy - target_pos[1]) * (oy - target_pos[1]) + 1e-8f);
-        if (obs_to_tgt_xy < 1.2f) continue;
+        if (obs_to_tgt_xy < 1.1f) continue;
 
         float dx = current_pos[0] - ox;
         float dy = current_pos[1] - oy;
         float dz = current_pos[2] - oz;
         float dist = sqrtf(dx * dx + dy * dy + dz * dz + 1e-8f);
-        float effective_safety_radius = ctrl->params.safety_radius + or;
+        
+        // Effective safety radius "breathes" based on environmental feedback
+        float effective_safety_radius = (dynamic_safety_buffer + or) * breathing_factor;
 
         if (dist < effective_safety_radius && dist > 0.01f) {
             float inv_r = 1.0f / effective_safety_radius;
             float inv_d = 1.0f / dist;
-            float scalar = ctrl->params.mode_v * (inv_r - inv_d) * (inv_d * inv_d * inv_d);
+            
+            // --- 3D Aware Repulsion ---
+            // If we are above the obstacle, we primarily want to push UP to clear it.
+            float vertical_boost = (dz > 0.0f) ? 2.5f : 1.0f;
+            
+            float scalar = k_repu_base * (inv_r - inv_d) * (inv_d * inv_d * inv_d);
+            
+            const float MAX_REPU_SCALAR = 25000.0f;
+            if (scalar < -MAX_REPU_SCALAR) scalar = -MAX_REPU_SCALAR;
+            
             gradient[0] += scalar * dx;
             gradient[1] += scalar * dy;
-            gradient[2] += scalar * dz;
+            gradient[2] += scalar * dz * vertical_boost;
         }
     }
 }
@@ -95,22 +118,31 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
     float dist_xy_lock = sqrtf((ctrl->state.current_pos[0] - ctrl->state.target_pos[0]) * (ctrl->state.current_pos[0] - ctrl->state.target_pos[0]) +
                                (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) * (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) + 1e-8f);
 
+    // Z-attraction (proportional control to cruise altitude, or target Z during landing)
+    float target_z_ref = tgt_z + 2.5f; // Default cruise altitude relative to pad
+    if (ctrl->state.landing_phase) {
+        float hover_offset = 0.1f + 0.6f * jnp_clip_placeholder(dist_xy_lock / 2.0f);
+        target_z_ref = tgt_z + hover_offset;
+    }
+    float dz_attraction = target_z_ref - current_z;
+    desired_vz += ctrl->params.attraction_gain * 1.5f * dz_attraction;
+
     if (ctrl->state.landing_phase) {
         if (dist_xy_lock > 3.0f && !ctrl->state.descent_phase) {
             ctrl->state.landing_phase = false;
             ctrl->state.descent_phase = false;
         }
     } else {
-        if (dist_xy_lock < 2.5f) ctrl->state.landing_phase = true;
+        if (dist_xy_lock < 6.0f) ctrl->state.landing_phase = true;
     }
 
     if (ctrl->state.landing_phase && !ctrl->state.descent_phase) {
         float cur_vx_rel = ctrl->state.current_vel[0] - ctrl->params.platform_vel_est[0];
         float cur_vy_rel = ctrl->state.current_vel[1] - ctrl->params.platform_vel_est[1];
         float vxy_rel = sqrtf(cur_vx_rel * cur_vx_rel + cur_vy_rel * cur_vy_rel + 1e-8f);
-        float adaptive_vxy_gate = fminf(0.85f, fmaxf(0.35f, 0.35f + 0.5f * (z_dist_lock / 0.90f)));
+        float adaptive_vxy_gate = fminf(1.5f, fmaxf(0.5f, 0.5f + 1.0f * (z_dist_lock / 1.5f)));
 
-        if (dist_xy_lock < 0.40f && z_dist_lock < 0.90f && z_dist_lock > 0.0f && vxy_rel < adaptive_vxy_gate) {
+        if (dist_xy_lock < (ctrl->params.landing_threshold_xy * 1.5f) && z_dist_lock < (ctrl->params.landing_threshold_z * 1.5f) && z_dist_lock > -0.1f && vxy_rel < adaptive_vxy_gate) {
             ctrl->state.descent_phase = true;
             ctrl->state.descent_vz = ctrl->state.current_vel[2];
         }
@@ -120,44 +152,47 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
 
     if (ctrl->state.descent_phase) {
         float h_rem = fmaxf(current_z - tgt_z, 0.0f);
-        if (h_rem < 0.04f || z_dist_lock <= 0.02f) {
-            float vz_target = -0.015f + ctrl->params.platform_vel_est[2];
-            desired_vz = fminf(0.2f, fmaxf(-0.2f, vz_target - ctrl->state.current_vel[2]));
+        
+        // --- Dynamic Feathering (Flare) Profile ---
+        // We use a feathered vertical velocity that decays as we approach touchdown
+        float vz_feather;
+        if (h_rem < 0.05f) {
+            // Final touchdown latch
+            vz_feather = -ctrl->params.landing_descent_rate * 4.0f; 
         } else {
-            float vz_safe = fminf(0.8f, sqrtf(0.16f + 2.0f * 1.5f * fmaxf(h_rem, 0.01f)));
-            float vz_clamped_des = -fminf(vz_safe, fmaxf(0.15f, h_rem * 1.2f));
-            if (h_rem < 0.09f) vz_clamped_des = -0.025f + ctrl->params.platform_vel_est[2];
-            else if (h_rem < 0.20f) vz_clamped_des = -0.10f + ctrl->params.platform_vel_est[2];
-            desired_vz = fminf(0.3f, fmaxf(-0.8f, (vz_clamped_des - ctrl->state.current_vel[2]) + (vz_clamped_des * 0.5f)));
+            // Exponential flare: faster at top, slowing down as we get closer
+            float flare_base = 0.65f;
+            vz_feather = -fmaxf(0.08f, flare_base * powf(h_rem / 1.5f, 0.75f));
         }
-        float speed_xy = fminf(0.45f, fmaxf(0.05f, dist_xy_lock * 1.5f));
+        
+        // Add platform vertical velocity compensation
+        float vz_target = vz_feather + ctrl->params.platform_vel_est[2];
+        desired_vz = fminf(0.5f, fmaxf(-1.0f, (vz_target - ctrl->state.current_vel[2]) * 1.5f + vz_target));
+
+        // --- Precise Station-Keeping ---
+        // Tighten horizontal control as we get closer to the pad
+        float speed_xy = fminf(0.6f, fmaxf(0.02f, dist_xy_lock * 2.5f));
         float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
-        desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
-        desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
-        max_total_speed = 1.0f;
-    } else if (ctrl->state.landing_phase) {
-        float speed_xy = fminf(1.0f, fmaxf(0.08f, dist_xy_lock * 1.0f));
-        float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
-        desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
-        desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
-        float hover_offset = 0.3f + 0.9f * jnp_clip_placeholder(dist_xy_lock / 1.5f);
-        float target_z_landing = fminf(fmaxf(current_z, tgt_z + 0.15f), tgt_z + hover_offset);
-        desired_vz = fminf(0.4f, fmaxf(-0.8f, (target_z_landing - current_z) * 1.5f));
+        
+        // Stronger centering force during final descent
+        float centering_bias = (h_rem < 0.3f) ? 1.2f : 1.0f;
+        desired_vx = (desired_vx / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[0] * 0.95f;
+        desired_vy = (desired_vy / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[1] * 0.95f;
+        
         max_total_speed = 1.5f;
-    } else {
-        float cruise_z = tgt_z + 2.2f;
-        if (dist_xy_lock < 15.0f) {
-            float blend = fminf(1.0f, fmaxf(0.0f, 1.0f - (dist_xy_lock / 15.0f)));
-            float blend_factor = 1.0f - (1.0f - blend) * (1.0f - blend);
-            cruise_z = (1.0f - blend_factor) * cruise_z + blend_factor * (tgt_z + 0.6f);
-        }
-        desired_vz = fminf(1.8f, fmaxf(-1.6f, (cruise_z - current_z) * 1.2f + ((desired_vz > 0.0f) ? desired_vz * 0.35f : 0.0f)));
-        float speed_xy = 1.8f;
-        if (dist_xy_lock < 6.0f) speed_xy = 1.0f + fminf(1.0f, fmaxf(0.0f, (dist_xy_lock - 2.5f) / 3.5f)) * 0.8f;
+    } else if (ctrl->state.landing_phase) {
+        float speed_xy = fminf(2.0f, fmaxf(0.15f, dist_xy_lock * 1.5f));
         float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
-        desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.85f;
-        desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.85f;
-        max_total_speed = 2.8f;
+        desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
+        desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
+        max_total_speed = 2.0f;
+    } else {
+        float speed_xy = 5.5f;
+        if (dist_xy_lock < 15.0f) speed_xy = 3.5f + fminf(1.0f, fmaxf(0.0f, (dist_xy_lock - 5.0f) / 10.0f)) * 3.5f;
+        float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
+        desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
+        desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
+        max_total_speed = 6.0f;
     }
 
     if (ctrl->state.landing_phase) {
@@ -173,7 +208,7 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         desired_vz = (desired_vz / total_speed) * max_total_speed;
     }
 
-    float max_dv = 2.0f * SIM_DT;
+    float max_dv = 8.0f * SIM_DT;
     float dv_x = desired_vx - ctrl->state.last_vel_cmd[0];
     float dv_y = desired_vy - ctrl->state.last_vel_cmd[1];
     float dv_z = desired_vz - ctrl->state.last_vel_cmd[2];
@@ -202,9 +237,19 @@ adaptation_controller_t* adapt_init()
     adaptation_controller_t *controller = (adaptation_controller_t*)malloc(sizeof(adaptation_controller_t));
     if (!controller) return NULL;
     memset(controller, 0, sizeof(adaptation_controller_t));
-    controller->params.max_speed = 3.0f;
-    controller->params.safety_radius = 0.7f;
-    controller->params.mode_v = 1.0f;
+
+    // Set default parameters (tuned from successful flights)
+    controller->params.cruise_altitude = 1.5f; // meters
+    controller->params.safety_radius = 1.15f;   // meters (base)
+    controller->params.mode_v = 200.0f;          // Repulsion strength (base)
+    controller->params.attraction_gain = 8.5f; // Attraction strength (base)
+    controller->params.max_speed = 5.0f;       // m/s
+    controller->params.max_yaw_rate = 1.5f;    // rad/s
+    controller->params.landing_descent_rate = 0.025f; // m/s
+    controller->params.landing_threshold_xy = 0.60f; // meters
+    controller->params.landing_threshold_z = 1.20f; // meters
+    memset(controller->params.platform_vel_est, 0, sizeof(controller->params.platform_vel_est));
+
     controller->state.mode = ADAPT_MODE_OFF;
     controller->state.speed = ADAPT_SPEED_MEDIUM;
     controller->initialized = true;
@@ -231,13 +276,10 @@ void adapt_reset(adaptation_controller_t *controller)
     controller->state.descent_phase = false;
 }
 
-void adapt_set_flight_params(adaptation_controller_t *controller, float max_speed, float safety_radius, float mode_v, const float platform_vel_est[3])
+void adapt_set_flight_params(adaptation_controller_t *controller, const adapt_flight_params_t *params)
 {
-    if (!controller) return;
-    controller->params.max_speed = max_speed;
-    controller->params.safety_radius = safety_radius;
-    controller->params.mode_v = mode_v;
-    if (platform_vel_est) memcpy(controller->params.platform_vel_est, platform_vel_est, sizeof(float) * 3);
+    if (!controller || !params) return;
+    memcpy(&controller->params, params, sizeof(adapt_flight_params_t));
 }
 
 void adapt_set_mode(adaptation_controller_t *controller, adapt_mode_t mode) { if (controller) controller->state.mode = mode; }
@@ -257,9 +299,14 @@ void adapt_stop(adaptation_controller_t *controller) { if (controller) { control
 bool adapt_update(adaptation_controller_t *controller)
 {
     if (!controller || !controller->running) return false;
+    
+    // Calculate potential field gradient (now using updated PSMSL state from process_sensor_data)
     float gradient[3];
     calculate_potential_gradient(controller, controller->state.current_pos, controller->state.target_pos, controller->internal_obstacles, controller->num_internal_obstacles, gradient);
+    
+    // Process control loop
     calculate_control_output(controller, gradient, controller->state.control_output);
+    
     controller->state.iterations++;
     return true;
 }
@@ -270,7 +317,10 @@ void adapt_process_sensor_data(adaptation_controller_t *controller, const float 
     memcpy(controller->state.current_pos, current_pos, sizeof(float) * 3);
     memcpy(controller->state.current_vel, current_vel, sizeof(float) * 3);
     memcpy(controller->state.current_rpy, current_rpy, sizeof(float) * 3);
-    memcpy(controller->state.target_pos, target_pos, sizeof(float) * 3);
+    // Only update target if not in landing/descent phases or if explicitly requested
+    if (!controller->state.landing_phase && !controller->state.descent_phase) {
+        memcpy(controller->state.target_pos, target_pos, sizeof(float) * 3);
+    }
     controller->state.yaw_rate = yaw_rate;
     controller->state.agl = agl;
     if (obstacles && num_obstacles > 0) {
