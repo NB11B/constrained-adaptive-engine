@@ -64,44 +64,51 @@ class SOTAPilotBenchmarker:
             cfg = TERRAINS[terrain_id]
             scene = ProcScene(cfg, seed)
             engine = ConstrainedAdaptiveEngine()
-            
+
+            # Initial observation — needed to read spawn altitude
+            obs_dict, _ = scene.reset()
+            spawn_z = float(obs_dict["state"][2])
+
             # Reset engine for new trial
+            # cruise_altitude = spawn_z prevents large Z-attraction commands at
+            # spawn that would cause excessive tilt and early environment truncation.
             engine.set_flight_params(
-                max_speed=5.0,
-                safety_radius=1.15,
-                mode_v=200.0,
-                platform_vel_est=[0.0, 0.0, 0.0]
+                cruise_altitude      = spawn_z,
+                max_speed            = 5.0,
+                safety_radius        = 1.15,
+                mode_v               = 200.0,
+                platform_vel_est     = [0.0, 0.0, 0.0],
             )
             engine.set_target_pos(scene.pad_pos)
             engine.start_adaptive()
-            
-            # Initial observation
-            obs_dict, _ = scene.reset()
-            
+
             start_time = time.time()
             steps = 0
             latencies = []
-            
+
             while steps < max_steps:
                 step_start = time.time()
-                
-                state_vec = obs_dict["state"]
+
+                state_vec   = obs_dict["state"]
                 current_pos = state_vec[0:3]
                 current_rpy = state_vec[3:6]
                 current_vel = state_vec[6:9]
-                target_pos = scene.pad_pos
-                yaw_rate = 0.0
-                agl = state_vec[-4] * 20.0
-                
-                obstacles = []
-                for ox, oy, oh, orad in scene.obstacles:
-                    oz = np.clip(current_pos[2], 0, oh)
-                    obstacles.append([ox, oy, oz, orad])
-                
-                # Update engine
+                target_pos  = scene.pad_pos
+                yaw_rate    = 0.0
+                agl         = state_vec[-4] * 20.0
+
+                # Pass raw depth image to C engine — psmsl_depth_analyze_image()
+                # handles all depth processing natively (MCU-compliant, no heap).
+                depth_img = obs_dict.get("depth", None)
                 engine.process_sensor_data(
-                    current_pos, current_vel, current_rpy, target_pos, 
-                    yaw_rate, agl, obstacles)
+                    current_pos, current_vel, current_rpy, target_pos,
+                    yaw_rate, agl,
+                    depth_image  = depth_img,
+                    depth_width  = 128,
+                    depth_height = 128,
+                    max_range    = 20.0,
+                    fov_deg      = 90.0,
+                )
                 engine.update()
                 
                 # Get control output
