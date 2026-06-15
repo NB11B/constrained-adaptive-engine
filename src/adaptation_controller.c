@@ -42,12 +42,17 @@ static void calculate_potential_gradient(adaptation_controller_t *ctrl,
     // The "breathing" factor expands in clutter and contracts in open space.
     // We incorporate navigability_score (lower is worse) to expand margins in complex geometry.
     float clutter_impact = ctrl->state.clutter_density * 5.0f;
-    float nav_impact = (1.0f - ctrl->state.local_navigability) * 2.0f;
-    float breathing_factor = fminf(3.0f, 1.0f + clutter_impact + nav_impact);
+    float nav_impact = (1.0f - ctrl->state.navigability_score) * 3.5f;
+    float target_breathing = fminf(3.5f, 1.0f + clutter_impact + nav_impact);
+    
+    // Temporal Smoothing: "Expand and Contract" over time
+    float alpha = 0.05f; // Smoothing coefficient (approx. 1s time constant at 50Hz)
+    ctrl->state.temporal_breathing = (1.0f - alpha) * ctrl->state.temporal_breathing + alpha * target_breathing;
+    float breathing_factor = ctrl->state.temporal_breathing;
     
     // Adaptive gains: safety prioritized in high-clutter
-    float k_att = ctrl->params.attraction_gain / breathing_factor;
-    float k_repu_base = ctrl->params.mode_v * breathing_factor;
+    float k_att = ctrl->params.attraction_gain / (breathing_factor * 0.85f);
+    float k_repu_base = ctrl->params.mode_v * breathing_factor * 1.50f;
 
     float dx_tgt = current_pos[0] - target_pos[0];
     float dy_tgt = current_pos[1] - target_pos[1];
@@ -90,7 +95,8 @@ static void calculate_potential_gradient(adaptation_controller_t *ctrl,
             
             // --- 3D Aware Repulsion ---
             // If we are above the obstacle, we primarily want to push UP to clear it.
-            float vertical_boost = (dz > 0.0f) ? 2.5f : 1.0f;
+            // Proactive boost for early clearing (starts when slightly below the top).
+            float vertical_boost = (dz > -0.2f) ? 5.5f : 1.0f;
             
             float scalar = k_repu_base * (inv_r - inv_d) * (inv_d * inv_d * inv_d);
             
@@ -119,30 +125,30 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
                                (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) * (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) + 1e-8f);
 
     // Z-attraction (proportional control to cruise altitude, or target Z during landing)
-    float target_z_ref = tgt_z + 2.5f; // Default cruise altitude relative to pad
+    float target_z_ref = ctrl->params.cruise_altitude;
     if (ctrl->state.landing_phase) {
-        float hover_offset = 0.1f + 0.6f * jnp_clip_placeholder(dist_xy_lock / 2.0f);
+        float hover_offset = 0.1f + (ctrl->params.cruise_altitude - tgt_z - 0.1f) * jnp_clip_placeholder(dist_xy_lock / 2.5f);
         target_z_ref = tgt_z + hover_offset;
     }
     float dz_attraction = target_z_ref - current_z;
-    desired_vz += ctrl->params.attraction_gain * 1.5f * dz_attraction;
+    desired_vz += ctrl->params.attraction_gain * 2.0f * dz_attraction;
 
     if (ctrl->state.landing_phase) {
-        if (dist_xy_lock > 3.0f && !ctrl->state.descent_phase) {
+        if (dist_xy_lock > 4.5f && !ctrl->state.descent_phase) {
             ctrl->state.landing_phase = false;
             ctrl->state.descent_phase = false;
         }
     } else {
-        if (dist_xy_lock < 6.0f) ctrl->state.landing_phase = true;
+        if (dist_xy_lock < 8.0f) ctrl->state.landing_phase = true;
     }
 
     if (ctrl->state.landing_phase && !ctrl->state.descent_phase) {
         float cur_vx_rel = ctrl->state.current_vel[0] - ctrl->params.platform_vel_est[0];
         float cur_vy_rel = ctrl->state.current_vel[1] - ctrl->params.platform_vel_est[1];
         float vxy_rel = sqrtf(cur_vx_rel * cur_vx_rel + cur_vy_rel * cur_vy_rel + 1e-8f);
-        float adaptive_vxy_gate = fminf(1.5f, fmaxf(0.5f, 0.5f + 1.0f * (z_dist_lock / 1.5f)));
+        float adaptive_vxy_gate = fminf(2.5f, fmaxf(1.0f, 1.0f + 1.5f * (z_dist_lock / 2.0f)));
 
-        if (dist_xy_lock < (ctrl->params.landing_threshold_xy * 1.5f) && z_dist_lock < (ctrl->params.landing_threshold_z * 1.5f) && z_dist_lock > -0.1f && vxy_rel < adaptive_vxy_gate) {
+        if (dist_xy_lock < (ctrl->params.landing_threshold_xy * 2.5f) && z_dist_lock < (ctrl->params.landing_threshold_z * 2.5f) && z_dist_lock > -0.2f && vxy_rel < adaptive_vxy_gate) {
             ctrl->state.descent_phase = true;
             ctrl->state.descent_vz = ctrl->state.current_vel[2];
         }
@@ -161,8 +167,8 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
             vz_feather = -ctrl->params.landing_descent_rate * 4.0f; 
         } else {
             // Exponential flare: faster at top, slowing down as we get closer
-            float flare_base = 0.65f;
-            vz_feather = -fmaxf(0.08f, flare_base * powf(h_rem / 1.5f, 0.75f));
+            float flare_base = 0.85f;
+            vz_feather = -fmaxf(ctrl->params.landing_descent_rate, flare_base * powf(h_rem / 1.5f, 0.75f));
         }
         
         // Add platform vertical velocity compensation
@@ -187,12 +193,12 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
         max_total_speed = 2.0f;
     } else {
-        float speed_xy = 5.5f;
-        if (dist_xy_lock < 15.0f) speed_xy = 3.5f + fminf(1.0f, fmaxf(0.0f, (dist_xy_lock - 5.0f) / 10.0f)) * 3.5f;
+        float speed_xy = 7.5f; // Increased base cruise speed
+        if (dist_xy_lock < 20.0f) speed_xy = 4.5f + fminf(1.0f, fmaxf(0.0f, (dist_xy_lock - 5.0f) / 15.0f)) * 3.0f;
         float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
         desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
         desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
-        max_total_speed = 6.0f;
+        max_total_speed = 8.0f; // Increased max total speed
     }
 
     if (ctrl->state.landing_phase) {
@@ -208,7 +214,7 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         desired_vz = (desired_vz / total_speed) * max_total_speed;
     }
 
-    float max_dv = 8.0f * SIM_DT;
+    float max_dv = 12.0f * SIM_DT; // Increased acceleration limit for faster response
     float dv_x = desired_vx - ctrl->state.last_vel_cmd[0];
     float dv_y = desired_vy - ctrl->state.last_vel_cmd[1];
     float dv_z = desired_vz - ctrl->state.last_vel_cmd[2];
@@ -269,6 +275,7 @@ void adapt_reset(adaptation_controller_t *controller)
     memset(controller->state.last_vel_cmd, 0, sizeof(float) * 3);
     controller->state.collision_detected = false;
     controller->state.target_reached = false;
+    controller->state.temporal_breathing = 1.0f;
     controller->state.convergence = 0.0f;
     controller->state.converged = false;
     controller->state.iterations = 0;
@@ -331,7 +338,7 @@ void adapt_process_sensor_data(adaptation_controller_t *controller, const float 
     psmsl_depth_result_t depth_analysis_result;
     psmsl_depth_analyze_obstacles(controller->internal_obstacles, controller->num_internal_obstacles, controller->state.current_pos, controller->state.current_rpy, controller->params.safety_radius * 2.0f, &depth_analysis_result);
     controller->state.clutter_density = depth_analysis_result.clutter_density;
-    controller->state.local_navigability = depth_analysis_result.local_navigability;
+    controller->state.navigability_score = depth_analysis_result.local_navigability;
     controller->state.collision_risk_score = depth_analysis_result.collision_risk_score;
 }
 

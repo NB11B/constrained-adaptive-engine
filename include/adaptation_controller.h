@@ -73,8 +73,9 @@ typedef struct {
     bool target_reached;
     
     float clutter_density;      // PSMSL result
-    float local_navigability;   // PSMSL result
+    float navigability_score;   // PSMSL result
     float collision_risk_score; // PSMSL result
+    float temporal_breathing;   // Smoothed breathing factor
     
     float convergence;
     bool converged;

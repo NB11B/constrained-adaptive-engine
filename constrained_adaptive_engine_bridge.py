@@ -59,6 +59,7 @@ class AdaptState(ctypes.Structure):
         ('clutter_density', ctypes.c_float), # PSMSL result
         ('local_navigability', ctypes.c_float), # PSMSL result
         ('collision_risk_score', ctypes.c_float), # PSMSL result
+        ('temporal_breathing', ctypes.c_float), # Smoothed breathing factor
         ('convergence', ctypes.c_float),
         ('converged', ctypes.c_bool),
         ('iterations', ctypes.c_uint32),
