@@ -72,6 +72,11 @@ typedef struct {
     bool collision_detected;
     bool target_reached;
     
+    // Local minimum escape state
+    uint32_t stuck_counter;
+    bool escape_mode_active;
+    float escape_vector[3];
+    
     float clutter_density;      // PSMSL result
     float navigability_score;   // PSMSL result
     float collision_risk_score; // PSMSL result
@@ -110,7 +115,18 @@ void adapt_set_target_pos(adaptation_controller_t *controller, const float targe
 bool adapt_start_adaptive(adaptation_controller_t *controller);
 void adapt_stop(adaptation_controller_t *controller);
 bool adapt_update(adaptation_controller_t *controller);
-void adapt_process_sensor_data(adaptation_controller_t *controller, const float current_pos[3], const float current_vel[3], const float current_rpy[3], const float target_pos[3], float yaw_rate, float agl, const float obstacles[][4], int num_obstacles);
+    void adapt_process_sensor_data(adaptation_controller_t *controller,
+                                   const float current_pos[3],
+                                   const float current_vel[3],
+                                   const float current_rpy[3],
+                                   const float target_pos[3],
+                                   float yaw_rate,
+                                   float agl,
+                                   const float *depth_image,
+                                   int depth_width,
+                                   int depth_height,
+                                   float max_range,
+                                   float fov_deg);
 const adapt_state_t* adapt_get_state(const adaptation_controller_t *controller);
 int adapt_export_state_json(const adaptation_controller_t *controller, char *buffer, size_t buffer_size);
 float jnp_clip_placeholder(float val);

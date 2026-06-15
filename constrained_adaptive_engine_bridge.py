@@ -56,8 +56,13 @@ class AdaptState(ctypes.Structure):
         ('descent_vz', ctypes.c_float),
         ('collision_detected', ctypes.c_bool),
         ('target_reached', ctypes.c_bool),
-        ('clutter_density', ctypes.c_float), # PSMSL result
-        ('local_navigability', ctypes.c_float), # PSMSL result
+        # Local minimum escape state (must match C struct order exactly)
+        ('stuck_counter', ctypes.c_uint32),
+        ('escape_mode_active', ctypes.c_bool),
+        ('_pad_escape', ctypes.c_uint8 * 3),  # alignment padding after bool
+        ('escape_vector', ctypes.c_float * 3),
+        ('clutter_density', ctypes.c_float),      # PSMSL result
+        ('navigability_score', ctypes.c_float),   # PSMSL result (was local_navigability)
         ('collision_risk_score', ctypes.c_float), # PSMSL result
         ('temporal_breathing', ctypes.c_float), # Smoothed breathing factor
         ('convergence', ctypes.c_float),
@@ -106,8 +111,11 @@ _adaptive_engine.adapt_process_sensor_data.argtypes = [
     ctypes.POINTER(ctypes.c_float * 3), # target_pos
     ctypes.c_float,                     # yaw_rate
     ctypes.c_float,                     # agl
-    ctypes.POINTER((ctypes.c_float * 4) * ADAPT_MAX_OBSTACLES), # Multi-Array pointer alignment
-    ctypes.c_int                        # num_obstacles
+    ctypes.POINTER(ctypes.c_float),     # depth_image
+    ctypes.c_int,                       # depth_width
+    ctypes.c_int,                       # depth_height
+    ctypes.c_float,                     # max_range
+    ctypes.c_float                      # fov_deg
 ]
 _adaptive_engine.adapt_process_sensor_data.restype = None
 
@@ -162,22 +170,18 @@ class ConstrainedAdaptiveEngine:
         target_pos_c = (ctypes.c_float * 3)(*target_pos)
         _adaptive_engine.adapt_set_target_pos(self._controller, ctypes.byref(target_pos_c))
 
-    def process_sensor_data(self, current_pos, current_vel, current_rpy, target_pos, yaw_rate, agl, obstacles):
+    def process_sensor_data(self, current_pos, current_vel, current_rpy, target_pos, yaw_rate, agl, depth_image=None, depth_width=128, depth_height=128, max_range=20.0, fov_deg=90.0):
         current_pos_c = (ctypes.c_float * 3)(*current_pos)
         current_vel_c = (ctypes.c_float * 3)(*current_vel)
         current_rpy_c = (ctypes.c_float * 3)(*current_rpy)
         target_pos_c = (ctypes.c_float * 3)(*target_pos)
         
-        num_obstacles = min(len(obstacles), ADAPT_MAX_OBSTACLES)
-        
-        # Zero out the reuse buffer to eliminate ghost points from previous passes
-        ctypes.memset(ctypes.byref(self._obstacle_buffer), 0, ctypes.sizeof(self._obstacle_buffer))
-        
-        for i in range(num_obstacles):
-            self._obstacle_buffer[i][0] = float(obstacles[i][0])
-            self._obstacle_buffer[i][1] = float(obstacles[i][1])
-            self._obstacle_buffer[i][2] = float(obstacles[i][2])
-            self._obstacle_buffer[i][3] = float(obstacles[i][3])
+        if depth_image is not None:
+            # Use numpy's ctypes interface for zero-copy float32 pointer — critical for 50Hz performance
+            depth_f32 = np.ascontiguousarray(depth_image.flatten(), dtype=np.float32)
+            c_depth_image = depth_f32.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+        else:
+            c_depth_image = None
 
         _adaptive_engine.adapt_process_sensor_data(
             self._controller, 
@@ -187,8 +191,11 @@ class ConstrainedAdaptiveEngine:
             ctypes.byref(target_pos_c), 
             float(yaw_rate), 
             float(agl), 
-            ctypes.byref(self._obstacle_buffer), 
-            int(num_obstacles)
+            c_depth_image,
+            int(depth_width),
+            int(depth_height),
+            float(max_range),
+            float(fov_deg)
         )
 
     def start_adaptive(self):

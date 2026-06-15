@@ -62,6 +62,24 @@ void psmsl_depth_analyze_obstacles(const float obstacles[][4], int num_obstacles
                                    float search_radius,
                                    psmsl_depth_result_t *result);
 
+/**
+ * @brief Processes a raw normalized depth image directly on the MCU.
+ *
+ * @param depth_image       Pointer to a flat array of depth values [0.0, 1.0].
+ * @param width             Width of the depth image (e.g., 128).
+ * @param height            Height of the depth image (e.g., 128).
+ * @param current_pos       Current position of the drone [x, y, z].
+ * @param current_rpy       Current roll, pitch, yaw of the drone [r, p, y].
+ * @param max_range         Maximum depth range in meters.
+ * @param fov_deg           Camera field of view in degrees.
+ * @param search_radius     Radius around current_pos to consider for analysis.
+ * @param result            Pointer to psmsl_depth_result_t to store the analysis output.
+ */
+void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
+                               const float current_pos[3], const float current_rpy[3],
+                               float max_range, float fov_deg, float search_radius,
+                               psmsl_depth_result_t *result);
+
 #ifdef __cplusplus
 }
 #endif

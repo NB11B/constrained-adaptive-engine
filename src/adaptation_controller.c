@@ -48,7 +48,8 @@ static void calculate_potential_gradient(adaptation_controller_t *ctrl,
     // Temporal Smoothing: "Expand and Contract" over time
     float alpha = 0.05f; // Smoothing coefficient (approx. 1s time constant at 50Hz)
     ctrl->state.temporal_breathing = (1.0f - alpha) * ctrl->state.temporal_breathing + alpha * target_breathing;
-    float breathing_factor = ctrl->state.temporal_breathing;
+    // Enforce a breathing floor to prevent the engine from freezing entirely near the ground
+    float breathing_factor = fmaxf(0.001f, ctrl->state.temporal_breathing);
     
     // Adaptive gains: safety prioritized in high-clutter
     float k_att = ctrl->params.attraction_gain / (breathing_factor * 0.85f);
@@ -118,11 +119,57 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
     float desired_vy = -gradient[1];
     float desired_vz = -gradient[2];
 
+    // --- Local Minimum Detector & Escape Strategy ---
     float current_z = ctrl->state.current_pos[2];
     float tgt_z = ctrl->state.target_pos[2];
     float z_dist_lock = current_z - tgt_z;
     float dist_xy_lock = sqrtf((ctrl->state.current_pos[0] - ctrl->state.target_pos[0]) * (ctrl->state.current_pos[0] - ctrl->state.target_pos[0]) +
                                (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) * (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) + 1e-8f);
+
+    // Detect if stuck: extremely slow movement while not converged on the pad
+    float speed_current = sqrtf(ctrl->state.current_vel[0]*ctrl->state.current_vel[0] + 
+                                ctrl->state.current_vel[1]*ctrl->state.current_vel[1] + 
+                                ctrl->state.current_vel[2]*ctrl->state.current_vel[2]);
+                                
+    // We are "stuck" if we are moving very slowly, not yet on the pad, and have been for a while
+    if (speed_current < 0.15f && dist_xy_lock > 0.15f) {
+        ctrl->state.stuck_counter++;
+    } else {
+        // Reset counter if moving or if we've reached the target
+        if (ctrl->state.stuck_counter > 0) ctrl->state.stuck_counter--;
+    }
+
+    // Trigger escape mode if stuck for ~1.5 seconds (75 ticks at 50Hz)
+    if (ctrl->state.stuck_counter > 75 && !ctrl->state.escape_mode_active) {
+        ctrl->state.escape_mode_active = true;
+        // Generate an orthogonal escape vector to break symmetry
+        // We use the cross product of the gradient and Z-axis to spiral out
+        float grad_norm = sqrtf(gradient[0]*gradient[0] + gradient[1]*gradient[1] + 1e-8f);
+        if (grad_norm > 0.1f) {
+            ctrl->state.escape_vector[0] = -gradient[1] / grad_norm; // Cross product with (0,0,1)
+            ctrl->state.escape_vector[1] = gradient[0] / grad_norm;
+            ctrl->state.escape_vector[2] = 1.5f; // Add an upward pop to clear low obstacles
+        } else {
+            // Randomish pop if gradient is exactly zero
+            ctrl->state.escape_vector[0] = 1.0f;
+            ctrl->state.escape_vector[1] = 1.0f;
+            ctrl->state.escape_vector[2] = 1.5f;
+        }
+    }
+
+    // Turn off escape mode once we've moved significantly or after a timeout
+    if (ctrl->state.escape_mode_active) {
+        if (speed_current > 1.0f || ctrl->state.stuck_counter > 150) {
+            ctrl->state.escape_mode_active = false;
+            ctrl->state.stuck_counter = 0; // Reset completely
+        } else {
+            // Override the gradient with the escape vector
+            desired_vx = ctrl->state.escape_vector[0] * 2.0f;
+            desired_vy = ctrl->state.escape_vector[1] * 2.0f;
+            desired_vz = ctrl->state.escape_vector[2];
+        }
+    }
+    // ------------------------------------------------
 
     // Z-attraction (proportional control to cruise altitude, or target Z during landing)
     float target_z_ref = ctrl->params.cruise_altitude;
@@ -148,7 +195,13 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         float vxy_rel = sqrtf(cur_vx_rel * cur_vx_rel + cur_vy_rel * cur_vy_rel + 1e-8f);
         float adaptive_vxy_gate = fminf(2.5f, fmaxf(1.0f, 1.0f + 1.5f * (z_dist_lock / 2.0f)));
 
-        if (dist_xy_lock < (ctrl->params.landing_threshold_xy * 2.5f) && z_dist_lock < (ctrl->params.landing_threshold_z * 2.5f) && z_dist_lock > -0.2f && vxy_rel < adaptive_vxy_gate) {
+        // Altimeter void guard: If we are physically low but AGL reads high, trust physical Z
+        float effective_z_dist = z_dist_lock;
+        if (ctrl->state.agl > 15.0f && current_z < 0.5f) {
+            effective_z_dist = current_z; // Trust the absolute Z when altimeter voids
+        }
+
+        if (dist_xy_lock < (ctrl->params.landing_threshold_xy * 2.5f) && effective_z_dist < (ctrl->params.landing_threshold_z * 2.5f) && effective_z_dist > -0.2f && vxy_rel < adaptive_vxy_gate) {
             ctrl->state.descent_phase = true;
             ctrl->state.descent_vz = ctrl->state.current_vel[2];
         }
@@ -182,8 +235,16 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         
         // Stronger centering force during final descent
         float centering_bias = (h_rem < 0.3f) ? 1.2f : 1.0f;
-        desired_vx = (desired_vx / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[0] * 0.95f;
-        desired_vy = (desired_vy / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[1] * 0.95f;
+        
+        // Kill-zone commitment: If extremely close, ignore gradient and just drop
+        if (dist_xy_lock < 0.5f && h_rem < 0.3f) {
+            desired_vx = 0.0f;
+            desired_vy = 0.0f;
+            desired_vz = -0.3f; // Pure vertical drop
+        } else {
+            desired_vx = (desired_vx / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[0] * 0.95f;
+            desired_vy = (desired_vy / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[1] * 0.95f;
+        }
         
         max_total_speed = 1.5f;
     } else if (ctrl->state.landing_phase) {
@@ -318,7 +379,18 @@ bool adapt_update(adaptation_controller_t *controller)
     return true;
 }
 
-void adapt_process_sensor_data(adaptation_controller_t *controller, const float current_pos[3], const float current_vel[3], const float current_rpy[3], const float target_pos[3], float yaw_rate, float agl, const float obstacles[][4], int num_obstacles)
+void adapt_process_sensor_data(adaptation_controller_t *controller,
+                               const float current_pos[3],
+                               const float current_vel[3],
+                               const float current_rpy[3],
+                               const float target_pos[3],
+                               float yaw_rate,
+                               float agl,
+                               const float *depth_image,
+                               int depth_width,
+                               int depth_height,
+                               float max_range,
+                               float fov_deg)
 {
     if (!controller) return;
     memcpy(controller->state.current_pos, current_pos, sizeof(float) * 3);
@@ -330,13 +402,24 @@ void adapt_process_sensor_data(adaptation_controller_t *controller, const float 
     }
     controller->state.yaw_rate = yaw_rate;
     controller->state.agl = agl;
-    if (obstacles && num_obstacles > 0) {
-        int to_copy = num_obstacles > 256 ? 256 : num_obstacles;
-        memcpy(controller->internal_obstacles, obstacles, sizeof(float) * 4 * to_copy);
-        controller->num_internal_obstacles = to_copy;
-    }
+    
+    // We no longer copy obstacles directly. The depth processor extracts them internally.
+    controller->num_internal_obstacles = 0; // Clear old obstacles
+
     psmsl_depth_result_t depth_analysis_result;
-    psmsl_depth_analyze_obstacles(controller->internal_obstacles, controller->num_internal_obstacles, controller->state.current_pos, controller->state.current_rpy, controller->params.safety_radius * 2.0f, &depth_analysis_result);
+    if (depth_image && depth_width > 0 && depth_height > 0) {
+        // Search radius must cover the full sensor range, not just the safety bubble.
+        // Use max_range * 0.8 to catch all relevant obstacles while ignoring far background.
+        float depth_search_radius = max_range * 0.8f;
+        psmsl_depth_analyze_image(depth_image, depth_width, depth_height,
+                                  controller->state.current_pos, controller->state.current_rpy,
+                                  max_range, fov_deg, depth_search_radius,
+                                  &depth_analysis_result);
+    } else {
+        depth_analysis_result.clutter_density = 0.0f;
+        depth_analysis_result.local_navigability = 1.0f;
+        depth_analysis_result.collision_risk_score = 0.0f;
+    }
     controller->state.clutter_density = depth_analysis_result.clutter_density;
     controller->state.navigability_score = depth_analysis_result.local_navigability;
     controller->state.collision_risk_score = depth_analysis_result.collision_risk_score;

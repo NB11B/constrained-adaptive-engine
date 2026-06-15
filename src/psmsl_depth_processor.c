@@ -141,3 +141,89 @@ void psmsl_depth_analyze_obstacles(const float obstacles[][4], int num_obstacles
         result->collision_risk_score = base_risk;
     }
 }
+
+void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
+                               const float current_pos[3], const float current_rpy[3],
+                               float max_range, float fov_deg, float search_radius,
+                               psmsl_depth_result_t *result)
+{
+    if (!result || !depth_image) return;
+
+    // Subsample the depth image to reduce MCU load (e.g., 16x16 grid)
+    int stride_y = height / 16;
+    if (stride_y < 1) stride_y = 1;
+    int stride_x = width / 16;
+    if (stride_x < 1) stride_x = 1;
+
+    // Camera geometry
+    float fov_rad = fov_deg * (M_PI / 180.0f);
+    float focal_length = (width / 2.0f) / tanf(fov_rad / 2.0f);
+    
+    // Drone rotation matrix (Roll, Pitch, Yaw)
+    float roll = current_rpy[0];
+    float pitch = current_rpy[1];
+    float yaw = current_rpy[2];
+    
+    float cr = cosf(roll), sr = sinf(roll);
+    float cp = cosf(pitch), sp = sinf(pitch);
+    float cy = cosf(yaw), sy = sinf(yaw);
+    
+    // R = Rz * Ry * Rx
+    float R[3][3];
+    R[0][0] = cy * cp;
+    R[0][1] = cy * sp * sr - sy * cr;
+    R[0][2] = cy * sp * cr + sy * sr;
+    R[1][0] = sy * cp;
+    R[1][1] = sy * sp * sr + cy * cr;
+    R[1][2] = sy * sp * cr - cy * sr;
+    R[2][0] = -sp;
+    R[2][1] = cp * sr;
+    R[2][2] = cp * cr;
+
+    // Temporary buffer for extracted obstacles (up to 256 points)
+    #define MAX_EXTRACTED_OBS 256
+    float extracted_obs[MAX_EXTRACTED_OBS][4];
+    int num_extracted = 0;
+
+    float min_depth_norm = 0.5f / max_range;
+
+    for (int v = 0; v < height; v += stride_y) {
+        for (int u = 0; u < width; u += stride_x) {
+            if (num_extracted >= MAX_EXTRACTED_OBS) break;
+
+            float d_norm = depth_image[v * width + u];
+            
+            // Ignore background/sky and points too close to drone body
+            if (d_norm >= 0.99f || d_norm <= min_depth_norm) continue;
+
+            float z_cam = d_norm * max_range;
+            float x_cam = (u - width / 2.0f) * z_cam / focal_length;
+            float y_cam = (v - height / 2.0f) * z_cam / focal_length;
+
+            // Camera frame to Drone frame mapping:
+            // Camera +Z -> Drone +X (forward)
+            // Camera +X -> Drone -Y (right)
+            // Camera +Y -> Drone -Z (down)
+            float p_drone[3] = {z_cam, -x_cam, -y_cam};
+
+            // Apply rotation and translation
+            float p_world[3];
+            p_world[0] = current_pos[0] + R[0][0]*p_drone[0] + R[0][1]*p_drone[1] + R[0][2]*p_drone[2];
+            p_world[1] = current_pos[1] + R[1][0]*p_drone[0] + R[1][1]*p_drone[1] + R[1][2]*p_drone[2];
+            p_world[2] = current_pos[2] + R[2][0]*p_drone[0] + R[2][1]*p_drone[1] + R[2][2]*p_drone[2];
+
+            // Radius based on distance (points further away represent larger areas)
+            float radius = z_cam * tanf(fov_rad / width * stride_x);
+            if (radius < 0.2f) radius = 0.2f;
+
+            extracted_obs[num_extracted][0] = p_world[0];
+            extracted_obs[num_extracted][1] = p_world[1];
+            extracted_obs[num_extracted][2] = p_world[2];
+            extracted_obs[num_extracted][3] = radius;
+            num_extracted++;
+        }
+    }
+
+    // Now pass the extracted point cloud to the existing spatial analyzer
+    psmsl_depth_analyze_obstacles(extracted_obs, num_extracted, current_pos, current_rpy, search_radius, result);
+}
