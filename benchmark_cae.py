@@ -42,6 +42,8 @@ class CAEBenchmarker:
                 "Min Dist (m)",
                 "Landing Phase",
                 "Descent Phase",
+                "Approach Assist Ticks",
+                "Terminal Assist Ticks",
             ])
 
             for terrain_id, terrain_name in TERRAIN_NAMES.items():
@@ -68,6 +70,8 @@ class CAEBenchmarker:
                         f"{result['min_dist_m']:.3f}",
                         result.get("landing_phase", False),
                         result.get("descent_phase", False),
+                        result.get("approach_assist_ticks", 0),
+                        result.get("terminal_assist_ticks", 0),
                     ])
                     f.flush()
 
@@ -75,7 +79,8 @@ class CAEBenchmarker:
                         f" {result['status']} "
                         f"({result['steps']} steps, min_dist={result['min_dist_m']}m, "
                         f"landing={result.get('landing_phase', False)}, "
-                        f"descent={result.get('descent_phase', False)}, wall={elapsed:.2f}s)"
+                        f"descent={result.get('descent_phase', False)}, "
+                        f"assist={result.get('approach_assist_ticks', 0)}/{result.get('terminal_assist_ticks', 0)}, wall={elapsed:.2f}s)"
                     )
                     self.summary.append(result)
 
@@ -101,6 +106,8 @@ class CAEBenchmarker:
         print(f"Collisions:   {len(collisions)}")
         print(f"Timeouts:     {len(timeouts)}")
         print(f"Landing Seen: {len(landing_entries)}")
+        print(f"Approach Assist Seen: {len([r for r in self.summary if r.get('approach_assist_ticks', 0) > 0])}")
+        print(f"Terminal Assist Seen: {len([r for r in self.summary if r.get('terminal_assist_ticks', 0) > 0])}")
         print(f"Descent Seen: {len(descent_entries)}")
         if errors:
             print(f"Errors:       {len(errors)}")

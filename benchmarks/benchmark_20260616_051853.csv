@@ -1,0 +1,7 @@
+Terrain,Terrain ID,Seed,Status,Steps,Time (s),Min Dist (m),Landing Phase,Descent Phase
+City Map,1,1337,TIMEOUT,3000,10.85,10.661,False,False
+Open/Valley,2,1337,SUCCESS,660,5.34,0.182,True,True
+Mountain,3,1337,COLLISION,1235,143.50,26.471,False,False
+Village,4,1337,TIMEOUT,3000,53.74,73.844,False,False
+Warehouse,5,1337,COLLISION,637,25.61,0.163,True,True
+Forest,6,1337,SUCCESS,533,37.25,2.380,True,True

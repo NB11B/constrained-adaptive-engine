@@ -135,7 +135,10 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
     bool in_approach = ctrl->state.landing_phase || ctrl->state.descent_phase;
 
     // ── Predictive escape outside final approach only ───────────────────────
-    if (!in_approach) {
+    // Disabling predictive escape within a radius of the pad to prevent it from kicking 
+    // the drone away during final acquisition, especially on mountain terrains.
+    bool near_pad_xy = dist_xy_lock < 10.0f;
+    if (!in_approach && !near_pad_xy) {
         float raw_threat = (ctrl->state.collision_risk_score * 0.50f) +
                            (ctrl->state.clutter_density * 0.30f) +
                            ((1.0f - ctrl->state.navigability_score) * 0.20f);
@@ -197,21 +200,23 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
 
     // ── Landing state machine ───────────────────────────────────────────────
     if (!ctrl->state.landing_phase) {
-        if (dist_xy_lock < 3.0f && current_z > tgt_z + 0.20f) {
+        // Absolute Altitude Gate: Don't land on mountains 20m above the pad.
+        bool near_ground = current_z < (tgt_z + 4.5f);
+        if (dist_xy_lock < 4.5f && current_z > tgt_z + 0.15f && near_ground) {
             ctrl->state.landing_phase = true;
             ctrl->state.predictive_escape_active = false;
             ctrl->state.escape_mode_active = false;
             ctrl->state.stuck_counter = 0;
         }
-    } else if (!ctrl->state.descent_phase && dist_xy_lock > 5.5f) {
+    } else if (!ctrl->state.descent_phase && dist_xy_lock > 6.5f) {
         ctrl->state.landing_phase = false;
     }
 
     if (ctrl->state.landing_phase && !ctrl->state.descent_phase) {
-        bool xy_ok = dist_xy_lock < fmaxf(0.85f, ctrl->params.landing_threshold_xy * 1.65f);
-        bool low_pass_ok = (ctrl->state.agl < 1.45f && dist_xy_lock < 1.35f);
-        bool alt_ok = z_dist_lock > 0.18f;
-        bool vxy_ok = vxy_rel < 1.65f;
+        bool xy_ok = dist_xy_lock < fmaxf(1.10f, ctrl->params.landing_threshold_xy * 1.85f);
+        bool low_pass_ok = (ctrl->state.agl < 1.65f && dist_xy_lock < 1.75f);
+        bool alt_ok = z_dist_lock > 0.15f;
+        bool vxy_ok = vxy_rel < 2.25f;
         if ((xy_ok || low_pass_ok) && alt_ok && vxy_ok) {
             ctrl->state.descent_phase = true;
             ctrl->state.descent_vz = ctrl->state.current_vel[2];

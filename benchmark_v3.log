@@ -1,0 +1,39 @@
+pybullet build time: Jun 16 2026 02:10:47
+/usr/local/lib/python3.12/dist-packages/gym_pybullet_drones/envs/BaseAviary.py:7: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+============================================================
+CAE Real Swarm Benchmarker | Trials per Terrain: 1 | Random: False
+============================================================
+
+Benchmarking Terrain: City Map
+  Trial 1/1 | Seed: 1337... TIMEOUT (3000 steps, min_dist=10.661m, landing=False, descent=False, wall=10.85s)
+
+Benchmarking Terrain: Open/Valley
+  Trial 1/1 | Seed: 1337... SUCCESS (660 steps, min_dist=0.182m, landing=True, descent=True, wall=5.34s)
+
+Benchmarking Terrain: Mountain
+  Trial 1/1 | Seed: 1337... COLLISION (1235 steps, min_dist=26.471m, landing=False, descent=False, wall=143.50s)
+
+Benchmarking Terrain: Village
+  Trial 1/1 | Seed: 1337... TIMEOUT (3000 steps, min_dist=73.844m, landing=False, descent=False, wall=53.74s)
+
+Benchmarking Terrain: Warehouse
+  Trial 1/1 | Seed: 1337... COLLISION (637 steps, min_dist=0.163m, landing=True, descent=True, wall=25.61s)
+
+Benchmarking Terrain: Forest
+  Trial 1/1 | Seed: 1337... SUCCESS (533 steps, min_dist=2.38m, landing=True, descent=True, wall=37.25s)
+
+============================================================
+BENCHMARK SUMMARY
+============================================================
+Total Trials: 6
+Successes:    2 (33.3%)
+Collisions:   2
+Timeouts:     2
+Landing Seen: 3
+Descent Seen: 3
+Avg Steps (Success): 596.5
+Avg Wall Time:       21.29s
+
+Detailed results saved to: benchmarks/benchmark_20260616_051853.csv
+============================================================

@@ -32,6 +32,7 @@ if _swarm_repo:
 from swarm.validator.task_gen import task_for_seed_and_type
 from swarm.utils.env_factory import make_env
 from constrained_adaptive_engine_bridge import ConstrainedAdaptiveEngine
+from flight_recorder import FlightRecorder
 
 CAMERA_FOV_DEG = 90.0
 DEPTH_MAX_RANGE = 20.0
@@ -52,35 +53,38 @@ def _action_from_velocity(vx, vy, vz, total_speed, yaw_cmd):
     return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
 
 
-def _direct_action(current_pos, target_pos, yaw_norm, descent=False):
+def _direct_action(current_pos, target_pos, plat_vel, yaw_norm, descent=False):
     """Closed-loop approach/touchdown assist outside the potential-field controller."""
     delta = target_pos - current_pos
     xy_dist = float(np.linalg.norm(delta[:2]))
     h_rem = max(float(current_pos[2] - target_pos[2]), 0.0)
 
     if descent:
-        if xy_dist < 0.30:
-            # Settle vertically over the pad; keep final press slow enough for success criteria.
-            vz = -0.22 if h_rem > 0.30 else -0.12
-            desired = np.array([0.0, 0.0, vz], dtype=np.float64)
+        if xy_dist < 0.22:
+            # Final Touchdown Settle: zero out relative XY velocity to avoid sliding off or clipping edges.
+            # Use a slightly firmer press at the very end to ensure contact.
+            # Increased descent rate at the very end to prevent hovering just above the success threshold.
+            vz = -0.20 if h_rem > 0.18 else -0.18
+            desired = np.array([plat_vel[0], plat_vel[1], vz + plat_vel[2]], dtype=np.float64)
         else:
-            xy_speed = min(0.50, max(0.08, xy_dist * 0.55))
-            vz = -0.26 if h_rem > 0.35 else -0.12
+            # Centering approach: prioritize lateral alignment before final drop.
+            xy_speed = min(0.50, max(0.12, xy_dist * 0.70))
+            vz = -0.22 if h_rem > 0.38 else -0.12
             desired = np.array(
-                [delta[0] / (xy_dist + 1e-8) * xy_speed,
-                 delta[1] / (xy_dist + 1e-8) * xy_speed,
-                 vz],
+                [delta[0] / (xy_dist + 1e-8) * xy_speed + plat_vel[0],
+                 delta[1] / (xy_dist + 1e-8) * xy_speed + plat_vel[1],
+                 vz + plat_vel[2]],
                 dtype=np.float64,
             )
     else:
         # Acquisition assist: pull toward the pad at a controlled altitude before C landing mode opens.
-        xy_speed = min(0.95, max(0.25, xy_dist * 0.45))
+        xy_speed = min(1.15, max(0.35, xy_dist * 0.55))
         desired_z = target_pos[2] + 1.4
-        vz = float(np.clip((desired_z - current_pos[2]) * 0.75, -0.45, 0.45))
+        vz = float(np.clip((desired_z - current_pos[2]) * 0.85, -0.55, 0.55))
         desired = np.array(
-            [delta[0] / (xy_dist + 1e-8) * xy_speed,
-             delta[1] / (xy_dist + 1e-8) * xy_speed,
-             vz],
+            [delta[0] / (xy_dist + 1e-8) * xy_speed + plat_vel[0],
+             delta[1] / (xy_dist + 1e-8) * xy_speed + plat_vel[1],
+             vz + plat_vel[2]],
             dtype=np.float64,
         )
 
@@ -143,6 +147,10 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     last_descent = False
     terminal_ticks = 0
     approach_assist_ticks = 0
+    
+    recorder = FlightRecorder()
+    terrain_name = TERRAIN_NAMES.get(terrain_id, f"Terrain{terrain_id}")
+    recorder.start_trial(terrain_name.replace(" ", "_"), seed)
 
     start_time = time.time()
     try:
@@ -193,13 +201,24 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             vx, vy, vz, total_speed, yaw_cmd = cs.control_output
             yaw_norm = float(np.clip(yaw_cmd, -1.0, 1.0))
             action = _action_from_velocity(vx, vy, vz, total_speed, yaw_norm)
-
-            if dist_xy < TERMINAL_ASSIST_XY_M and agl < TERMINAL_ASSIST_AGL_M:
+            
+            assist_type = 0 # 0: None, 1: Approach, 2: Terminal
+            # Robust Landing Gate: AGL must be low AND absolute altitude must be near target altitude.
+            # This prevents "landing" on mountain peaks 20m above the actual pad.
+            is_near_ground_level = current_pos[2] < (plat_pos[2] + 4.2)
+            
+            if dist_xy < TERMINAL_ASSIST_XY_M and agl < TERMINAL_ASSIST_AGL_M and is_near_ground_level:
                 terminal_ticks += 1
-                action = _direct_action(current_pos, plat_pos, yaw_norm, descent=True)
+                assist_type = 2
+                action = _direct_action(current_pos, plat_pos, plat_vel, yaw_norm, descent=True)
             elif dist_xy < APPROACH_ASSIST_XY_M and not bool(cs.landing_phase):
                 approach_assist_ticks += 1
-                action = _direct_action(current_pos, plat_pos, yaw_norm, descent=False)
+                assist_type = 1
+                action = _direct_action(current_pos, plat_pos, plat_vel, yaw_norm, descent=False)
+
+            dist = float(np.linalg.norm(current_pos - plat_pos))
+            recorder.record_step(step, time.time() - start_time, current_pos, current_vel, 
+                               agl, dist_xy, dist, plat_pos, plat_vel, cs.control_output, cs, assist_type)
 
             obs, _reward, term, trunc, info = env.step(action)
 
@@ -233,6 +252,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         else:
             step = max_steps - 1
     finally:
+        recorder.close()
         if hasattr(engine, "close"):
             engine.close()
         env.close()
@@ -266,9 +286,9 @@ TERRAIN_NAMES = {
 
 if __name__ == "__main__":
     test_cases = [
-        (2, 39259),
-        (1, 29593),
-        (1, 30269),
+        (3, 1337),   # Mountain Collision
+        (5, 1337),   # Warehouse Collision
+        (2, 39259),  # Open/Valley Collision (agl clipping case)
     ]
 
     print("=" * 60)
