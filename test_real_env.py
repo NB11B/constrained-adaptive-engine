@@ -282,6 +282,15 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     terminal_ticks = 0
     approach_assist_ticks = 0
     settle_ticks = 0
+    last_phase_reason = "INIT"
+    min_dist_step = 0
+    min_dist_xy = 9999.0
+    min_agl = 9999.0
+    max_agl_floor_ticks = 0
+    agl_floor_ticks = 0
+    descent_corridor_ticks = 0
+    terminal_press_ticks = 0
+    settle_phase_ticks = 0
 
     recorder = FlightRecorder()
     terrain_name = TERRAIN_NAMES.get(terrain_id, f"Terrain{terrain_id}")
@@ -346,6 +355,22 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             assist_type = 0  # 0: none, 1: approach, 2: terminal
             phase_reason = _c_phase_reason(cs)
             is_near_ground_level = current_pos[2] < (plat_pos[2] + 4.2)
+
+            last_phase_reason = phase_reason
+            min_agl = min(min_agl, agl)
+
+            if phase_reason == "MOUNTAIN_AGL_FLOOR_CLIMB":
+                agl_floor_ticks += 1
+            if phase_reason == "MOUNTAIN_DESCENT_CORRIDOR":
+                descent_corridor_ticks += 1
+            if phase_reason == "TERMINAL_PRESS":
+                terminal_press_ticks += 1
+            if phase_reason == "SETTLE_PHASE":
+                settle_phase_ticks += 1
+
+            if dist_xy < min_dist_xy:
+                min_dist_step = step
+                min_dist_xy = dist_xy
 
             mountain_low_agl_guard = (
                 terrain_id == 3
@@ -493,11 +518,16 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         "descent_phase": last_descent,
         "approach_assist_ticks": approach_assist_ticks,
         "terminal_assist_ticks": terminal_ticks,
-    }
-
-
-TERRAIN_NAMES = {
-    1: "City Map",
+        "wall_time_s": 0.0,
+        "last_phase_reason": last_phase_reason,
+        "min_dist_step": min_dist_step,
+        "min_dist_xy": round(min_dist_xy, 3),
+        "min_agl": round(min_agl, 3),
+        "agl_floor_ticks": agl_floor_ticks,
+        "descent_corridor_ticks": descent_corridor_ticks,
+        "settle_phase_ticks": settle_phase_ticks,
+        "terminal_press_ticks": terminal_press_ticks,
+    }1: "City Map",
     2: "Open/Valley",
     3: "Mountain",
     4: "Village",

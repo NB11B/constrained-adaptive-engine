@@ -44,6 +44,14 @@ class CAEBenchmarker:
                 "Descent Phase",
                 "Approach Assist Ticks",
                 "Terminal Assist Ticks",
+                "Last Phase Reason",
+                "Min Dist Step",
+                "Min Dist XY",
+                "Min AGL",
+                "AGL Floor Ticks",
+                "Descent Corridor Ticks",
+                "Settle Phase Ticks",
+                "Terminal Press Ticks",
             ])
 
             for terrain_id, terrain_name in TERRAIN_NAMES.items():
@@ -72,6 +80,14 @@ class CAEBenchmarker:
                         result.get("descent_phase", False),
                         result.get("approach_assist_ticks", 0),
                         result.get("terminal_assist_ticks", 0),
+                        result.get("last_phase_reason", "N/A"),
+                        result.get("min_dist_step", 0),
+                        result.get("min_dist_xy", 9999.0),
+                        result.get("min_agl", 9999.0),
+                        result.get("agl_floor_ticks", 0),
+                        result.get("descent_corridor_ticks", 0),
+                        result.get("settle_phase_ticks", 0),
+                        result.get("terminal_press_ticks", 0),
                     ])
                     f.flush()
 
