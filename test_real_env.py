@@ -104,11 +104,11 @@ TERRAIN_PROFILES = {
         "acq_gain": 0.52,
         "acq_speed_max": 0.95,
         "approach_gate_xy": 4.75,
-        "term_gate_xy": 0.38,
-        "final_center_gate": 0.15,
-        "settle_required": 14,
-        "settle_v_tol": 0.07,
-        "press_vz": -0.15,
+        "term_gate_xy": 0.34,
+        "final_center_gate": 0.12,
+        "settle_required": 24,
+        "settle_v_tol": 0.055,
+        "press_vz": -0.10,
     },
     6: {
         "name": "forest",
@@ -166,14 +166,22 @@ def _direct_action(
         if xy_dist < final_center_gate:
             # Centered enough: first damp/settle relative XY, then press vertically.
             if settle_ticks >= settle_required:
-                vz = press_vz if h_rem > 0.12 else (press_vz * 0.60)
+                if terrain_id == 5:
+                    if h_rem > 0.22:
+                        vz = press_vz
+                    elif h_rem > 0.08:
+                        vz = -0.055
+                    else:
+                        vz = -0.025
+                else:
+                    vz = press_vz if h_rem > 0.12 else (press_vz * 0.60)
             else:
-                vz = -0.015 if terrain_id == 5 else -0.01
+                vz = -0.003 if terrain_id == 5 else -0.01
             desired = np.array([plat_vel[0], plat_vel[1], vz + plat_vel[2]], dtype=np.float64)
         else:
             # Still outside final center gate. Prioritize centering over dropping.
-            xy_speed = min(0.28 if terrain_id == 5 else 0.55, max(0.05, xy_dist * 0.45))
-            vz = -0.06 if terrain_id == 5 else (-0.10 if h_rem > 0.38 else -0.04)
+            xy_speed = min(0.22 if terrain_id == 5 else 0.55, max(0.04, xy_dist * 0.40))
+            vz = -0.005 if terrain_id == 5 else (-0.10 if h_rem > 0.38 else -0.04)
             desired = np.array(
                 [delta[0] / (xy_dist + 1e-8) * xy_speed + plat_vel[0],
                  delta[1] / (xy_dist + 1e-8) * xy_speed + plat_vel[1],
@@ -245,7 +253,7 @@ def _landing_params(terrain_id, dist_xy, spawn_z, plat_vel):
         "attraction_gain": attraction_gain,
         "landing_threshold_xy": 0.95 if landing_committed else 0.75,
         "landing_threshold_z": 1.20,
-        "landing_descent_rate": 0.40 if terrain_id == 5 and landing_committed else (0.38 if landing_committed else 0.34),
+        "landing_descent_rate": 0.34 if terrain_id == 5 and landing_committed else (0.38 if landing_committed else 0.34),
         "platform_vel_est": list(plat_vel),
     }
 
