@@ -72,9 +72,9 @@ TERRAIN_PROFILES = {
         "transit_alt": 6.3,
         "mode_v": 108.0,
         "safety": 1.28,
-        "acq_gain": 0.60,
-        "acq_speed_max": 1.40,
-        "approach_gate_xy": 18.0,
+        "acq_gain": 0.64,
+        "acq_speed_max": 1.55,
+        "approach_gate_xy": 22.0,
         "term_gate_xy": 1.20,
         "final_center_gate": 0.20,
         "settle_required": 12,
@@ -287,11 +287,11 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     min_dist_step = 0
     min_dist_xy = 9999.0
     min_agl = 9999.0
-    max_agl_floor_ticks = 0
     agl_floor_ticks = 0
     descent_corridor_ticks = 0
     terminal_press_ticks = 0
     settle_phase_ticks = 0
+    warehouse_commit_ticks = 0
 
     recorder = FlightRecorder()
     terrain_name = TERRAIN_NAMES.get(terrain_id, f"Terrain{terrain_id}")
@@ -367,7 +367,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             mountain_low_agl_guard = (
                 terrain_id == 3
                 and agl < profile.get("ridge_floor_agl", 1.6)
-
+                and dist_xy > 2.5
                 and not bool(cs.landing_phase)
             )
             mountain_safety_climb = (
@@ -400,7 +400,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 warehouse_terminal_commit = (
                     terrain_id == 5
                     and terminal_ticks > 900
-
+                    and dist_xy < 0.50
                     and agl < 0.90
                     and bool(cs.landing_phase)
                     and bool(cs.descent_phase)
@@ -420,6 +420,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
 
                 if warehouse_terminal_commit:
                     phase_reason = "WAREHOUSE_COMMIT_PRESS"
+                    warehouse_commit_ticks += 1
                 else:
                     phase_reason = "TERMINAL_PRESS" if settle_ticks >= profile["settle_required"] else "SETTLE_PHASE"
             elif (dist_xy < approach_gate_xy or mountain_safety_climb or mountain_descent_corridor) and not bool(cs.landing_phase):
@@ -544,6 +545,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         "descent_corridor_ticks": descent_corridor_ticks,
         "settle_phase_ticks": settle_phase_ticks,
         "terminal_press_ticks": terminal_press_ticks,
+        "warehouse_commit_ticks": warehouse_commit_ticks,
     }
 
 
@@ -567,7 +569,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print("CAE Real Environment Integration Test")
     print("  Depth: native C psmsl_depth_analyze_image (16×16 grid)")
-    print("  Landing: mountain AGL floor + softened warehouse touchdown")
+    print("  Landing: mountain corridor optimization + warehouse commit guard")
     print("=" * 60)
 
     for terrain_id, seed in test_cases:
@@ -579,6 +581,7 @@ if __name__ == "__main__":
             f"min_dist={result['min_dist_m']}m | "
             f"landing={result['landing_phase']} descent={result['descent_phase']} | "
             f"assist={result['approach_assist_ticks']}/{result['terminal_assist_ticks']} | "
+            f"phase={result.get('last_phase_reason', 'N/A')} | "
             f"time={result['duration_s']}s"
         )
 
