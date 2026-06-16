@@ -16,6 +16,11 @@
 #define Inv_Resolution_XY           2.50f   // Pre-inverted multiplication factor
 #define Inv_Resolution_Z            1.25f   // Pre-inverted height shift factor
 
+// Swarm normalizes useful camera depth over 0.5m..20m. max_range is the upper
+// bound supplied by the harness/agent, while this near bound keeps native C
+// deprojection aligned with the observation tensor.
+#define SWARM_DEPTH_MIN_M           0.50f
+
 /**
  * @brief Maps high-precision world coordinates to localized discrete array coordinates.
  * Eliminates slow floating-point division using pre-inverted scaling constants.
@@ -159,6 +164,7 @@ void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
     // Camera geometry
     float fov_rad = fov_deg * (M_PI / 180.0f);
     float focal_length = (width / 2.0f) / tanf(fov_rad / 2.0f);
+    float depth_span = fmaxf(0.01f, max_range - SWARM_DEPTH_MIN_M);
     
     // Drone rotation matrix (Roll, Pitch, Yaw)
     float roll = current_rpy[0];
@@ -182,7 +188,6 @@ void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
     R[2][2] = cp * cr;
 
     int num_extracted = 0;
-    float min_depth_norm = 0.5f / max_range;
 
     for (int v = 0; v < height; v += stride_y) {
         for (int u = 0; u < width; u += stride_x) {
@@ -190,10 +195,12 @@ void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
 
             float d_norm = depth_image[v * width + u];
             
-            // Ignore background/sky and points too close to drone body
-            if (d_norm >= 0.99f || d_norm <= min_depth_norm) continue;
+            // Ignore background/sky and invalid normalized pixels.
+            if (d_norm >= 0.99f || d_norm < 0.0f) continue;
 
-            float z_cam = d_norm * max_range;
+            // Swarm depth image is normalized after clipping to [0.5m, max_range].
+            // Reconstruct metric camera depth before pinhole deprojection.
+            float z_cam = SWARM_DEPTH_MIN_M + d_norm * depth_span;
             float x_cam = (u - width / 2.0f) * z_cam / focal_length;
             float y_cam = (v - height / 2.0f) * z_cam / focal_length;
 
