@@ -12,13 +12,10 @@ The **Constrained Adaptive Engine (CAE)** is a high-performance, JAX-free flight
 - **Spawn-Altitude Cruise Initialisation**: `cruise_altitude` is set from the first observed spawn altitude, preventing excessive Z-attraction commands that would cause tilt-based early truncation.
 - **Benchmarking Suite**: Includes `test_real_env.py` (real swarm-subnet environment) and `benchmark_cae.py` (ProcScene-based multi-seed stress test).
 
-## Performance Metrics (Hardened Milestone)
-
-| Metric | Forest (CT3) | Warehouse | Mountain | City |
-| :--- | :--- | :--- | :--- | :--- |
-| **Success Rate** | 100% | 100% | 100% | 100% |
-| **Avg Latency** | 2.1 ms | 1.8 ms | 1.9 ms | 1.5 ms |
-| **Max Delta** | 2.5 ms | 2.2 ms | 2.4 ms | 1.9 ms |
+Current verified baseline: commit 0bb38b0
+Benchmark: 5/6 terrain successes, 0 collisions, 1 safe Mountain timeout.
+Warehouse precision landing fixed via staged terminal press.
+Mountain ridge collision mitigated via AGL floor climb.
 
 ## Project Structure
 
@@ -69,4 +66,4 @@ The depth pipeline is fully native-C and MCU-compliant:
 3. `psmsl_depth_analyze_obstacles()` bins the world-frame points into a spatial grid, computes **clutter density**, **local navigability**, and **collision risk score**.
 4. These three metrics feed the adaptive breathing factor that modulates the potential-field repulsion gain in real time.
 
-*Copyright © 2026 SOTAPilot Development Team. All rights reserved.*
+*Nathanael J. Bocker, 2026 all rights reserved*
