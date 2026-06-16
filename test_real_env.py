@@ -11,12 +11,10 @@ Key design principles
   conversion — all depth processing is MCU-compliant inside the C engine.
 - cruise_altitude is initialised from the spawn altitude observed in the
   first observation. This prevents the Z-attraction term from issuing large
-  downward velocity commands at spawn (which would cause excessive tilt and
-  early truncation by the environment's safety cut-off).
+  downward velocity commands at spawn.
 - The bridge maps C engine output [vx, vy, vz, speed, yaw] to the
   environment's [dir_x, dir_y, dir_z, speed_norm, yaw_norm] action format.
-- No artificial speed clamps or overrides — the engine's adaptive dynamics
-  manage acceleration and deceleration.
+- The validation harness mirrors the tuned landing policy used by drone_agent.py.
 """
 import os
 import sys
@@ -37,50 +35,72 @@ from swarm.validator.task_gen import task_for_seed_and_type
 from swarm.utils.env_factory import make_env
 from constrained_adaptive_engine_bridge import ConstrainedAdaptiveEngine
 
-# Camera constants
-CAMERA_FOV_DEG = 90.0    # Base FOV used for depth de-projection
-DEPTH_MAX_RANGE = 20.0   # metres — matches swarm-subnet normalized depth encoding
-
-# C engine internal max speed / Swarm validator speed limit
+CAMERA_FOV_DEG = 90.0
+DEPTH_MAX_RANGE = 20.0
 C_ENGINE_MAX_SPEED = 3.0
+TERMINAL_ASSIST_XY_M = 1.25
+TERMINAL_ASSIST_AGL_M = 2.20
+
+
+def _action_from_velocity(vx, vy, vz, total_speed, yaw_cmd):
+    vel_mag = np.sqrt(vx**2 + vy**2 + vz**2) + 1e-8
+    dir_xyz = np.array([vx, vy, vz], dtype=np.float64) / vel_mag
+    speed_norm = float(np.clip(total_speed / C_ENGINE_MAX_SPEED, 0.0, 1.0))
+    yaw_norm = float(np.clip(yaw_cmd, -1.0, 1.0))
+    return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
+
+
+def _terminal_assist_action(current_pos, target_pos, yaw_norm):
+    delta = target_pos - current_pos
+    xy_dist = float(np.linalg.norm(delta[:2]))
+    h_rem = max(float(current_pos[2] - target_pos[2]), 0.0)
+
+    if xy_dist < 0.18:
+        desired = np.array([0.0, 0.0, -0.55 if h_rem > 0.35 else -0.28], dtype=np.float64)
+    else:
+        xy_speed = min(0.65, max(0.12, xy_dist * 0.85))
+        desired = np.array(
+            [delta[0] / (xy_dist + 1e-8) * xy_speed,
+             delta[1] / (xy_dist + 1e-8) * xy_speed,
+             -0.55 if h_rem > 0.35 else -0.25],
+            dtype=np.float64,
+        )
+
+    vel_mag = float(np.linalg.norm(desired)) + 1e-8
+    dir_xyz = desired / vel_mag
+    speed_norm = float(np.clip(vel_mag / C_ENGINE_MAX_SPEED, 0.0, 1.0))
+    return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
+
+
+def _landing_params(dist_xy, spawn_z, plat_vel):
+    landing_committed = dist_xy < 3.0
+    return {
+        "cruise_altitude": 0.55 if landing_committed else spawn_z,
+        "max_speed": 3.0,
+        "safety_radius": 0.70 if landing_committed else 1.10,
+        "mode_v": 55.0 if landing_committed else 160.0,
+        "attraction_gain": 15.0 if landing_committed else 11.0,
+        "landing_threshold_xy": 0.85 if landing_committed else 0.65,
+        "landing_threshold_z": 1.20,
+        "landing_descent_rate": 0.58 if landing_committed else 0.45,
+        "platform_vel_est": list(plat_vel),
+    }
 
 
 def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     """
     Run a single trial of the CAE against the real swarm environment.
-
-    Parameters
-    ----------
-    terrain_id : int   Swarm-subnet challenge type (1=City, 2=Open/Valley, …)
-    seed       : int   Map seed
-    max_steps  : int   Hard step cap (default 3000 = 60 s at 50 Hz)
-    verbose    : bool  Print per-step progress
-
-    Returns
-    -------
-    dict with keys: terrain_id, seed, status, steps, duration_s, min_dist_m
     """
     task = task_for_seed_and_type(sim_dt=1 / 50, seed=seed, challenge_type=terrain_id)
     env = make_env(task, gui=False)
     obs, _ = env.reset()
     goal = env.GOAL_POS.copy().astype(np.float64)
+    goal[2] = 0.2
 
-    # Read spawn altitude from the first observation so the Z-attraction term
-    # starts at rest (desired_vz ≈ 0) rather than commanding a dive.
     spawn_z = float(obs["state"][2])
 
     engine = ConstrainedAdaptiveEngine()
-    engine.set_flight_params(
-        cruise_altitude=spawn_z,
-        max_speed=3.0,
-        safety_radius=1.15,
-        mode_v=200.0,
-        attraction_gain=5.0,
-        landing_threshold_xy=0.60,
-        landing_threshold_z=1.20,
-        landing_descent_rate=0.025,
-        platform_vel_est=[0.0, 0.0, 0.0],
-    )
+    engine.set_flight_params(**_landing_params(dist_xy=999.0, spawn_z=spawn_z, plat_vel=np.zeros(3)))
     engine.set_target_pos(goal)
     engine.start_adaptive()
 
@@ -88,6 +108,8 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     collision = False
     min_dist = 9999.0
     prev_plat_pos = None
+    last_landing = False
+    last_descent = False
 
     start_time = time.time()
     try:
@@ -97,19 +119,17 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             current_rpy = state_vec[3:6].astype(np.float64)
             current_vel = state_vec[6:9].astype(np.float64)
             yaw_rate = float(state_vec[9])
-
-            # Swarm state tail is [..., altitude_norm, search_dx, search_dy, search_dz].
             agl = float(state_vec[-4]) * DEPTH_MAX_RANGE
 
-            # Query moving/static landing platform position and velocity from simulator.
             import pybullet as p
 
             plat_uid = env.unwrapped._end_platform_uids[-1]
-            plat_pos, _ = p.getBasePositionAndOrientation(
+            plat_pos_raw, _ = p.getBasePositionAndOrientation(
                 plat_uid,
                 physicsClientId=env.unwrapped.CLIENT,
             )
-            plat_pos = np.array(plat_pos, dtype=np.float64)
+            plat_pos = np.array(plat_pos_raw, dtype=np.float64)
+            plat_pos[2] = 0.2
 
             if prev_plat_pos is not None:
                 plat_vel = (plat_pos - prev_plat_pos) / 0.02
@@ -117,21 +137,10 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 plat_vel = np.zeros(3)
             prev_plat_pos = plat_pos.copy()
 
-            # Update flight parameters dynamically with moving platform velocity estimate.
-            engine.set_flight_params(
-                cruise_altitude=spawn_z,
-                max_speed=3.0,
-                safety_radius=1.15,
-                mode_v=200.0,
-                attraction_gain=5.0,
-                landing_threshold_xy=0.60,
-                landing_threshold_z=1.20,
-                landing_descent_rate=0.025,
-                platform_vel_est=list(plat_vel),
-            )
+            dist_xy = float(np.linalg.norm(current_pos[:2] - plat_pos[:2]))
+            engine.set_flight_params(**_landing_params(dist_xy=dist_xy, spawn_z=spawn_z, plat_vel=plat_vel))
+            engine.set_target_pos(plat_pos)
 
-            # Pass raw depth image to C engine — all depth processing in C via
-            # psmsl_depth_analyze_image() (16×16 subsampled, world-frame point cloud).
             engine.process_sensor_data(
                 current_pos,
                 current_vel,
@@ -149,30 +158,26 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
 
             cs = engine.get_state()
             vx, vy, vz, total_speed, yaw_cmd = cs.control_output
-
-            # Build unit direction vector from velocity components.
-            vel_mag = np.sqrt(vx**2 + vy**2 + vz**2) + 1e-8
-            dir_xyz = np.array([vx, vy, vz]) / vel_mag
-
-            # Map C engine speed [0, C_ENGINE_MAX_SPEED] → env speed_norm [0, 1].
-            speed_norm = float(np.clip(total_speed / C_ENGINE_MAX_SPEED, 0.0, 1.0))
-
-            # C engine already emits normalized yaw in [-1, 1]. Do not divide by pi again.
             yaw_norm = float(np.clip(yaw_cmd, -1.0, 1.0))
-            action = np.array(
-                [[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]],
-                dtype=np.float32,
-            )
+            action = _action_from_velocity(vx, vy, vz, total_speed, yaw_norm)
+
+            if dist_xy < TERMINAL_ASSIST_XY_M and agl < TERMINAL_ASSIST_AGL_M:
+                action = _terminal_assist_action(current_pos, plat_pos, yaw_norm)
+
             obs, _reward, term, trunc, info = env.step(action)
 
-            dist = float(np.linalg.norm(obs["state"][0:3] - goal))
+            dist = float(np.linalg.norm(obs["state"][0:3] - plat_pos))
             min_dist = min(min_dist, dist)
+            last_landing = bool(cs.landing_phase)
+            last_descent = bool(cs.descent_phase)
 
-            if verbose:
+            if verbose and (step % 25 == 0 or last_landing or last_descent):
                 print(
                     f"  step={step:4d} pos={current_pos.round(3)} "
-                    f"vel={current_vel.round(3)} rpy={current_rpy.round(3)} "
-                    f"action={action.round(3)} landing={bool(cs.landing_phase)}"
+                    f"dist_xy={dist_xy:.2f} agl={agl:.2f} "
+                    f"vel={current_vel.round(3)} action={action.round(3)} "
+                    f"landing={last_landing} descent={last_descent} "
+                    f"risk={cs.collision_risk_score:.2f} clutter={cs.clutter_density:.2f}"
                 )
 
             if info.get("collision", False):
@@ -204,10 +209,11 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         "steps": step + 1,
         "duration_s": round(duration, 2),
         "min_dist_m": round(min_dist, 3),
+        "landing_phase": last_landing,
+        "descent_phase": last_descent,
     }
 
 
-# Terrain ID → human-readable name (from swarm-subnet)
 TERRAIN_NAMES = {
     1: "City Map",
     2: "Open/Valley",
@@ -219,7 +225,6 @@ TERRAIN_NAMES = {
 
 
 if __name__ == "__main__":
-    # Test suite: Open/Valley regression guard + City Map seeds.
     test_cases = [
         (2, 39259),
         (1, 29593),
@@ -229,7 +234,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print("CAE Real Environment Integration Test")
     print("  Depth: native C psmsl_depth_analyze_image (16×16 grid)")
-    print("  Fix:   cruise_altitude = spawn_z (prevents tilt truncation)")
+    print("  Landing: tuned committed descent + terminal assist")
     print("=" * 60)
 
     for terrain_id, seed in test_cases:
@@ -238,7 +243,9 @@ if __name__ == "__main__":
         result = run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=True)
         print(
             f"  => {result['status']} | steps={result['steps']} | "
-            f"min_dist={result['min_dist_m']}m | time={result['duration_s']}s"
+            f"min_dist={result['min_dist_m']}m | "
+            f"landing={result['landing_phase']} descent={result['descent_phase']} | "
+            f"time={result['duration_s']}s"
         )
 
     print("\n" + "=" * 60)
