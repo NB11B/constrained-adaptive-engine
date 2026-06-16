@@ -50,6 +50,9 @@ static void calculate_potential_gradient(adaptation_controller_t *ctrl,
     ctrl->state.temporal_breathing = (1.0f - alpha) * ctrl->state.temporal_breathing + alpha * target_breathing;
     // Enforce a breathing floor to prevent the engine from freezing entirely near the ground
     float breathing_factor = fmaxf(0.001f, ctrl->state.temporal_breathing);
+    if (ctrl->state.landing_phase) {
+        breathing_factor = 0.8f;
+    }
     
     // Adaptive gains: safety prioritized in high-clutter
     float k_att = ctrl->params.attraction_gain / (breathing_factor * 0.85f);
@@ -174,7 +177,7 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
     // Z-attraction (proportional control to cruise altitude, or target Z during landing)
     float target_z_ref = ctrl->params.cruise_altitude;
     if (ctrl->state.landing_phase) {
-        float hover_offset = 0.1f + (ctrl->params.cruise_altitude - tgt_z - 0.1f) * jnp_clip_placeholder(dist_xy_lock / 2.5f);
+        float hover_offset = 0.3f + 0.9f * jnp_clip_placeholder(dist_xy_lock / 1.5f);
         target_z_ref = tgt_z + hover_offset;
     }
     float dz_attraction = target_z_ref - current_z;
@@ -186,7 +189,7 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
             ctrl->state.descent_phase = false;
         }
     } else {
-        if (dist_xy_lock < 8.0f) ctrl->state.landing_phase = true;
+        if (dist_xy_lock < 2.5f) ctrl->state.landing_phase = true;
     }
 
     if (ctrl->state.landing_phase && !ctrl->state.descent_phase) {
@@ -230,7 +233,7 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
 
         // --- Precise Station-Keeping ---
         // Tighten horizontal control as we get closer to the pad
-        float speed_xy = fminf(0.6f, fmaxf(0.02f, dist_xy_lock * 2.5f));
+        float speed_xy = fminf(0.5f, fmaxf(0.05f, dist_xy_lock * 1.5f));
         float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
         
         // Stronger centering force during final descent
@@ -242,24 +245,26 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
             desired_vy = 0.0f;
             desired_vz = -0.3f; // Pure vertical drop
         } else {
-            desired_vx = (desired_vx / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[0] * 0.95f;
-            desired_vy = (desired_vy / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[1] * 0.95f;
+            desired_vx = (desired_vx / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[0] * 1.00f;
+            desired_vy = (desired_vy / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[1] * 1.00f;
         }
         
-        max_total_speed = 1.5f;
+        max_total_speed = 1.0f;
     } else if (ctrl->state.landing_phase) {
-        float speed_xy = fminf(2.0f, fmaxf(0.15f, dist_xy_lock * 1.5f));
+        float speed_xy = fminf(1.0f, fmaxf(0.08f, dist_xy_lock * 1.2f));
         float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
         desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
         desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
-        max_total_speed = 2.0f;
+        max_total_speed = 1.5f;
+        desired_vz = fminf(0.4f, fmaxf(-0.8f, desired_vz));
     } else {
-        float speed_xy = 7.5f; // Increased base cruise speed
-        if (dist_xy_lock < 20.0f) speed_xy = 4.5f + fminf(1.0f, fmaxf(0.0f, (dist_xy_lock - 5.0f) / 15.0f)) * 3.0f;
+        float speed_xy = 2.2f; // Matches JAX reference
+        if (dist_xy_lock < 20.0f) speed_xy = 2.0f + fminf(1.0f, fmaxf(0.0f, (dist_xy_lock - 5.0f) / 15.0f)) * 0.5f;
         float grad_norm = sqrtf(desired_vx * desired_vx + desired_vy * desired_vy + 1e-8f);
-        desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
-        desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
-        max_total_speed = 8.0f; // Increased max total speed
+        desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.85f;
+        desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.85f;
+        max_total_speed = 3.0f; // Matches physical max speed
+        desired_vz = fminf(1.8f, fmaxf(-1.6f, desired_vz));
     }
 
     if (ctrl->state.landing_phase) {
@@ -275,7 +280,7 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         desired_vz = (desired_vz / total_speed) * max_total_speed;
     }
 
-    float max_dv = 12.0f * SIM_DT; // Increased acceleration limit for faster response
+    float max_dv = 2.0f * SIM_DT; // Matches JAX reference max_accel = 2.0 m/s2
     float dv_x = desired_vx - ctrl->state.last_vel_cmd[0];
     float dv_y = desired_vy - ctrl->state.last_vel_cmd[1];
     float dv_z = desired_vz - ctrl->state.last_vel_cmd[2];
@@ -396,10 +401,7 @@ void adapt_process_sensor_data(adaptation_controller_t *controller,
     memcpy(controller->state.current_pos, current_pos, sizeof(float) * 3);
     memcpy(controller->state.current_vel, current_vel, sizeof(float) * 3);
     memcpy(controller->state.current_rpy, current_rpy, sizeof(float) * 3);
-    // Only update target if not in landing/descent phases or if explicitly requested
-    if (!controller->state.landing_phase && !controller->state.descent_phase) {
-        memcpy(controller->state.target_pos, target_pos, sizeof(float) * 3);
-    }
+    memcpy(controller->state.target_pos, target_pos, sizeof(float) * 3);
     controller->state.yaw_rate = yaw_rate;
     controller->state.agl = agl;
     
@@ -414,6 +416,7 @@ void adapt_process_sensor_data(adaptation_controller_t *controller,
         psmsl_depth_analyze_image(depth_image, depth_width, depth_height,
                                   controller->state.current_pos, controller->state.current_rpy,
                                   max_range, fov_deg, depth_search_radius,
+                                  controller->internal_obstacles, &controller->num_internal_obstacles, ADAPT_MAX_OBSTACLES,
                                   &depth_analysis_result);
     } else {
         depth_analysis_result.clutter_density = 0.0f;

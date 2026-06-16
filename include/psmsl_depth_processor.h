@@ -78,6 +78,7 @@ void psmsl_depth_analyze_obstacles(const float obstacles[][4], int num_obstacles
 void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
                                const float current_pos[3], const float current_rpy[3],
                                float max_range, float fov_deg, float search_radius,
+                               float out_obstacles[][4], int *out_num_obstacles, int max_obstacles,
                                psmsl_depth_result_t *result);
 
 #ifdef __cplusplus

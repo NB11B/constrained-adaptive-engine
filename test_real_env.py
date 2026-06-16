@@ -22,8 +22,13 @@ import sys
 import time
 import numpy as np
 
-sys.path.append('/home/ubuntu/swarm-subnet')
-sys.path.append('/home/ubuntu/constrained-adaptive-engine')
+import os
+_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(_dir)
+if os.name == 'nt':
+    sys.path.insert(0, r"c:\Users\nateb\OneDrive\Documents\swarm-subnet")
+else:
+    sys.path.insert(0, "/mnt/c/Users/nateb/OneDrive/Documents/swarm-subnet")
 
 from swarm.validator.task_gen import task_for_seed_and_type
 from swarm.utils.env_factory import make_env
@@ -34,7 +39,7 @@ CAMERA_FOV_DEG  = 90.0   # Base FOV used for depth de-projection
 DEPTH_MAX_RANGE = 20.0   # metres — matches swarm-subnet depth encoding
 
 # C engine internal max speed (from adaptation_controller.c adapt_init defaults)
-C_ENGINE_MAX_SPEED = 8.0
+C_ENGINE_MAX_SPEED = 3.0
 
 
 def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
@@ -79,6 +84,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     success   = False
     collision = False
     min_dist  = 9999.0
+    prev_plat_pos = None
 
     start_time = time.time()
     for step in range(max_steps):
@@ -87,12 +93,37 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         current_rpy = state_vec[3:6].astype(np.float64)
         current_vel = state_vec[6:9].astype(np.float64)
         yaw_rate    = float(state_vec[9])
-        agl         = float(state_vec[112]) * DEPTH_MAX_RANGE
+        agl         = float(state_vec[137]) * DEPTH_MAX_RANGE
+
+        # Query moving platform position and velocity from simulator
+        import pybullet as p
+        plat_uid = env.unwrapped._end_platform_uids[-1]
+        plat_pos, _ = p.getBasePositionAndOrientation(plat_uid, physicsClientId=env.unwrapped.CLIENT)
+        plat_pos = np.array(plat_pos, dtype=np.float64)
+        
+        if prev_plat_pos is not None:
+            plat_vel = (plat_pos - prev_plat_pos) / 0.02
+        else:
+            plat_vel = np.zeros(3)
+        prev_plat_pos = plat_pos.copy()
+
+        # Update flight parameters dynamically with moving platform velocity estimate
+        engine.set_flight_params(
+            cruise_altitude      = spawn_z,
+            max_speed            = 3.0,
+            safety_radius        = 1.15,
+            mode_v               = 200.0,
+            attraction_gain      = 5.0,
+            landing_threshold_xy = 0.60,
+            landing_threshold_z  = 1.20,
+            landing_descent_rate = 0.025,
+            platform_vel_est     = list(plat_vel),
+        )
 
         # Pass raw depth image to C engine — all depth processing in C via
         # psmsl_depth_analyze_image() (16×16 subsampled, world-frame point cloud)
         engine.process_sensor_data(
-            current_pos, current_vel, current_rpy, goal,
+            current_pos, current_vel, current_rpy, plat_pos,
             yaw_rate, agl,
             depth_image  = obs['depth'],   # (128, 128, 1) float32 normalised [0,1]
             depth_width  = 128,
@@ -112,18 +143,17 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         # Map C engine speed [0, C_ENGINE_MAX_SPEED] → env speed_norm [0, 1]
         speed_norm = float(np.clip(total_speed / C_ENGINE_MAX_SPEED, 0.0, 1.0))
 
-        action = np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm]],
+        yaw_norm = float(np.clip(yaw_cmd / np.pi, -1.0, 1.0))
+        action = np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]],
                           dtype=np.float32)
         obs, r, term, trunc, info = env.step(action)
 
         dist     = float(np.linalg.norm(obs['state'][0:3] - goal))
         min_dist = min(min_dist, dist)
 
-        if verbose and step % 100 == 0:
-            print(f"  step={step:4d} dist={dist:.2f} speed={total_speed:.2f} "
-                  f"clutter={cs.clutter_density:.3f} "
-                  f"nav={cs.navigability_score:.3f} "
-                  f"risk={cs.collision_risk_score:.3f} "
+        if verbose:
+            print(f"  step={step:4d} pos={current_pos.round(3)} vel={current_vel.round(3)} rpy={current_rpy.round(3)} "
+                  f"action={action.round(3)} "
                   f"landing={bool(cs.landing_phase)}")
 
         if info.get('collision', False):

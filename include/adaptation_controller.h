@@ -101,21 +101,27 @@ typedef struct {
     bool running;
 } adaptation_controller_t;
 
+#ifdef _WIN32
+#define CAE_API __declspec(dllexport)
+#else
+#define CAE_API
+#endif
+
 // =============================================================================
 // Public Functional Synapse Protocols
 // =============================================================================
 
-adaptation_controller_t* adapt_init();
-void adapt_free(adaptation_controller_t *controller);
-void adapt_reset(adaptation_controller_t *controller);
-void adapt_set_flight_params(adaptation_controller_t *controller, const adapt_flight_params_t *params);
-void adapt_set_mode(adaptation_controller_t *controller, adapt_mode_t mode);
-void adapt_set_speed(adaptation_controller_t *controller, adapt_speed_t speed);
-void adapt_set_target_pos(adaptation_controller_t *controller, const float target_pos[3]);
-bool adapt_start_adaptive(adaptation_controller_t *controller);
-void adapt_stop(adaptation_controller_t *controller);
-bool adapt_update(adaptation_controller_t *controller);
-    void adapt_process_sensor_data(adaptation_controller_t *controller,
+CAE_API adaptation_controller_t* adapt_init();
+CAE_API void adapt_free(adaptation_controller_t *controller);
+CAE_API void adapt_reset(adaptation_controller_t *controller);
+CAE_API void adapt_set_flight_params(adaptation_controller_t *controller, const adapt_flight_params_t *params);
+CAE_API void adapt_set_mode(adaptation_controller_t *controller, adapt_mode_t mode);
+CAE_API void adapt_set_speed(adaptation_controller_t *controller, adapt_speed_t speed);
+CAE_API void adapt_set_target_pos(adaptation_controller_t *controller, const float target_pos[3]);
+CAE_API bool adapt_start_adaptive(adaptation_controller_t *controller);
+CAE_API void adapt_stop(adaptation_controller_t *controller);
+CAE_API bool adapt_update(adaptation_controller_t *controller);
+CAE_API void adapt_process_sensor_data(adaptation_controller_t *controller,
                                    const float current_pos[3],
                                    const float current_vel[3],
                                    const float current_rpy[3],
@@ -127,8 +133,8 @@ bool adapt_update(adaptation_controller_t *controller);
                                    int depth_height,
                                    float max_range,
                                    float fov_deg);
-const adapt_state_t* adapt_get_state(const adaptation_controller_t *controller);
-int adapt_export_state_json(const adaptation_controller_t *controller, char *buffer, size_t buffer_size);
+CAE_API const adapt_state_t* adapt_get_state(const adaptation_controller_t *controller);
+CAE_API int adapt_export_state_json(const adaptation_controller_t *controller, char *buffer, size_t buffer_size);
 float jnp_clip_placeholder(float val);
 
 #ifdef __cplusplus

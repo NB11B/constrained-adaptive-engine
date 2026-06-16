@@ -145,9 +145,10 @@ void psmsl_depth_analyze_obstacles(const float obstacles[][4], int num_obstacles
 void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
                                const float current_pos[3], const float current_rpy[3],
                                float max_range, float fov_deg, float search_radius,
+                               float out_obstacles[][4], int *out_num_obstacles, int max_obstacles,
                                psmsl_depth_result_t *result)
 {
-    if (!result || !depth_image) return;
+    if (!result || !depth_image || !out_obstacles || !out_num_obstacles || max_obstacles <= 0) return;
 
     // Subsample the depth image to reduce MCU load (e.g., 16x16 grid)
     int stride_y = height / 16;
@@ -180,16 +181,12 @@ void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
     R[2][1] = cp * sr;
     R[2][2] = cp * cr;
 
-    // Temporary buffer for extracted obstacles (up to 256 points)
-    #define MAX_EXTRACTED_OBS 256
-    float extracted_obs[MAX_EXTRACTED_OBS][4];
     int num_extracted = 0;
-
     float min_depth_norm = 0.5f / max_range;
 
     for (int v = 0; v < height; v += stride_y) {
         for (int u = 0; u < width; u += stride_x) {
-            if (num_extracted >= MAX_EXTRACTED_OBS) break;
+            if (num_extracted >= max_obstacles) break;
 
             float d_norm = depth_image[v * width + u];
             
@@ -216,14 +213,16 @@ void psmsl_depth_analyze_image(const float *depth_image, int width, int height,
             float radius = z_cam * tanf(fov_rad / width * stride_x);
             if (radius < 0.2f) radius = 0.2f;
 
-            extracted_obs[num_extracted][0] = p_world[0];
-            extracted_obs[num_extracted][1] = p_world[1];
-            extracted_obs[num_extracted][2] = p_world[2];
-            extracted_obs[num_extracted][3] = radius;
+            out_obstacles[num_extracted][0] = p_world[0];
+            out_obstacles[num_extracted][1] = p_world[1];
+            out_obstacles[num_extracted][2] = p_world[2];
+            out_obstacles[num_extracted][3] = radius;
             num_extracted++;
         }
     }
 
+    *out_num_obstacles = num_extracted;
+
     // Now pass the extracted point cloud to the existing spatial analyzer
-    psmsl_depth_analyze_obstacles(extracted_obs, num_extracted, current_pos, current_rpy, search_radius, result);
+    psmsl_depth_analyze_obstacles(out_obstacles, num_extracted, current_pos, current_rpy, search_radius, result);
 }

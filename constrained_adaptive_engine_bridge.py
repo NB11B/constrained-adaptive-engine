@@ -14,7 +14,78 @@ ADAPT_MAX_OBSTACLES = 256
 
 # Locate and resolve the local absolute file library path layout
 _dir = os.path.dirname(os.path.abspath(__file__))
-_library_path = os.path.join(_dir, 'libadaptive_controller.so')
+lib_name = 'libadaptive_controller.dll' if os.name == 'nt' else 'libadaptive_controller.so'
+_library_path = os.path.join(_dir, lib_name)
+
+def compile_c_library():
+    import subprocess
+    import shutil
+    print("[BRIDGE] Compiling C flight engine dynamically...")
+    src_dir = os.path.join(_dir, "src")
+    include_dir = os.path.join(_dir, "include")
+    
+    c_files = [
+        os.path.join(src_dir, "adaptation_controller.c"),
+        os.path.join(src_dir, "psmsl_depth_processor.c")
+    ]
+    
+    for f in c_files:
+        if not os.path.exists(f):
+            raise FileNotFoundError(f"Dynamic compilation failed: missing source file {f}")
+            
+    if os.name != 'nt':  # Linux / macOS
+        compilers = ['gcc', 'clang']
+        compiled = False
+        errors = []
+        for compiler in compilers:
+            if shutil.which(compiler):
+                cmd = [
+                    compiler, "-shared", "-o", _library_path, "-fPIC", "-O2",
+                    f"-I{include_dir}", c_files[0], c_files[1], "-lm"
+                ]
+                try:
+                    subprocess.run(cmd, capture_output=True, text=True, check=True)
+                    compiled = True
+                    break
+                except subprocess.CalledProcessError as e:
+                    errors.append(f"{compiler} compile error:\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
+        if not compiled:
+            raise RuntimeError("Dynamic compilation failed on Linux. Errors:\n" + "\n".join(errors))
+    else:  # Windows
+        compiled = False
+        errors = []
+        if shutil.which("gcc"):
+            cmd = [
+                "gcc", "-shared", "-o", _library_path, "-O2",
+                f"-I{include_dir}", c_files[0], c_files[1], "-lm"
+            ]
+            try:
+                subprocess.run(cmd, capture_output=True, text=True, check=True)
+                compiled = True
+            except subprocess.CalledProcessError as e:
+                errors.append(f"gcc compile error:\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
+                
+        if not compiled and shutil.which("cl"):
+            cmd = [
+                "cl", "/LD", "/O2", "/D_USE_MATH_DEFINES",
+                f"/I{include_dir}", c_files[0], c_files[1], f"/Fe:{_library_path}"
+            ]
+            try:
+                subprocess.run(cmd, capture_output=True, text=True, check=True)
+                compiled = True
+            except subprocess.CalledProcessError as e:
+                errors.append(f"cl compile error:\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
+                
+        if not compiled:
+            raise RuntimeError("Dynamic compilation failed on Windows. Make sure gcc is in PATH or run from MSVC developer command prompt. Errors:\n" + "\n".join(errors))
+            
+    print(f"[BRIDGE] Dynamic compilation successful. Library generated at: {_library_path}")
+
+if not os.path.exists(_library_path):
+    try:
+        compile_c_library()
+    except Exception as e:
+        raise RuntimeError(f"Could not load or compile C library: {e}")
 
 if not os.path.exists(_library_path):
     raise FileNotFoundError(f"Missing required bare-metal flight binary at: {_library_path}")
@@ -231,7 +302,7 @@ if __name__ == '__main__':
             target_pos=[0.0, 0.0, 1.0],
             yaw_rate=0.0,
             agl=1.0,
-            obstacles=[[1.0, 1.0, 1.5, 0.2], [-1.0, -1.0, 1.8, 0.3]]
+            depth_image=np.ones((128, 128, 1), dtype=np.float32)
         )
         
         engine.update()
