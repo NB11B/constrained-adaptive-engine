@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from constrained_adaptive_engine_bridge import ConstrainedAdaptiveEngine
 
@@ -16,6 +17,8 @@ COMMIT_ZONE_M = 1.35
 LOW_PASS_AGL_M = 1.80
 SEARCH_DWELL_TICKS = 180       # 3.6s at 50Hz inside the search zone
 COMMIT_DWELL_TICKS = 35        # 0.7s near target before forced commit
+TERMINAL_ASSIST_XY_M = 1.25
+TERMINAL_ASSIST_AGL_M = 2.20
 
 
 # ---------------------------------------------------------------------------
@@ -33,7 +36,7 @@ class DroneFlightController:
 
     def __init__(self):
         self._engine = ConstrainedAdaptiveEngine()
-        self._debug = False
+        self._debug = os.environ.get("CAE_DEBUG", "0") == "1"
         self._reset_mission_state()
 
     def _reset_mission_state(self):
@@ -47,6 +50,7 @@ class DroneFlightController:
         self._calibrated_offset = np.zeros(3, dtype=np.float64)
         self._is_calibrated = False
         self._landing_committed = False
+        self._commit_reason = "none"
         self._search_start_step = 0
         self._search_phase = 0  # 0: approach, 1: active sweep, 2: committed/locked
         self._agl_history = []
@@ -54,21 +58,49 @@ class DroneFlightController:
         self._last_agl = None
         self._near_target_ticks = 0
         self._search_zone_ticks = 0
+        self._last_debug_step = -9999
 
-    def _commit_landing(self, reason: str, pos: np.ndarray, noisy_center: np.ndarray):
+    def _commit_landing(self, reason: str, pos: np.ndarray, noisy_center: np.ndarray, use_overflight_offset: bool = False):
         """Commit to the current best target estimate and hand final descent to C."""
         if not self._landing_committed:
             if not self._is_calibrated:
-                # If we never saw a clean AGL dip, use current overflight error as a bounded correction.
-                self._calibrated_offset = np.array(
-                    [pos[0] - noisy_center[0], pos[1] - noisy_center[1], 0.0],
-                    dtype=np.float64,
-                )
+                if use_overflight_offset:
+                    # Only use current-position offset when AGL/low-pass evidence says the drone is actually over the pad.
+                    self._calibrated_offset = np.array(
+                        [pos[0] - noisy_center[0], pos[1] - noisy_center[1], 0.0],
+                        dtype=np.float64,
+                    )
+                else:
+                    # Fallback commit should land on the best available Swarm reference, not on the drone's current XY.
+                    self._calibrated_offset = np.zeros(3, dtype=np.float64)
                 self._is_calibrated = True
             self._landing_committed = True
+            self._commit_reason = reason
             self._search_phase = 2
             if self._debug:
                 print(f"[LANDING-COMMIT] {reason} at step {self._step}")
+
+    def _terminal_assist_action(self, pos, target_3d, yaw_norm):
+        """Direct touchdown assist when committed and close enough that the C field should stop searching."""
+        delta = target_3d - pos
+        xy_dist = float(np.linalg.norm(delta[:2]))
+        h_rem = max(float(pos[2] - target_3d[2]), 0.0)
+
+        if xy_dist < 0.18:
+            desired = np.array([0.0, 0.0, -0.55 if h_rem > 0.35 else -0.28], dtype=np.float32)
+        else:
+            xy_speed = min(0.65, max(0.12, xy_dist * 0.85))
+            desired = np.array(
+                [delta[0] / (xy_dist + 1e-8) * xy_speed,
+                 delta[1] / (xy_dist + 1e-8) * xy_speed,
+                 -0.55 if h_rem > 0.35 else -0.25],
+                dtype=np.float32,
+            )
+
+        vel_mag = float(np.linalg.norm(desired)) + 1e-8
+        dir_xyz = desired / vel_mag
+        speed_norm = float(np.clip(vel_mag / SPEED_LIMIT, 0.0, 1.0))
+        return np.array([dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm], dtype=np.float32)
 
     def act(self, observation: dict) -> np.ndarray:
         """
@@ -131,7 +163,7 @@ class DroneFlightController:
 
             agl_dip_detected = (
                 agl_m < (avg_agl - 0.06)
-                or agl_m <= (min_recent_agl + 0.03) and len(self._agl_history) >= 10
+                or (agl_m <= (min_recent_agl + 0.03) and len(self._agl_history) >= 10)
                 or (agl_m < LOW_PASS_AGL_M and dist_to_noisy < COMMIT_ZONE_M)
             )
             if agl_dip_detected:
@@ -146,11 +178,11 @@ class DroneFlightController:
         # Commit if we have repeatedly crossed the expected pad region, even without a perfect AGL dip.
         if self._takeoff_complete and not self._landing_committed:
             if self._is_calibrated and dist_to_noisy < 2.25:
-                self._commit_landing("calibrated target proximity", pos, noisy_center)
+                self._commit_landing("calibrated target proximity", pos, noisy_center, use_overflight_offset=False)
             elif self._near_target_ticks >= COMMIT_DWELL_TICKS:
-                self._commit_landing("near-target dwell", pos, noisy_center)
+                self._commit_landing("near-target dwell", pos, noisy_center, use_overflight_offset=False)
             elif self._search_zone_ticks >= SEARCH_DWELL_TICKS and agl_m < 2.4:
-                self._commit_landing("search-zone low-altitude dwell", pos, noisy_center)
+                self._commit_landing("search-zone low-altitude dwell", pos, noisy_center, use_overflight_offset=False)
 
         # Apply calibration if found; otherwise use noisy center.
         true_target = noisy_center + self._calibrated_offset
@@ -184,7 +216,7 @@ class DroneFlightController:
         cruise_alt = max(self._spawn_z + 3.0, float(noisy_center[2]) + 2.5)
 
         if self._landing_committed:
-            target_alt = 0.72
+            target_alt = 0.55
         elif in_search_zone:
             target_alt = search_alt
         else:
@@ -201,12 +233,12 @@ class DroneFlightController:
         self._engine.set_flight_params(
             cruise_altitude=target_alt,
             max_speed=SPEED_LIMIT,
-            safety_radius=0.80 if self._landing_committed else 1.10,
-            mode_v=80.0 if self._landing_committed else 160.0,
-            attraction_gain=14.0 if self._landing_committed else 11.0,
-            landing_threshold_xy=0.65,
+            safety_radius=0.70 if self._landing_committed else 1.10,
+            mode_v=55.0 if self._landing_committed else 160.0,
+            attraction_gain=15.0 if self._landing_committed else 11.0,
+            landing_threshold_xy=0.85 if self._landing_committed else 0.65,
             landing_threshold_z=1.20,
-            landing_descent_rate=0.45,
+            landing_descent_rate=0.58 if self._landing_committed else 0.45,
             platform_vel_est=[0.0, 0.0, 0.0],
         )
 
@@ -241,6 +273,21 @@ class DroneFlightController:
             [dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm],
             dtype=np.float32,
         )
+
+        target_xy_dist = float(np.linalg.norm(target_3d[:2] - pos[:2]))
+        if self._landing_committed and target_xy_dist < TERMINAL_ASSIST_XY_M and agl_m < TERMINAL_ASSIST_AGL_M:
+            action = self._terminal_assist_action(pos, target_3d, yaw_norm)
+
+        if self._debug and self._step - self._last_debug_step >= 50:
+            self._last_debug_step = self._step
+            print(
+                f"[CAE] step={self._step} pos={pos.round(2)} agl={agl_m:.2f} "
+                f"d_noisy={dist_to_noisy:.2f} d_tgt={target_xy_dist:.2f} "
+                f"commit={self._landing_committed} reason={self._commit_reason} "
+                f"landing={bool(cs.landing_phase)} descent={bool(cs.descent_phase)} "
+                f"near_ticks={self._near_target_ticks} search_ticks={self._search_zone_ticks} "
+                f"action={action.round(3)}"
+            )
 
         self._step += 1
         return action
