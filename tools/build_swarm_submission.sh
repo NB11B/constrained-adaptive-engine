@@ -3,42 +3,51 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="${1:-$ROOT/build/swarm_cae_agent}"
+RUNTIME="$OUT/cae_runtime"
 
 rm -rf "$OUT"
-mkdir -p "$OUT/src" "$OUT/include"
+mkdir -p "$OUT" "$RUNTIME/src" "$RUNTIME/include"
 
-cp "$ROOT/swarm_submission/cae_agent/drone_agent.py" "$OUT/drone_agent.py"
+# Swarm-packaged entrypoint: small loader only.
+cp "$ROOT/swarm_submission/cae_agent/drone_agent_wrapper.py" "$OUT/drone_agent.py"
 cp "$ROOT/swarm_submission/cae_agent/requirements.txt" "$OUT/requirements.txt"
-cp "$ROOT/constrained_adaptive_engine_bridge.py" "$OUT/constrained_adaptive_engine_bridge.py"
-cp "$ROOT/src/adaptation_controller.c" "$OUT/src/adaptation_controller.c"
-cp "$ROOT/src/psmsl_depth_processor.c" "$OUT/src/psmsl_depth_processor.c"
-cp "$ROOT/include/"*.h "$OUT/include/"
 
-# Include a prebuilt Linux shared object when available. The bridge can also
-# compile from src/include when the evaluation container has gcc/clang.
+# Real CAE implementation goes inside cae_runtime.zip.
+cp "$ROOT/swarm_submission/cae_agent/drone_agent.py" "$RUNTIME/cae_agent_impl.py"
+cp "$ROOT/constrained_adaptive_engine_bridge.py" "$RUNTIME/constrained_adaptive_engine_bridge.py"
+cp "$ROOT/src/adaptation_controller.c" "$RUNTIME/src/adaptation_controller.c"
+cp "$ROOT/src/psmsl_depth_processor.c" "$RUNTIME/src/psmsl_depth_processor.c"
+cp "$ROOT/include/"*.h "$RUNTIME/include/"
+
+# Include prebuilt Linux shared object when available. If absent, the bridge can
+# compile from src/include when gcc/clang is available in the validator image.
 if [[ -f "$ROOT/libadaptive_controller.so" ]]; then
-  cp "$ROOT/libadaptive_controller.so" "$OUT/libadaptive_controller.so"
+  cp "$ROOT/libadaptive_controller.so" "$RUNTIME/libadaptive_controller.so"
 fi
 
-cat > "$OUT/README_CAE_SUBMISSION.txt" <<'EOF'
-Constrained Adaptive Engine Swarm submission source folder.
+(
+  cd "$RUNTIME"
+  python3 - <<'PY'
+from pathlib import Path
+import zipfile
 
-Required Swarm files:
-- drone_agent.py
-- requirements.txt
+out = Path("../cae_runtime.zip")
+if out.exists():
+    out.unlink()
 
-CAE runtime files:
-- constrained_adaptive_engine_bridge.py
-- src/adaptation_controller.c
-- src/psmsl_depth_processor.c
-- include/*.h
-- libadaptive_controller.so when prebuilt locally
+with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
+    for path in sorted(Path(".").rglob("*")):
+        if path.is_file():
+            zf.write(path, path.as_posix())
+PY
+)
 
-Package with Swarm CLI:
-  swarm model test --source build/swarm_cae_agent/
-  swarm model package --source build/swarm_cae_agent/
-  swarm model verify --model Submission/submission.zip
-EOF
+rm -rf "$RUNTIME"
 
 echo "Built Swarm CAE agent source at: $OUT"
 find "$OUT" -maxdepth 2 -type f | sort
+echo
+echo "Expected Swarm package files:"
+echo "  drone_agent.py"
+echo "  requirements.txt"
+echo "  cae_runtime.zip"
