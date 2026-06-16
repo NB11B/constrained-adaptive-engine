@@ -141,6 +141,18 @@ def _action_from_velocity(vx, vy, vz, total_speed, yaw_cmd):
     return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
 
 
+
+def _coerce_action_for_env(action, env_action_dim):
+    """Adapt CAE canonical 5-wide action to local Swarm env width."""
+    if env_action_dim == 4 and action.shape[-1] == 5:
+        return action[:, :4].copy()
+    if env_action_dim == 5 and action.shape[-1] == 5:
+        return action
+    if action.shape[-1] == env_action_dim:
+        return action
+    raise ValueError(f"Action width mismatch: action={action.shape}, env_action_dim={env_action_dim}")
+
+
 def _direct_action(
     current_pos,
     target_pos,
@@ -263,6 +275,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     task = task_for_seed_and_type(sim_dt=1 / 50, seed=seed, challenge_type=terrain_id)
     env = make_env(task, gui=False)
     obs, _ = env.reset()
+    env_action_dim = int(getattr(env.action_space, "shape", (1, 5))[-1])
     goal = env.GOAL_POS.copy().astype(np.float64)
     if terrain_id != 3:
         goal[2] = 0.2
@@ -484,7 +497,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 pad_frame_dy,
             )
 
-            obs, _reward, term, trunc, info = env.step(action)
+            obs, _reward, term, trunc, info = env.step(_coerce_action_for_env(action, env_action_dim))
 
             dist = float(np.linalg.norm(obs["state"][0:3] - plat_pos))
             min_dist = min(min_dist, dist)
