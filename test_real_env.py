@@ -35,10 +35,9 @@ APPROACH_ASSIST_XY_M = 4.75
 TERMINAL_ASSIST_XY_M = 1.45
 TERMINAL_ASSIST_AGL_M = 2.40
 
-# Terrain-specific validation profiles. The values below are a stable baseline,
-# not an exploratory sweep. Mountain receives a long acquisition corridor so it
-# can reach the pad before timeout; Warehouse receives late terminal assist so
-# it does not spend the whole episode hovering inside the terminal override.
+# Stable terrain profiles. Mountain is intentionally conservative after the
+# long-range override caused early termination far from the pad. Warehouse is
+# intentionally decisive after repeated near-pad hover timeouts.
 TERRAIN_PROFILES = {
     1: {
         "name": "city",
@@ -70,12 +69,12 @@ TERRAIN_PROFILES = {
     },
     3: {
         "name": "mountain",
-        "transit_alt": 6.0,
-        "mode_v": 118.0,
-        "safety": 1.18,
-        "acq_gain": 0.92,
-        "acq_speed_max": 2.05,
-        "approach_gate_xy": 35.0,
+        "transit_alt": 5.6,
+        "mode_v": 108.0,
+        "safety": 1.22,
+        "acq_gain": 0.54,
+        "acq_speed_max": 1.20,
+        "approach_gate_xy": 12.0,
         "term_gate_xy": 1.20,
         "final_center_gate": 0.20,
         "settle_required": 12,
@@ -104,11 +103,11 @@ TERRAIN_PROFILES = {
         "acq_gain": 0.52,
         "acq_speed_max": 0.95,
         "approach_gate_xy": 4.75,
-        "term_gate_xy": 0.25,
-        "final_center_gate": 0.11,
-        "settle_required": 45,
-        "settle_v_tol": 0.055,
-        "press_vz": -0.10,
+        "term_gate_xy": 0.35,
+        "final_center_gate": 0.18,
+        "settle_required": 8,
+        "settle_v_tol": 0.09,
+        "press_vz": -0.22,
     },
     6: {
         "name": "forest",
@@ -166,14 +165,14 @@ def _direct_action(
         if xy_dist < final_center_gate:
             # Centered enough: first damp/settle relative XY, then press vertically.
             if settle_ticks >= settle_required:
-                vz = press_vz if h_rem > 0.15 else (press_vz * 0.50)
+                vz = press_vz if h_rem > 0.12 else (press_vz * 0.65)
             else:
-                vz = -0.01
+                vz = -0.02 if terrain_id == 5 else -0.01
             desired = np.array([plat_vel[0], plat_vel[1], vz + plat_vel[2]], dtype=np.float64)
         else:
             # Still outside final center gate. Prioritize centering over dropping.
-            xy_speed = min(0.30 if terrain_id == 5 else 0.55, max(0.06, xy_dist * 0.50))
-            vz = -0.10 if h_rem > 0.38 else -0.04
+            xy_speed = min(0.34 if terrain_id == 5 else 0.55, max(0.06, xy_dist * 0.50))
+            vz = -0.08 if terrain_id == 5 else (-0.10 if h_rem > 0.38 else -0.04)
             desired = np.array(
                 [delta[0] / (xy_dist + 1e-8) * xy_speed + plat_vel[0],
                  delta[1] / (xy_dist + 1e-8) * xy_speed + plat_vel[1],
@@ -186,13 +185,13 @@ def _direct_action(
         desired_z = target_alt_override if target_alt_override is not None else (target_pos[2] + 1.4)
 
         # Mountain-specific descent corridor: once it is within the landing approach
-        # cylinder, descend toward the absolute altitude gate instead of loitering high.
+        # cylinder, descend toward the absolute altitude gate without high-speed runaway.
         mountain_descent_corridor = terrain_id == 3 and xy_dist < 6.0 and h_rem > 4.2
         centered_high_mountain = terrain_id == 3 and xy_dist < 2.0 and h_rem > 4.2
-        descent_gain = 1.35 if centered_high_mountain else (1.05 if mountain_descent_corridor else 0.85)
-        max_desc = -1.55 if centered_high_mountain else (-1.15 if mountain_descent_corridor else -0.55)
+        descent_gain = 1.10 if centered_high_mountain else (0.95 if mountain_descent_corridor else 0.78)
+        max_desc = -1.15 if centered_high_mountain else (-0.90 if mountain_descent_corridor else -0.45)
 
-        vz = float(np.clip((desired_z - current_pos[2]) * descent_gain, max_desc, 0.55))
+        vz = float(np.clip((desired_z - current_pos[2]) * descent_gain, max_desc, 0.50))
         desired = np.array(
             [delta[0] / (xy_dist + 1e-8) * xy_speed + plat_vel[0],
              delta[1] / (xy_dist + 1e-8) * xy_speed + plat_vel[1],
@@ -228,8 +227,8 @@ def _landing_params(terrain_id, dist_xy, spawn_z, plat_vel):
 
     if landing_committed:
         cruise_altitude = 0.50
-        safety_radius = 0.55 if terrain_id == 5 else 0.62
-        mode_v = 38.0 if terrain_id == 5 else 42.0
+        safety_radius = 0.50 if terrain_id == 5 else 0.62
+        mode_v = 34.0 if terrain_id == 5 else 42.0
         attraction_gain = 16.0
     else:
         cruise_altitude = spawn_z + profile["transit_alt"]
@@ -245,7 +244,7 @@ def _landing_params(terrain_id, dist_xy, spawn_z, plat_vel):
         "attraction_gain": attraction_gain,
         "landing_threshold_xy": 0.95 if landing_committed else 0.75,
         "landing_threshold_z": 1.20,
-        "landing_descent_rate": 0.38 if landing_committed else 0.34,
+        "landing_descent_rate": 0.44 if terrain_id == 5 and landing_committed else (0.38 if landing_committed else 0.34),
         "platform_vel_est": list(plat_vel),
     }
 
@@ -345,7 +344,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 terrain_id == 3
                 and 4.5 < dist_xy < 15.0
                 and cs.collision_risk_score > 0.70
-                and current_pos[2] < plat_pos[2] + 5.8
+                and current_pos[2] < plat_pos[2] + 5.6
             )
 
             mountain_descent_corridor = terrain_id == 3 and dist_xy < 6.0 and current_pos[2] > plat_pos[2] + 4.2
@@ -377,14 +376,14 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 approach_assist_ticks += 1
                 assist_type = 1
                 if mountain_safety_climb:
-                    target_alt_assist = plat_pos[2] + 5.8
+                    target_alt_assist = plat_pos[2] + 5.6
                     phase_reason = "MOUNTAIN_SAFETY_CLIMB"
                 elif mountain_descent_corridor:
                     target_alt_assist = plat_pos[2] + 3.2
                     phase_reason = "MOUNTAIN_DESCENT_CORRIDOR"
                 elif terrain_id == 3 and dist_xy > 6.0:
-                    target_alt_assist = plat_pos[2] + 5.8
-                    phase_reason = "MOUNTAIN_LONG_RANGE_ACQUISITION"
+                    target_alt_assist = plat_pos[2] + 5.6
+                    phase_reason = "MOUNTAIN_APPROACH_CORRIDOR"
                 else:
                     target_alt_assist = plat_pos[2] + 1.4
                     phase_reason = "ACQUISITION_ASSIST"
@@ -496,7 +495,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print("CAE Real Environment Integration Test")
     print("  Depth: native C psmsl_depth_analyze_image (16×16 grid)")
-    print("  Landing: final acquisition corridor + terminal baseline")
+    print("  Landing: conservative mountain + decisive warehouse finalization")
     print("=" * 60)
 
     for terrain_id, seed in test_cases:
