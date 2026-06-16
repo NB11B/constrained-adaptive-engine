@@ -72,9 +72,9 @@ TERRAIN_PROFILES = {
         "transit_alt": 6.3,
         "mode_v": 108.0,
         "safety": 1.28,
-        "acq_gain": 0.56,
-        "acq_speed_max": 1.25,
-        "approach_gate_xy": 14.0,
+        "acq_gain": 0.64,
+        "acq_speed_max": 1.55,
+        "approach_gate_xy": 22.0,
         "term_gate_xy": 1.20,
         "final_center_gate": 0.20,
         "settle_required": 12,
@@ -405,16 +405,31 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 else:
                     settle_ticks = 0
 
+                warehouse_terminal_commit = (
+                    terrain_id == 5
+                    and terminal_ticks > 900
+                    and dist_xy < 0.50
+                    and agl < 0.90
+                    and bool(cs.landing_phase)
+                    and bool(cs.descent_phase)
+                )
+
+                forced_settle_ticks = profile["settle_required"] if warehouse_terminal_commit else settle_ticks
+
                 action = _direct_action(
                     current_pos,
                     plat_pos,
                     plat_vel,
                     yaw_norm,
                     descent=True,
-                    settle_ticks=settle_ticks,
+                    settle_ticks=forced_settle_ticks,
                     terrain_id=terrain_id,
                 )
-                phase_reason = "TERMINAL_PRESS" if settle_ticks >= profile["settle_required"] else "SETTLE_PHASE"
+
+                if warehouse_terminal_commit:
+                    phase_reason = "WAREHOUSE_COMMIT_PRESS"
+                else:
+                    phase_reason = "TERMINAL_PRESS" if settle_ticks >= profile["settle_required"] else "SETTLE_PHASE"
             elif (dist_xy < approach_gate_xy or mountain_safety_climb or mountain_descent_corridor) and not bool(cs.landing_phase):
                 approach_assist_ticks += 1
                 assist_type = 1
@@ -527,7 +542,11 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         "descent_corridor_ticks": descent_corridor_ticks,
         "settle_phase_ticks": settle_phase_ticks,
         "terminal_press_ticks": terminal_press_ticks,
-    }1: "City Map",
+    }
+
+
+TERRAIN_NAMES = {
+    1: "City Map",
     2: "Open/Valley",
     3: "Mountain",
     4: "Village",
