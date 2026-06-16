@@ -11,4 +11,5 @@ pydantic
 requests
 loguru
 rich
-gym-pybullet-drones
+transforms3d
+setuptools<81
