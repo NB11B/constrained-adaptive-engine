@@ -1,0 +1,11 @@
+pybullet build time: Jun 16 2026 02:10:47
+/usr/local/lib/python3.12/dist-packages/gym_pybullet_drones/envs/BaseAviary.py:7: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Rendering Terrain 5, Seed 1337 at Step 2284...
+Drone Pos: (8.949217128311766, 1.5302163858300375, 3.9063139206438806), Pad Pos: [0.3972772309835211, -3.5846590552600555, 0.2]
+Environment render saved to warehouse_collision_render.png
+Side render saved to warehouse_collision_render_side.png
+Rendering Terrain 3, Seed 1337 at Step 3000...
+Drone Pos: (20.97481088188844, 7.7391874090942165, 25.64871520761569), Pad Pos: [-4.136622185737988, -10.736082608385853, 0.2]
+Environment render saved to mountain_timeout_render.png
+Side render saved to mountain_timeout_render_side.png

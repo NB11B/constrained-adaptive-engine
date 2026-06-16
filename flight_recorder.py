@@ -20,7 +20,7 @@ class FlightRecorder:
             "landing_phase", "descent_phase",
             "assist_type", "collision_risk", "clutter_density", "navigability",
             "escape_active", "pred_escape_active", "threat_acc",
-            "terrain_id", "phase_reason", "rel_vx_to_pad", "rel_vy_to_pad"
+            "terrain_id", "phase_reason", "rel_vx_to_pad", "rel_vy_to_pad", "pad_frame_dx", "pad_frame_dy"
         ]
 
     def start_trial(self, terrain_name, seed):
@@ -33,7 +33,7 @@ class FlightRecorder:
         return path
 
     def record_step(self, step, time_s, current_pos, current_vel, agl, dist_xy, dist_3d, 
-                    target_pos, plat_vel, control_output, cs, assist_type, terrain_id, phase_reason, rel_vx_to_pad, rel_vy_to_pad):
+                    target_pos, plat_vel, control_output, cs, assist_type, terrain_id, phase_reason, rel_vx_to_pad, rel_vy_to_pad, pad_frame_dx, pad_frame_dy):
         if not self.writer:
             return
         
@@ -72,7 +72,9 @@ class FlightRecorder:
             "terrain_id": terrain_id,
             "phase_reason": phase_reason,
             "rel_vx_to_pad": round(rel_vx_to_pad, 4),
-            "rel_vy_to_pad": round(rel_vy_to_pad, 4)
+            "rel_vy_to_pad": round(rel_vy_to_pad, 4),
+            "pad_frame_dx": round(pad_frame_dx, 4),
+            "pad_frame_dy": round(pad_frame_dy, 4)
         }
         self.writer.writerow(row)
 

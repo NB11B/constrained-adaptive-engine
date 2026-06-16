@@ -66,13 +66,13 @@ def _direct_action(current_pos, target_pos, plat_vel, yaw_norm, descent=False, t
 
     if descent:
         # Warehouse-specific final center
-        final_center_gate = 0.15 if terrain_id == 5 else 0.22
+        final_center_gate = 0.10 if terrain_id == 5 else 0.22
         
         if xy_dist < final_center_gate:
             # Final Touchdown Settle: zero out relative XY velocity to avoid sliding off or clipping edges.
-            if settle_ticks > 40:
+            if settle_ticks > 60: # Increased for Warehouse
                 # Patient final press for Warehouse to ensure perfect centering
-                press_vz = -0.10 if terrain_id == 5 else -0.16
+                press_vz = -0.08 if terrain_id == 5 else -0.16
                 vz = press_vz if h_rem > 0.15 else (press_vz * 0.5)
             else:
                 vz = -0.01 # Damping phase: allow lateral centering to finish
@@ -89,7 +89,7 @@ def _direct_action(current_pos, target_pos, plat_vel, yaw_norm, descent=False, t
             )
     else:
         # Acquisition assist: pull toward the pad at a controlled altitude before C landing mode opens.
-        xy_speed = min(1.15, max(0.35, xy_dist * 0.55))
+        xy_speed = min(1.15, max(0.35, xy_dist * (0.55 * 1.30) if terrain_id == 3 else xy_dist * 0.55))
         desired_z = target_alt_override if target_alt_override is not None else (target_pos[2] + 1.4)
         
         # Mountain descent boost: if we are over the pad but way too high, drop faster to beat the clock.
@@ -272,9 +272,11 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             phase_reason = _get_phase_reason(cs)
             rel_vx_to_pad = current_vel[0] - plat_vel[0]
             rel_vy_to_pad = current_vel[1] - plat_vel[1]
+            pad_frame_dx = current_pos[0] - plat_pos[0]
+            pad_frame_dy = current_pos[1] - plat_pos[1]
             recorder.record_step(step, time.time() - start_time, current_pos, current_vel, 
                                agl, dist_xy, dist, plat_pos, plat_vel, cs.control_output, cs, assist_type, 
-                               terrain_id, phase_reason, rel_vx_to_pad, rel_vy_to_pad)
+                               terrain_id, phase_reason, rel_vx_to_pad, rel_vy_to_pad, pad_frame_dx, pad_frame_dy)
 
             obs, _reward, term, trunc, info = env.step(action)
 
