@@ -1,0 +1,14 @@
+numpy==1.26.4
+pybullet
+gymnasium
+scipy
+matplotlib
+opencv-python
+pillow
+tqdm
+msgpack
+pydantic
+requests
+loguru
+rich
+gym-pybullet-drones
