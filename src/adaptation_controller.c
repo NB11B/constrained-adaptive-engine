@@ -234,7 +234,9 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
             ctrl->state.descent_phase = false;
         }
     } else {
-        if (dist_xy_lock < 2.5f) ctrl->state.landing_phase = true;
+        // Enter landing_phase only when close laterally AND above the pad.
+        // This prevents the drone from entering landing mode while still at ground level.
+        if (dist_xy_lock < 2.5f && current_z > tgt_z + 0.5f) ctrl->state.landing_phase = true;
     }
 
     if (ctrl->state.landing_phase && !ctrl->state.descent_phase) {
@@ -249,7 +251,16 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
             effective_z_dist = current_z; // Trust the absolute Z when altimeter voids
         }
 
-        if (dist_xy_lock < (ctrl->params.landing_threshold_xy * 2.5f) && effective_z_dist < (ctrl->params.landing_threshold_z * 2.5f) && effective_z_dist > -0.2f && vxy_rel < adaptive_vxy_gate) {
+        // Descent phase gate (three conditions must all hold):
+        //   1. XY within 1.5x threshold (0.60 * 1.5 = 0.90m) — close enough laterally
+        //   2. Must be ABOVE the pad by at least 0.30m — prevents lateral ground-level approach
+        //   3. Z distance within 3.0x threshold — altitude gate
+        //   4. Lateral speed within adaptive gate
+        bool xy_ok  = dist_xy_lock < (ctrl->params.landing_threshold_xy * 1.5f);
+        // alt_ok: must be above pad (>0.30m) but no upper limit — drone may approach from high altitude
+        bool alt_ok = effective_z_dist > 0.30f;
+        bool vxy_ok = vxy_rel < adaptive_vxy_gate;
+        if (xy_ok && alt_ok && vxy_ok) {
             ctrl->state.descent_phase = true;
             ctrl->state.descent_vz = ctrl->state.current_vel[2];
         }
@@ -290,11 +301,22 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         // Stronger centering force during final descent
         float centering_bias = (h_rem < 0.3f) ? 1.2f : 1.0f;
         
-        // Kill-zone commitment: If extremely close, ignore gradient and just drop
-        if (dist_xy_lock < 0.5f && h_rem < 0.3f) {
-            desired_vx = 0.0f;
-            desired_vy = 0.0f;
-            desired_vz = -0.3f; // Pure vertical drop
+        // Kill-zone commitment: Once within 1.0m XY, ignore the potential field gradient
+        // entirely and use pure centering toward the pad. This prevents obstacle repulsion
+        // from kicking the drone sideways during the final descent.
+        if (dist_xy_lock < 1.0f) {
+            // Pure centering: move directly toward pad center, ignore gradient
+            float dx_to_pad = ctrl->state.target_pos[0] - ctrl->state.current_pos[0];
+            float dy_to_pad = ctrl->state.target_pos[1] - ctrl->state.current_pos[1];
+            float d_to_pad = sqrtf(dx_to_pad * dx_to_pad + dy_to_pad * dy_to_pad + 1e-8f);
+            if (dist_xy_lock < 0.15f) {
+                // Directly above pad: pure vertical drop
+                desired_vx = ctrl->params.platform_vel_est[0];
+                desired_vy = ctrl->params.platform_vel_est[1];
+            } else {
+                desired_vx = (dx_to_pad / d_to_pad) * speed_xy + ctrl->params.platform_vel_est[0];
+                desired_vy = (dy_to_pad / d_to_pad) * speed_xy + ctrl->params.platform_vel_est[1];
+            }
         } else {
             desired_vx = (desired_vx / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[0] * 1.00f;
             desired_vy = (desired_vy / grad_norm) * speed_xy * centering_bias + ctrl->params.platform_vel_est[1] * 1.00f;
@@ -307,7 +329,12 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
         desired_vx = (desired_vx / grad_norm) * speed_xy + ctrl->params.platform_vel_est[0] * 0.90f;
         desired_vy = (desired_vy / grad_norm) * speed_xy + ctrl->params.platform_vel_est[1] * 0.90f;
         max_total_speed = 1.5f;
-        desired_vz = fminf(0.4f, fmaxf(-0.8f, desired_vz));
+        // If below hover target, force upward — do not allow downward drift
+        if (current_z < target_z_ref - 0.10f) {
+            desired_vz = fminf(1.2f, fmaxf(0.30f, desired_vz));
+        } else {
+            desired_vz = fminf(0.4f, fmaxf(-0.4f, desired_vz));
+        }
     } else {
         float speed_xy = 2.2f; // Matches JAX reference
         if (dist_xy_lock < 20.0f) speed_xy = 2.0f + fminf(1.0f, fmaxf(0.0f, (dist_xy_lock - 5.0f) / 15.0f)) * 0.5f;
@@ -337,10 +364,34 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
     float dv_z = desired_vz - ctrl->state.last_vel_cmd[2];
     float dv_norm = sqrtf(dv_x * dv_x + dv_y * dv_y + dv_z * dv_z + 1e-8f);
 
+    // Emergency climb: if the drone is dangerously low (below cruise_altitude - 1m) and
+    // needs to climb, allow faster vz correction (8x normal) to arrest descent.
+    // This applies in both cruise and landing_phase (but not descent_phase).
+    float max_dv_z = max_dv;
+    if (!ctrl->state.descent_phase) {
+        float danger_floor = ctrl->params.cruise_altitude - 1.0f;
+        // Also trigger if below landing hover target in landing_phase
+        if (ctrl->state.landing_phase) {
+            float hover_target = tgt_z + 0.3f + 0.9f * fminf(1.0f, fmaxf(0.0f, dist_xy_lock / 1.5f));
+            danger_floor = fminf(danger_floor, hover_target - 0.10f);
+        }
+        if (current_z < danger_floor && desired_vz > ctrl->state.last_vel_cmd[2]) {
+            max_dv_z = max_dv * 8.0f; // Emergency climb: 8x acceleration
+        }
+        // Ground contact escape: if drone is at ground level and not in descent,
+        // override the smoother entirely and force a strong upward command.
+        if (current_z < 0.15f) {
+            desired_vz = 1.8f; // Full upward command
+            ctrl->state.last_vel_cmd[2] = 1.8f; // Bypass smoother
+        }
+    }
+
     if (dv_norm > max_dv) {
         dv_x = (dv_x / dv_norm) * max_dv;
         dv_y = (dv_y / dv_norm) * max_dv;
-        dv_z = (dv_z / dv_norm) * max_dv;
+        // Apply separate (potentially higher) limit for vz
+        float dv_z_limited = fminf(fabsf(dv_z), max_dv_z) * (dv_z >= 0.0f ? 1.0f : -1.0f);
+        dv_z = dv_z_limited;
     }
 
     ctrl->state.control_output[0] = ctrl->state.last_vel_cmd[0] + dv_x;

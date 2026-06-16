@@ -1,0 +1,4 @@
+trial,label,challenge_type,terrain_name,seed,moving_platform,horizon_s,success,collision,steps,t_sim_s,t_flight_s,wall_time_s,min_clearance_m,dist_to_goal_m,score
+1,type=2 (MP) seed=39259,2,Open/Valley,39259,True,60.0,False,False,3000,60.0,60.0,22.43,0.2654,4.3931,0.01
+2,type=2 seed=39260,2,Open/Valley,39260,False,60.0,False,False,3000,60.0,60.0,19.24,0.156,1.6531,0.01
+3,type=2 (MP) seed=39261,2,Open/Valley,39261,True,60.0,True,False,924,18.48,18.48,6.84,0.3625,0.9966,0.803645
