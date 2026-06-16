@@ -72,10 +72,17 @@ typedef struct {
     bool collision_detected;
     bool target_reached;
     
-    // Local minimum escape state
+    // Reactive local minimum escape state
     uint32_t stuck_counter;
     bool escape_mode_active;
     float escape_vector[3];
+
+    // Predictive local minimum detector state
+    float predictive_threat_score;    // Blended PSMSL threat scalar [0,1]
+    float threat_accumulator;         // Leaky integrator over sustained threat
+    bool predictive_escape_active;    // Predictive escape in progress
+    float predictive_escape_target_z; // Target altitude for climb escape
+    uint32_t predictive_escape_ticks; // Ticks since predictive escape started
     
     float clutter_density;      // PSMSL result
     float navigability_score;   // PSMSL result

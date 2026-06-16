@@ -127,11 +127,18 @@ class AdaptState(ctypes.Structure):
         ('descent_vz', ctypes.c_float),
         ('collision_detected', ctypes.c_bool),
         ('target_reached', ctypes.c_bool),
-        # Local minimum escape state (must match C struct order exactly)
+        # Reactive local minimum escape state (must match C struct order exactly)
         ('stuck_counter', ctypes.c_uint32),
         ('escape_mode_active', ctypes.c_bool),
         ('_pad_escape', ctypes.c_uint8 * 3),  # alignment padding after bool
         ('escape_vector', ctypes.c_float * 3),
+        # Predictive local minimum detector state
+        ('predictive_threat_score', ctypes.c_float),
+        ('threat_accumulator', ctypes.c_float),
+        ('predictive_escape_active', ctypes.c_bool),
+        ('_pad_pred1', ctypes.c_uint8 * 3),  # alignment padding after bool
+        ('predictive_escape_target_z', ctypes.c_float),
+        ('predictive_escape_ticks', ctypes.c_uint32),
         ('clutter_density', ctypes.c_float),      # PSMSL result
         ('navigability_score', ctypes.c_float),   # PSMSL result (was local_navigability)
         ('collision_risk_score', ctypes.c_float), # PSMSL result

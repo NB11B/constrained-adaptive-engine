@@ -129,50 +129,95 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
     float dist_xy_lock = sqrtf((ctrl->state.current_pos[0] - ctrl->state.target_pos[0]) * (ctrl->state.current_pos[0] - ctrl->state.target_pos[0]) +
                                (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) * (ctrl->state.current_pos[1] - ctrl->state.target_pos[1]) + 1e-8f);
 
-    // Detect if stuck: extremely slow movement while not converged on the pad
     float speed_current = sqrtf(ctrl->state.current_vel[0]*ctrl->state.current_vel[0] + 
                                 ctrl->state.current_vel[1]*ctrl->state.current_vel[1] + 
                                 ctrl->state.current_vel[2]*ctrl->state.current_vel[2]);
-                                
-    // We are "stuck" if we are moving very slowly, not yet on the pad, and have been for a while
+
+    // ── LAYER 1: Predictive Detector ─────────────────────────────────────────
+    // Fires ~0.4s before a stall by blending PSMSL threat signals.
+    // Disabled during landing/descent to avoid aborting a precision approach.
+    bool in_approach = ctrl->state.landing_phase || ctrl->state.descent_phase;
+    if (!in_approach) {
+        // Blended threat scalar: collision_risk dominates, clutter and nav supplement
+        float raw_threat = (ctrl->state.collision_risk_score * 0.50f) +
+                           (ctrl->state.clutter_density      * 0.30f) +
+                           ((1.0f - ctrl->state.navigability_score) * 0.20f);
+        // Fast-attack EMA (alpha=0.3 → ~6-tick time constant at 50Hz)
+        ctrl->state.predictive_threat_score = 0.70f * ctrl->state.predictive_threat_score + 0.30f * raw_threat;
+
+        // Leaky integrator: accumulates under sustained threat + slow speed
+        if (ctrl->state.predictive_threat_score > 0.55f && speed_current < 0.8f) {
+            ctrl->state.threat_accumulator += 1.0f;
+        } else if (speed_current > 1.2f) {
+            // Clear progress resets the threat at 2x the accumulation rate
+            ctrl->state.threat_accumulator -= 2.0f;
+        } else {
+            ctrl->state.threat_accumulator -= 0.5f;
+        }
+        if (ctrl->state.threat_accumulator < 0.0f) ctrl->state.threat_accumulator = 0.0f;
+
+        // Fire predictive escape at threshold (approx 0.4s of degraded conditions)
+        if (ctrl->state.threat_accumulator > 20.0f && !ctrl->state.predictive_escape_active
+            && !ctrl->state.escape_mode_active) {
+            ctrl->state.predictive_escape_active = true;
+            ctrl->state.predictive_escape_ticks = 0;
+            // Climb above the obstacle field: higher in clutter, lower in open space
+            ctrl->state.predictive_escape_target_z = current_z
+                + 1.0f + ctrl->state.clutter_density * 2.0f;
+            ctrl->state.threat_accumulator = 0.0f;
+        }
+    }
+
+    // Execute predictive escape: climb to clear altitude, then release
+    if (ctrl->state.predictive_escape_active) {
+        ctrl->state.predictive_escape_ticks++;
+        float climb_err = ctrl->state.predictive_escape_target_z - current_z;
+        // Bypass vz smoother on first tick for immediate response
+        if (ctrl->state.predictive_escape_ticks == 1) {
+            desired_vz = fminf(2.0f, fmaxf(0.5f, climb_err * 2.0f));
+        } else {
+            desired_vz = fminf(1.5f, fmaxf(0.0f, climb_err * 1.5f));
+        }
+        // Release when altitude reached or after 5s timeout (250 ticks)
+        if (climb_err < 0.15f || ctrl->state.predictive_escape_ticks > 250) {
+            ctrl->state.predictive_escape_active = false;
+            ctrl->state.predictive_escape_ticks = 0;
+        }
+    }
+
+    // ── LAYER 2: Reactive Escape (safety net, fires after 1.5s of zero motion) ─
     if (speed_current < 0.15f && dist_xy_lock > 0.15f) {
         ctrl->state.stuck_counter++;
     } else {
-        // Reset counter if moving or if we've reached the target
         if (ctrl->state.stuck_counter > 0) ctrl->state.stuck_counter--;
     }
 
-    // Trigger escape mode if stuck for ~1.5 seconds (75 ticks at 50Hz)
-    if (ctrl->state.stuck_counter > 75 && !ctrl->state.escape_mode_active) {
+    if (ctrl->state.stuck_counter > 75 && !ctrl->state.escape_mode_active
+        && !ctrl->state.predictive_escape_active) {
         ctrl->state.escape_mode_active = true;
-        // Generate an orthogonal escape vector to break symmetry
-        // We use the cross product of the gradient and Z-axis to spiral out
         float grad_norm = sqrtf(gradient[0]*gradient[0] + gradient[1]*gradient[1] + 1e-8f);
         if (grad_norm > 0.1f) {
-            ctrl->state.escape_vector[0] = -gradient[1] / grad_norm; // Cross product with (0,0,1)
-            ctrl->state.escape_vector[1] = gradient[0] / grad_norm;
-            ctrl->state.escape_vector[2] = 1.5f; // Add an upward pop to clear low obstacles
+            ctrl->state.escape_vector[0] = -gradient[1] / grad_norm;
+            ctrl->state.escape_vector[1] =  gradient[0] / grad_norm;
+            ctrl->state.escape_vector[2] = 1.5f;
         } else {
-            // Randomish pop if gradient is exactly zero
             ctrl->state.escape_vector[0] = 1.0f;
             ctrl->state.escape_vector[1] = 1.0f;
             ctrl->state.escape_vector[2] = 1.5f;
         }
     }
 
-    // Turn off escape mode once we've moved significantly or after a timeout
     if (ctrl->state.escape_mode_active) {
         if (speed_current > 1.0f || ctrl->state.stuck_counter > 150) {
             ctrl->state.escape_mode_active = false;
-            ctrl->state.stuck_counter = 0; // Reset completely
+            ctrl->state.stuck_counter = 0;
         } else {
-            // Override the gradient with the escape vector
             desired_vx = ctrl->state.escape_vector[0] * 2.0f;
             desired_vy = ctrl->state.escape_vector[1] * 2.0f;
             desired_vz = ctrl->state.escape_vector[2];
         }
     }
-    // ------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Z-attraction (proportional control to cruise altitude, or target Z during landing)
     float target_z_ref = ctrl->params.cruise_altitude;
@@ -214,19 +259,25 @@ static void calculate_control_output(adaptation_controller_t *ctrl,
 
     if (ctrl->state.descent_phase) {
         float h_rem = fmaxf(current_z - tgt_z, 0.0f);
-        
-        // --- Dynamic Feathering (Flare) Profile ---
-        // We use a feathered vertical velocity that decays as we approach touchdown
+
+        // --- Stepped Feathering Profile (Landing Fix) ---
+        // Three-stage descent: approach (-0.8), feather (-0.3), press (-0.25).
+        // Floor guard at tgt_z+0.01 stops pressing once contact is made.
         float vz_feather;
-        if (h_rem < 0.05f) {
-            // Final touchdown latch
-            vz_feather = -ctrl->params.landing_descent_rate * 4.0f; 
+        if (current_z < tgt_z + 0.01f) {
+            // Floor guard: we are at or below pad surface — stop pressing
+            vz_feather = 0.0f;
+        } else if (h_rem > 0.50f) {
+            // Approach: descend at -0.8 m/s until 0.5m above pad
+            vz_feather = -0.80f;
+        } else if (h_rem > 0.10f) {
+            // Feather: slow to -0.3 m/s between 0.5m and 0.1m
+            vz_feather = -0.30f;
         } else {
-            // Exponential flare: faster at top, slowing down as we get closer
-            float flare_base = 0.85f;
-            vz_feather = -fmaxf(ctrl->params.landing_descent_rate, flare_base * powf(h_rem / 1.5f, 0.75f));
+            // Final press: gentle -0.25 m/s for last 0.1m
+            vz_feather = -0.25f;
         }
-        
+
         // Add platform vertical velocity compensation
         float vz_target = vz_feather + ctrl->params.platform_vel_est[2];
         desired_vz = fminf(0.5f, fmaxf(-1.0f, (vz_target - ctrl->state.current_vel[2]) * 1.5f + vz_target));
@@ -347,6 +398,16 @@ void adapt_reset(adaptation_controller_t *controller)
     controller->state.iterations = 0;
     controller->state.landing_phase = false;
     controller->state.descent_phase = false;
+    // Reset predictive detector state
+    controller->state.predictive_threat_score = 0.0f;
+    controller->state.threat_accumulator = 0.0f;
+    controller->state.predictive_escape_active = false;
+    controller->state.predictive_escape_target_z = 0.0f;
+    controller->state.predictive_escape_ticks = 0;
+    // Reset reactive escape state
+    controller->state.stuck_counter = 0;
+    controller->state.escape_mode_active = false;
+    memset(controller->state.escape_vector, 0, sizeof(float) * 3);
 }
 
 void adapt_set_flight_params(adaptation_controller_t *controller, const adapt_flight_params_t *params)
