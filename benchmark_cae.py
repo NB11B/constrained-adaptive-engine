@@ -32,7 +32,17 @@ class CAEBenchmarker:
 
         with open(self.results_file, mode="w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["Terrain", "Terrain ID", "Seed", "Status", "Steps", "Time (s)", "Min Dist (m)"])
+            writer.writerow([
+                "Terrain",
+                "Terrain ID",
+                "Seed",
+                "Status",
+                "Steps",
+                "Time (s)",
+                "Min Dist (m)",
+                "Landing Phase",
+                "Descent Phase",
+            ])
 
             for terrain_id, terrain_name in TERRAIN_NAMES.items():
                 print(f"\nBenchmarking Terrain: {terrain_name}")
@@ -56,12 +66,16 @@ class CAEBenchmarker:
                         result["steps"],
                         f"{elapsed:.2f}",
                         f"{result['min_dist_m']:.3f}",
+                        result.get("landing_phase", False),
+                        result.get("descent_phase", False),
                     ])
                     f.flush()
 
                     print(
                         f" {result['status']} "
-                        f"({result['steps']} steps, min_dist={result['min_dist_m']}m, wall={elapsed:.2f}s)"
+                        f"({result['steps']} steps, min_dist={result['min_dist_m']}m, "
+                        f"landing={result.get('landing_phase', False)}, "
+                        f"descent={result.get('descent_phase', False)}, wall={elapsed:.2f}s)"
                     )
                     self.summary.append(result)
 
@@ -76,6 +90,8 @@ class CAEBenchmarker:
         collisions = [r for r in self.summary if r["status"] == "COLLISION"]
         timeouts = [r for r in self.summary if r["status"] == "TIMEOUT"]
         errors = [r for r in self.summary if "ERROR" in r["status"]]
+        landing_entries = [r for r in self.summary if r.get("landing_phase", False)]
+        descent_entries = [r for r in self.summary if r.get("descent_phase", False)]
 
         total = len(self.summary)
         success_rate = (len(successes) / total * 100) if total > 0 else 0.0
@@ -84,6 +100,8 @@ class CAEBenchmarker:
         print(f"Successes:    {len(successes)} ({success_rate:.1f}%)")
         print(f"Collisions:   {len(collisions)}")
         print(f"Timeouts:     {len(timeouts)}")
+        print(f"Landing Seen: {len(landing_entries)}")
+        print(f"Descent Seen: {len(descent_entries)}")
         if errors:
             print(f"Errors:       {len(errors)}")
 
