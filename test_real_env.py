@@ -42,7 +42,12 @@ TERMINAL_ASSIST_XY_M = 1.45
 TERMINAL_ASSIST_AGL_M = 2.40
 
 # Harder maps need to clear obstacle fields before committing descent.
-COMPLEX_TERRAINS = {1, 3, 4, 5}  # City, Mountain, Village, Warehouse
+TERRAIN_PROFILES = {
+    1: {"name": "city", "transit_alt": 3.0, "mode_v": 95.0, "safety": 0.95},
+    3: {"name": "mountain", "transit_alt": 6.8, "mode_v": 120.0, "safety": 1.25},
+    4: {"name": "village", "transit_alt": 3.2, "mode_v": 100.0, "safety": 0.95},
+    5: {"name": "warehouse", "transit_alt": 2.4, "mode_v": 60.0, "safety": 0.55},
+}
 
 
 def _action_from_velocity(vx, vy, vz, total_speed, yaw_cmd):
@@ -53,18 +58,24 @@ def _action_from_velocity(vx, vy, vz, total_speed, yaw_cmd):
     return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
 
 
-def _direct_action(current_pos, target_pos, plat_vel, yaw_norm, descent=False):
+def _direct_action(current_pos, target_pos, plat_vel, yaw_norm, descent=False, target_alt_override=None, settle_ticks=0, terrain_id=None):
     """Closed-loop approach/touchdown assist outside the potential-field controller."""
     delta = target_pos - current_pos
     xy_dist = float(np.linalg.norm(delta[:2]))
     h_rem = max(float(current_pos[2] - target_pos[2]), 0.0)
 
     if descent:
-        if xy_dist < 0.22:
+        # Warehouse-specific final center
+        final_center_gate = 0.15 if terrain_id == 5 else 0.22
+        
+        if xy_dist < final_center_gate:
             # Final Touchdown Settle: zero out relative XY velocity to avoid sliding off or clipping edges.
-            # Use a slightly firmer press at the very end to ensure contact.
-            # Increased descent rate at the very end to prevent hovering just above the success threshold.
-            vz = -0.20 if h_rem > 0.18 else -0.18
+            if settle_ticks > 40:
+                # Patient final press for Warehouse to ensure perfect centering
+                press_vz = -0.10 if terrain_id == 5 else -0.16
+                vz = press_vz if h_rem > 0.15 else (press_vz * 0.5)
+            else:
+                vz = -0.01 # Damping phase: allow lateral centering to finish
             desired = np.array([plat_vel[0], plat_vel[1], vz + plat_vel[2]], dtype=np.float64)
         else:
             # Centering approach: prioritize lateral alignment before final drop.
@@ -79,8 +90,13 @@ def _direct_action(current_pos, target_pos, plat_vel, yaw_norm, descent=False):
     else:
         # Acquisition assist: pull toward the pad at a controlled altitude before C landing mode opens.
         xy_speed = min(1.15, max(0.35, xy_dist * 0.55))
-        desired_z = target_pos[2] + 1.4
-        vz = float(np.clip((desired_z - current_pos[2]) * 0.85, -0.55, 0.55))
+        desired_z = target_alt_override if target_alt_override is not None else (target_pos[2] + 1.4)
+        
+        # Mountain descent boost: if we are over the pad but way too high, drop faster to beat the clock.
+        descent_gain = 1.2 if (terrain_id == 3 and xy_dist < 2.0 and h_rem > 10.0) else 0.85
+        max_desc = -1.5 if (terrain_id == 3 and xy_dist < 2.0) else -0.55
+        
+        vz = float(np.clip((desired_z - current_pos[2]) * descent_gain, max_desc, 0.55))
         desired = np.array(
             [delta[0] / (xy_dist + 1e-8) * xy_speed + plat_vel[0],
              delta[1] / (xy_dist + 1e-8) * xy_speed + plat_vel[1],
@@ -94,20 +110,36 @@ def _direct_action(current_pos, target_pos, plat_vel, yaw_norm, descent=False):
     return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
 
 
+def _get_phase_reason(cs):
+    if cs.target_reached:
+        return "TARGET_REACHED"
+    if cs.descent_phase:
+        return "DESCENT_PHASE"
+    if cs.landing_phase:
+        return "LANDING_PHASE"
+    if cs.escape_mode_active:
+        return "ESCAPE_ACTIVE"
+    if cs.predictive_escape_active:
+        return "PREDICTIVE_ESCAPE_ACTIVE"
+    if cs.collision_detected:
+        return "COLLISION_DETECTED"
+    return "SEARCH_PHASE"
+
+
 def _landing_params(terrain_id, dist_xy, spawn_z, plat_vel):
-    complex_map = terrain_id in COMPLEX_TERRAINS
+    profile = TERRAIN_PROFILES.get(terrain_id, {"name": "default", "transit_alt": 1.2, "mode_v": 145.0, "safety": 1.05})
     landing_committed = dist_xy < 4.25
 
     if landing_committed:
         cruise_altitude = 0.50
-        safety_radius = 0.62 if complex_map else 0.68
-        mode_v = 42.0 if complex_map else 50.0
+        safety_radius = 0.62
+        mode_v = 42.0
         attraction_gain = 16.0
     else:
-        cruise_altitude = spawn_z + (2.4 if complex_map else 1.2)
-        safety_radius = 0.92 if complex_map else 1.05
-        mode_v = 105.0 if complex_map else 145.0
-        attraction_gain = 13.5 if complex_map else 11.5
+        cruise_altitude = spawn_z + profile["transit_alt"]
+        safety_radius = profile["safety"]
+        mode_v = profile["mode_v"]
+        attraction_gain = 13.5
 
     return {
         "cruise_altitude": cruise_altitude,
@@ -147,6 +179,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     last_descent = False
     terminal_ticks = 0
     approach_assist_ticks = 0
+    settle_ticks = 0
     
     recorder = FlightRecorder()
     terrain_name = TERRAIN_NAMES.get(terrain_id, f"Terrain{terrain_id}")
@@ -207,18 +240,41 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             # This prevents "landing" on mountain peaks 20m above the actual pad.
             is_near_ground_level = current_pos[2] < (plat_pos[2] + 4.2)
             
-            if dist_xy < TERMINAL_ASSIST_XY_M and agl < TERMINAL_ASSIST_AGL_M and is_near_ground_level:
+            # Mountain-only Safety Assist: climb/hold altitude instead of descending when collision risk is high near pad.
+            mountain_safety_climb = False
+            if terrain_id == 3 and dist_xy < 15.0 and cs.collision_risk_score > 0.70 and current_pos[2] > plat_pos[2] + 4.0:
+                mountain_safety_climb = True
+
+            # Warehouse-specific terminal gates
+            term_gate_xy = 0.75 if terrain_id == 5 else TERMINAL_ASSIST_XY_M
+            
+            if dist_xy < term_gate_xy and agl < TERMINAL_ASSIST_AGL_M and is_near_ground_level:
                 terminal_ticks += 1
                 assist_type = 2
-                action = _direct_action(current_pos, plat_pos, plat_vel, yaw_norm, descent=True)
-            elif dist_xy < APPROACH_ASSIST_XY_M and not bool(cs.landing_phase):
+                
+                # Settle counter logic
+                rel_vx = current_vel[0] - plat_vel[0]
+                rel_vy = current_vel[1] - plat_vel[1]
+                if dist_xy < 0.18 and abs(rel_vx) < 0.08 and abs(rel_vy) < 0.08:
+                    settle_ticks += 1
+                else:
+                    settle_ticks = 0
+                
+                action = _direct_action(current_pos, plat_pos, plat_vel, yaw_norm, descent=True, settle_ticks=settle_ticks, terrain_id=terrain_id)
+            elif (dist_xy < APPROACH_ASSIST_XY_M or mountain_safety_climb) and not bool(cs.landing_phase):
                 approach_assist_ticks += 1
                 assist_type = 1
-                action = _direct_action(current_pos, plat_pos, plat_vel, yaw_norm, descent=False)
+                # If mountain safety climb is active, force a higher target altitude in the assist.
+                target_alt_assist = plat_pos[2] + (5.5 if mountain_safety_climb else 1.4)
+                action = _direct_action(current_pos, plat_pos, plat_vel, yaw_norm, descent=False, target_alt_override=target_alt_assist)
 
             dist = float(np.linalg.norm(current_pos - plat_pos))
+            phase_reason = _get_phase_reason(cs)
+            rel_vx_to_pad = current_vel[0] - plat_vel[0]
+            rel_vy_to_pad = current_vel[1] - plat_vel[1]
             recorder.record_step(step, time.time() - start_time, current_pos, current_vel, 
-                               agl, dist_xy, dist, plat_pos, plat_vel, cs.control_output, cs, assist_type)
+                               agl, dist_xy, dist, plat_pos, plat_vel, cs.control_output, cs, assist_type, 
+                               terrain_id, phase_reason, rel_vx_to_pad, rel_vy_to_pad)
 
             obs, _reward, term, trunc, info = env.step(action)
 
