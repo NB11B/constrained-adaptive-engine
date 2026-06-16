@@ -9,9 +9,7 @@ Key design principles
   natively via psmsl_depth_analyze_image() (16×16 subsampled, world-frame
   point cloud, spatial grid analysis). No Python-side depth-to-obstacle
   conversion — all depth processing is MCU-compliant inside the C engine.
-- cruise_altitude is initialised from the spawn altitude observed in the
-  first observation. This prevents the Z-attraction term from issuing large
-  downward velocity commands at spawn.
+- Transit altitude and approach aggressiveness are adapted by terrain class.
 - The bridge maps C engine output [vx, vy, vz, speed, yaw] to the
   environment's [dir_x, dir_y, dir_z, speed_norm, yaw_norm] action format.
 - The validation harness mirrors the tuned landing policy used by drone_agent.py.
@@ -38,8 +36,12 @@ from constrained_adaptive_engine_bridge import ConstrainedAdaptiveEngine
 CAMERA_FOV_DEG = 90.0
 DEPTH_MAX_RANGE = 20.0
 C_ENGINE_MAX_SPEED = 3.0
-TERMINAL_ASSIST_XY_M = 1.25
-TERMINAL_ASSIST_AGL_M = 2.20
+APPROACH_ASSIST_XY_M = 4.75
+TERMINAL_ASSIST_XY_M = 1.45
+TERMINAL_ASSIST_AGL_M = 2.40
+
+# Harder maps need to clear obstacle fields before committing descent.
+COMPLEX_TERRAINS = {1, 3, 4, 5}  # City, Mountain, Village, Warehouse
 
 
 def _action_from_velocity(vx, vy, vz, total_speed, yaw_cmd):
@@ -50,19 +52,35 @@ def _action_from_velocity(vx, vy, vz, total_speed, yaw_cmd):
     return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
 
 
-def _terminal_assist_action(current_pos, target_pos, yaw_norm):
+def _direct_action(current_pos, target_pos, yaw_norm, descent=False):
+    """Closed-loop approach/touchdown assist outside the potential-field controller."""
     delta = target_pos - current_pos
     xy_dist = float(np.linalg.norm(delta[:2]))
     h_rem = max(float(current_pos[2] - target_pos[2]), 0.0)
 
-    if xy_dist < 0.18:
-        desired = np.array([0.0, 0.0, -0.55 if h_rem > 0.35 else -0.28], dtype=np.float64)
+    if descent:
+        if xy_dist < 0.30:
+            # Settle vertically over the pad; keep final press slow enough for success criteria.
+            vz = -0.22 if h_rem > 0.30 else -0.12
+            desired = np.array([0.0, 0.0, vz], dtype=np.float64)
+        else:
+            xy_speed = min(0.50, max(0.08, xy_dist * 0.55))
+            vz = -0.26 if h_rem > 0.35 else -0.12
+            desired = np.array(
+                [delta[0] / (xy_dist + 1e-8) * xy_speed,
+                 delta[1] / (xy_dist + 1e-8) * xy_speed,
+                 vz],
+                dtype=np.float64,
+            )
     else:
-        xy_speed = min(0.65, max(0.12, xy_dist * 0.85))
+        # Acquisition assist: pull toward the pad at a controlled altitude before C landing mode opens.
+        xy_speed = min(0.95, max(0.25, xy_dist * 0.45))
+        desired_z = target_pos[2] + 1.4
+        vz = float(np.clip((desired_z - current_pos[2]) * 0.75, -0.45, 0.45))
         desired = np.array(
             [delta[0] / (xy_dist + 1e-8) * xy_speed,
              delta[1] / (xy_dist + 1e-8) * xy_speed,
-             -0.55 if h_rem > 0.35 else -0.25],
+             vz],
             dtype=np.float64,
         )
 
@@ -72,17 +90,30 @@ def _terminal_assist_action(current_pos, target_pos, yaw_norm):
     return np.array([[dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm]], dtype=np.float32)
 
 
-def _landing_params(dist_xy, spawn_z, plat_vel):
-    landing_committed = dist_xy < 3.0
+def _landing_params(terrain_id, dist_xy, spawn_z, plat_vel):
+    complex_map = terrain_id in COMPLEX_TERRAINS
+    landing_committed = dist_xy < 4.25
+
+    if landing_committed:
+        cruise_altitude = 0.50
+        safety_radius = 0.62 if complex_map else 0.68
+        mode_v = 42.0 if complex_map else 50.0
+        attraction_gain = 16.0
+    else:
+        cruise_altitude = spawn_z + (2.4 if complex_map else 1.2)
+        safety_radius = 0.92 if complex_map else 1.05
+        mode_v = 105.0 if complex_map else 145.0
+        attraction_gain = 13.5 if complex_map else 11.5
+
     return {
-        "cruise_altitude": 0.55 if landing_committed else spawn_z,
+        "cruise_altitude": cruise_altitude,
         "max_speed": 3.0,
-        "safety_radius": 0.70 if landing_committed else 1.10,
-        "mode_v": 55.0 if landing_committed else 160.0,
-        "attraction_gain": 15.0 if landing_committed else 11.0,
-        "landing_threshold_xy": 0.85 if landing_committed else 0.65,
+        "safety_radius": safety_radius,
+        "mode_v": mode_v,
+        "attraction_gain": attraction_gain,
+        "landing_threshold_xy": 0.95 if landing_committed else 0.75,
         "landing_threshold_z": 1.20,
-        "landing_descent_rate": 0.58 if landing_committed else 0.45,
+        "landing_descent_rate": 0.42 if landing_committed else 0.38,
         "platform_vel_est": list(plat_vel),
     }
 
@@ -100,7 +131,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     spawn_z = float(obs["state"][2])
 
     engine = ConstrainedAdaptiveEngine()
-    engine.set_flight_params(**_landing_params(dist_xy=999.0, spawn_z=spawn_z, plat_vel=np.zeros(3)))
+    engine.set_flight_params(**_landing_params(terrain_id, dist_xy=999.0, spawn_z=spawn_z, plat_vel=np.zeros(3)))
     engine.set_target_pos(goal)
     engine.start_adaptive()
 
@@ -110,6 +141,8 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     prev_plat_pos = None
     last_landing = False
     last_descent = False
+    terminal_ticks = 0
+    approach_assist_ticks = 0
 
     start_time = time.time()
     try:
@@ -138,7 +171,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             prev_plat_pos = plat_pos.copy()
 
             dist_xy = float(np.linalg.norm(current_pos[:2] - plat_pos[:2]))
-            engine.set_flight_params(**_landing_params(dist_xy=dist_xy, spawn_z=spawn_z, plat_vel=plat_vel))
+            engine.set_flight_params(**_landing_params(terrain_id, dist_xy=dist_xy, spawn_z=spawn_z, plat_vel=plat_vel))
             engine.set_target_pos(plat_pos)
 
             engine.process_sensor_data(
@@ -162,7 +195,11 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             action = _action_from_velocity(vx, vy, vz, total_speed, yaw_norm)
 
             if dist_xy < TERMINAL_ASSIST_XY_M and agl < TERMINAL_ASSIST_AGL_M:
-                action = _terminal_assist_action(current_pos, plat_pos, yaw_norm)
+                terminal_ticks += 1
+                action = _direct_action(current_pos, plat_pos, yaw_norm, descent=True)
+            elif dist_xy < APPROACH_ASSIST_XY_M and not bool(cs.landing_phase):
+                approach_assist_ticks += 1
+                action = _direct_action(current_pos, plat_pos, yaw_norm, descent=False)
 
             obs, _reward, term, trunc, info = env.step(action)
 
@@ -171,12 +208,13 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             last_landing = bool(cs.landing_phase)
             last_descent = bool(cs.descent_phase)
 
-            if verbose and (step % 25 == 0 or last_landing or last_descent):
+            if verbose and (step % 25 == 0 or last_landing or last_descent or terminal_ticks > 0):
                 print(
                     f"  step={step:4d} pos={current_pos.round(3)} "
                     f"dist_xy={dist_xy:.2f} agl={agl:.2f} "
                     f"vel={current_vel.round(3)} action={action.round(3)} "
                     f"landing={last_landing} descent={last_descent} "
+                    f"assist={approach_assist_ticks}/{terminal_ticks} "
                     f"risk={cs.collision_risk_score:.2f} clutter={cs.clutter_density:.2f}"
                 )
 
@@ -211,6 +249,8 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         "min_dist_m": round(min_dist, 3),
         "landing_phase": last_landing,
         "descent_phase": last_descent,
+        "approach_assist_ticks": approach_assist_ticks,
+        "terminal_assist_ticks": terminal_ticks,
     }
 
 
@@ -234,7 +274,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print("CAE Real Environment Integration Test")
     print("  Depth: native C psmsl_depth_analyze_image (16×16 grid)")
-    print("  Landing: tuned committed descent + terminal assist")
+    print("  Landing: terrain-aware approach + soft terminal assist")
     print("=" * 60)
 
     for terrain_id, seed in test_cases:
@@ -245,6 +285,7 @@ if __name__ == "__main__":
             f"  => {result['status']} | steps={result['steps']} | "
             f"min_dist={result['min_dist_m']}m | "
             f"landing={result['landing_phase']} descent={result['descent_phase']} | "
+            f"assist={result['approach_assist_ticks']}/{result['terminal_assist_ticks']} | "
             f"time={result['duration_s']}s"
         )
 
