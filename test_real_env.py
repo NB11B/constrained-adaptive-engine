@@ -264,7 +264,8 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     env = make_env(task, gui=False)
     obs, _ = env.reset()
     goal = env.GOAL_POS.copy().astype(np.float64)
-    goal[2] = 0.2
+    if terrain_id != 3:
+        goal[2] = 0.2
 
     spawn_z = float(obs["state"][2])
 
@@ -314,7 +315,8 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 physicsClientId=env.unwrapped.CLIENT,
             )
             plat_pos = np.array(plat_pos_raw, dtype=np.float64)
-            plat_pos[2] = 0.2
+            if terrain_id != 3:
+                plat_pos[2] = 0.2
 
             if prev_plat_pos is not None:
                 plat_vel = (plat_pos - prev_plat_pos) / 0.02
@@ -356,17 +358,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             phase_reason = _c_phase_reason(cs)
             is_near_ground_level = current_pos[2] < (plat_pos[2] + 4.2)
 
-            last_phase_reason = phase_reason
             min_agl = min(min_agl, agl)
-
-            if phase_reason == "MOUNTAIN_AGL_FLOOR_CLIMB":
-                agl_floor_ticks += 1
-            if phase_reason == "MOUNTAIN_DESCENT_CORRIDOR":
-                descent_corridor_ticks += 1
-            if phase_reason == "TERMINAL_PRESS":
-                terminal_press_ticks += 1
-            if phase_reason == "SETTLE_PHASE":
-                settle_phase_ticks += 1
 
             if dist_xy < min_dist_xy:
                 min_dist_step = step
@@ -375,7 +367,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
             mountain_low_agl_guard = (
                 terrain_id == 3
                 and agl < profile.get("ridge_floor_agl", 1.6)
-                and dist_xy > 2.5
+
                 and not bool(cs.landing_phase)
             )
             mountain_safety_climb = (
@@ -408,7 +400,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 warehouse_terminal_commit = (
                     terrain_id == 5
                     and terminal_ticks > 900
-                    and dist_xy < 0.50
+
                     and agl < 0.90
                     and bool(cs.landing_phase)
                     and bool(cs.descent_phase)
@@ -458,6 +450,16 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                     target_alt_override=target_alt_assist,
                     terrain_id=terrain_id,
                 )
+
+            last_phase_reason = phase_reason
+            if phase_reason == "MOUNTAIN_AGL_FLOOR_CLIMB":
+                agl_floor_ticks += 1
+            if phase_reason == "MOUNTAIN_DESCENT_CORRIDOR":
+                descent_corridor_ticks += 1
+            if phase_reason == "TERMINAL_PRESS":
+                terminal_press_ticks += 1
+            if phase_reason == "SETTLE_PHASE":
+                settle_phase_ticks += 1
 
             dist = float(np.linalg.norm(current_pos - plat_pos))
             recorder.record_step(
