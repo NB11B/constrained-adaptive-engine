@@ -302,6 +302,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
     min_agl = 9999.0
     agl_floor_ticks = 0
     descent_corridor_ticks = 0
+    mountain_centered_descent_ticks = 0
     terminal_press_ticks = 0
     settle_phase_ticks = 0
     warehouse_commit_ticks = 0
@@ -396,6 +397,14 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 and current_pos[2] > plat_pos[2] + 4.2
                 and agl > profile.get("ridge_floor_agl", 1.6)
             )
+            mountain_centered_descent = (
+                terrain_id == 3
+                and dist_xy < 0.35
+                and agl > TERMINAL_ASSIST_AGL_M
+                and agl > profile.get("ridge_floor_agl", 1.6) + 0.45
+                and descent_corridor_ticks > 40
+                and not bool(cs.landing_phase)
+            )
             approach_gate_xy = profile.get("approach_gate_xy", APPROACH_ASSIST_XY_M)
             term_gate_xy = profile["term_gate_xy"]
             settle_gate = profile["final_center_gate"]
@@ -436,7 +445,12 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                     warehouse_commit_ticks += 1
                 else:
                     phase_reason = "TERMINAL_PRESS" if settle_ticks >= profile["settle_required"] else "SETTLE_PHASE"
-            elif (dist_xy < approach_gate_xy or mountain_safety_climb or mountain_descent_corridor) and not bool(cs.landing_phase):
+            elif (
+                dist_xy < approach_gate_xy
+                or mountain_safety_climb
+                or mountain_descent_corridor
+                or mountain_centered_descent
+            ) and not bool(cs.landing_phase):
                 approach_assist_ticks += 1
                 assist_type = 1
                 if mountain_low_agl_guard:
@@ -445,6 +459,9 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 elif mountain_safety_climb:
                     target_alt_assist = max(current_pos[2] + 1.2, plat_pos[2] + 6.3)
                     phase_reason = "MOUNTAIN_SAFETY_CLIMB"
+                elif mountain_centered_descent:
+                    target_alt_assist = plat_pos[2] + 2.15
+                    phase_reason = "MOUNTAIN_CENTERED_DESCENT"
                 elif mountain_descent_corridor:
                     target_alt_assist = plat_pos[2] + 4.6
                     phase_reason = "MOUNTAIN_DESCENT_CORRIDOR"
@@ -470,6 +487,8 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
                 agl_floor_ticks += 1
             if phase_reason == "MOUNTAIN_DESCENT_CORRIDOR":
                 descent_corridor_ticks += 1
+            if phase_reason == "MOUNTAIN_CENTERED_DESCENT":
+                mountain_centered_descent_ticks += 1
             if phase_reason == "TERMINAL_PRESS":
                 terminal_press_ticks += 1
             if phase_reason == "SETTLE_PHASE":
@@ -556,6 +575,7 @@ def run_real_env_trial(terrain_id, seed, max_steps=3000, verbose=False):
         "min_agl": round(min_agl, 3),
         "agl_floor_ticks": agl_floor_ticks,
         "descent_corridor_ticks": descent_corridor_ticks,
+        "mountain_centered_descent_ticks": mountain_centered_descent_ticks,
         "settle_phase_ticks": settle_phase_ticks,
         "terminal_press_ticks": terminal_press_ticks,
         "warehouse_commit_ticks": warehouse_commit_ticks,
