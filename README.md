@@ -136,3 +136,15 @@ The depth pipeline is designed to remain MCU-compliant:
 ## Authorship
 
 Copyright © 2026 Nathanael J. Bocker. All rights reserved.
+
+## License and Commercial Use
+
+This repository is provided under the **Constrained Adaptive Engine Non-Commercial Source-Available License**.
+
+The code, documentation, algorithms, architecture, benchmarks, and related materials are available for internal non-commercial review, research, testing, and evaluation only.
+
+Commercial use is prohibited without prior express written permission from Nathanael J. Bocker.
+
+This includes, but is not limited to, product integration, paid pilots, customer demonstrations, hosted services, consulting deliverables, commercial benchmarking, derivative commercialization, sublicensing, redistribution, or use in a competing commercial implementation.
+
+See `LICENSE` and `NOTICE.md`.

@@ -1,0 +1,69 @@
+Constrained Adaptive Engine Non-Commercial Source-Available License
+Version 1.0
+
+Copyright (c) 2026 Nathanael J. Bocker. All rights reserved.
+
+This repository, including its source code, documentation, examples, scripts, benchmark harnesses, reports, and related materials, is provided for limited non-commercial evaluation only.
+
+By accessing, cloning, downloading, copying, running, testing, or otherwise using this repository, you agree to the terms below.
+
+1. Permitted Use
+
+You may use this repository solely for internal, non-commercial review, research, testing, evaluation, interoperability assessment, and technical feedback.
+
+2. Commercial Use Prohibited
+
+You may not use this repository, source code, algorithms, architecture, documentation, benchmark harnesses, derivative works, or any substantial portion thereof for commercial purposes without prior express written permission from Nathanael J. Bocker.
+
+Commercial use includes, but is not limited to:
+
+- incorporation into a product, service, platform, SDK, API, hosted service, consulting deliverable, or commercial research program;
+- use in paid pilots, customer demonstrations, procurement proposals, revenue-generating deployments, or commercial evaluations;
+- use to train, improve, validate, benchmark, or support a commercial autonomy, robotics, drone, swarm, embedded-control, or AI system;
+- sale, licensing, sublicensing, rental, leasing, distribution, or commercialization of the Software or derivative works;
+- development of a competing or substantially similar commercial implementation based on this repository.
+
+3. Redistribution Restricted
+
+You may not redistribute, republish, mirror, upload, post, share, sublicense, or make this repository or any portion of it available to third parties without prior express written permission.
+
+Private sharing inside an authorized review team is permitted only if all recipients are bound by equivalent non-commercial and confidentiality restrictions.
+
+4. Derivative Works
+
+You may create modifications solely for internal non-commercial evaluation.
+
+You may not distribute, commercialize, sublicense, or publicly release derivative works without prior express written permission.
+
+5. No Patent or Trademark License
+
+No patent license, trademark license, trade name license, or other intellectual-property license is granted except for the limited copyright license expressly stated in this license.
+
+6. Contributions
+
+Unless otherwise agreed in writing, any contribution submitted to this repository is provided under the same non-commercial source-available terms and does not grant the contributor any commercialization, sublicensing, or distribution right.
+
+7. Termination
+
+This license terminates automatically if you violate any term. Upon termination, you must stop using the repository and delete all copies under your control.
+
+8. No Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, SAFETY, RELIABILITY, OR SUITABILITY FOR FLIGHT, ROBOTICS, AUTONOMY, COMMERCIAL, OR PRODUCTION USE.
+
+9. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE COPYRIGHT HOLDER SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGE, LOSS, LIABILITY, OR EXPENSE ARISING FROM ACCESS TO OR USE OF THE SOFTWARE.
+
+10. Separate Commercial Licensing
+
+Commercial rights are available only under a separate written agreement signed by Nathanael J. Bocker or an authorized legal representative.
+
+For commercial licensing, partnership discussions, evaluation extensions, or written permission, contact:
+
+Nathanael J. Bocker
+nathanael.j.bocker@gmail.com
+
+11. Reservation of Rights
+
+All rights not expressly granted are reserved.
