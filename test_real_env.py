@@ -72,9 +72,9 @@ TERRAIN_PROFILES = {
         "transit_alt": 6.3,
         "mode_v": 108.0,
         "safety": 1.28,
-        "acq_gain": 0.64,
-        "acq_speed_max": 1.55,
-        "approach_gate_xy": 22.0,
+        "acq_gain": 0.60,
+        "acq_speed_max": 1.40,
+        "approach_gate_xy": 18.0,
         "term_gate_xy": 1.20,
         "final_center_gate": 0.20,
         "settle_required": 12,
@@ -170,9 +170,9 @@ def _direct_action(
                     if h_rem > 0.22:
                         vz = press_vz
                     elif h_rem > 0.08:
-                        vz = -0.055
+                        vz = -0.08
                     else:
-                        vz = -0.025
+                        vz = -0.05
                 else:
                     vz = press_vz if h_rem > 0.12 else (press_vz * 0.60)
             else:
