@@ -15,44 +15,77 @@ cp "$ROOT/swarm_submission/cae_agent/requirements.txt" "$OUT/requirements.txt"
 # Real CAE implementation goes inside cae_runtime.zip.
 cp "$ROOT/swarm_submission/cae_agent/drone_agent.py" "$RUNTIME/cae_agent_impl.py"
 
-# Package-time adapter correction: Swarm's final search vector can behave like a
-# short direction cue outside warehouse maps. If treated as a literal 1m-ish
-# target offset, the agent chases a moving carrot and never reaches the visible
-# platform. Preserve warehouse literal behavior, but project short non-warehouse
-# search vectors farther ahead before feeding CAE.
+# Package-time adapter correction for Swarm. Action traces from failed city/open
+# seeds show sustained positive-Z commands during acquisition. Preserve warehouse
+# and mountain special handling, but stop city/open/village/forest from climbing
+# to high cruise altitude before they commit to the visible platform.
 python3 - "$RUNTIME/cae_agent_impl.py" <<'PY'
 from pathlib import Path
 import sys
 
 path = Path(sys.argv[1])
 s = path.read_text()
-needle = '''        terrain_id = self._infer_terrain(current_pos, agl, depth, dist_xy)
-        self.terrain_id = terrain_id
-        profile = _profile(terrain_id)
 
-        self.engine.set_flight_params(**_landing_params(terrain_id, dist_xy, self.spawn_z, self.target_vel))
+old_landing = '''def _landing_params(terrain_id: int, dist_xy: float, spawn_z: float, target_vel: np.ndarray) -> Dict[str, object]:
+    profile = _profile(terrain_id)
+    landing_committed = dist_xy < 4.25
+
+    if landing_committed:
+        cruise_altitude = 0.50
+        safety_radius = 0.52 if terrain_id == 5 else 0.62
+        mode_v = 36.0 if terrain_id == 5 else 42.0
+        attraction_gain = 16.0
+    else:
+        cruise_altitude = spawn_z + float(profile["transit_alt"])
+        safety_radius = float(profile["safety"])
+        mode_v = float(profile["mode_v"])
+        attraction_gain = 13.5
 '''
-replacement = '''        terrain_id = self._infer_terrain(current_pos, agl, depth, dist_xy)
-        self.terrain_id = terrain_id
-        profile = _profile(terrain_id)
+new_landing = '''def _landing_params(terrain_id: int, dist_xy: float, spawn_z: float, target_vel: np.ndarray) -> Dict[str, object]:
+    profile = _profile(terrain_id)
+    landing_committed = dist_xy < 4.25
 
-        # Non-warehouse Swarm vectors often behave as search-direction cues.
-        # Project short vectors into a useful absolute acquisition target after
-        # terrain inference, while leaving warehouse's proven near-field behavior
-        # unchanged.
-        search_norm = float(np.linalg.norm(search_vec))
-        if terrain_id != 5 and 0.05 < search_norm < 2.25 and dist_xy < 3.0:
-            projected = current_pos + (search_vec / (search_norm + 1e-8)) * 9.5
-            projected[2] = target_pos[2]
-            target_pos = projected.astype(np.float64)
-            dist_xy = float(np.linalg.norm(current_pos[:2] - target_pos[:2]))
-            self.min_dist_xy = min(self.min_dist_xy, dist_xy)
-
-        self.engine.set_flight_params(**_landing_params(terrain_id, dist_xy, self.spawn_z, self.target_vel))
+    if landing_committed:
+        cruise_altitude = 0.50
+        safety_radius = 0.52 if terrain_id == 5 else 0.62
+        mode_v = 36.0 if terrain_id == 5 else 42.0
+        attraction_gain = 16.0
+    else:
+        if terrain_id == 3:
+            cruise_altitude = spawn_z + float(profile["transit_alt"])
+        elif terrain_id == 5:
+            cruise_altitude = spawn_z + float(profile["transit_alt"])
+        else:
+            # Non-warehouse/non-mountain maps should acquire laterally at low
+            # altitude. The previous spawn+transit profile produced persistent
+            # upward commands and missed visible platforms.
+            cruise_altitude = min(spawn_z + float(profile["transit_alt"]), 1.25)
+        safety_radius = float(profile["safety"])
+        mode_v = float(profile["mode_v"])
+        attraction_gain = 13.5
 '''
-if needle not in s:
-    raise SystemExit("Could not find terrain/flight-param block to patch")
-s = s.replace(needle, replacement)
+if old_landing not in s:
+    raise SystemExit("Could not find _landing_params altitude block")
+s = s.replace(old_landing, new_landing)
+
+old_assist = '''            elif terrain_id == 3 and dist_xy > 5.0:
+                target_alt_assist = target_pos[2] + 6.3
+            else:
+                target_alt_assist = target_pos[2] + 1.4
+'''
+new_assist = '''            elif terrain_id == 3 and dist_xy > 5.0:
+                target_alt_assist = target_pos[2] + 6.3
+            elif terrain_id == 5:
+                target_alt_assist = target_pos[2] + 1.4
+            else:
+                # Hold a low acquisition shelf outside warehouse/mountain so
+                # the adapter does not climb over the target during approach.
+                target_alt_assist = target_pos[2] + 0.75
+'''
+if old_assist not in s:
+    raise SystemExit("Could not find non-mountain target_alt_assist block")
+s = s.replace(old_assist, new_assist)
+
 path.write_text(s)
 PY
 
