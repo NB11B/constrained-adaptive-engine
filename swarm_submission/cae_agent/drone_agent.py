@@ -440,7 +440,19 @@ class DroneFlightController:
         settle_gate = float(profile["final_center_gate"])
         settle_v_tol = float(profile["settle_v_tol"])
 
-        if dist_xy < term_gate_xy and agl < TERMINAL_ASSIST_AGL_M and is_near_ground_level:
+        warehouse_terminal_capture = (
+            terrain_id == 5
+            and dist_xy < term_gate_xy
+            and agl < TERMINAL_ASSIST_AGL_M
+            and is_near_ground_level
+        )
+        nonwarehouse_terminal_capture = (
+            terrain_id != 5
+            and dist_xy < term_gate_xy
+            and current_pos[2] < target_pos[2] + 5.0
+        )
+
+        if warehouse_terminal_capture or nonwarehouse_terminal_capture:
             self.terminal_ticks += 1
             if dist_xy < settle_gate and abs(float(target_rel_v[0])) < settle_v_tol and abs(float(target_rel_v[1])) < settle_v_tol:
                 self.settle_ticks += 1
@@ -455,7 +467,13 @@ class DroneFlightController:
                 and bool(cs.landing_phase)
                 and bool(cs.descent_phase)
             )
-            forced_settle = int(profile["settle_required"]) if warehouse_terminal_commit else self.settle_ticks
+            nonwarehouse_terminal_commit = (
+                terrain_id != 5
+                and nonwarehouse_terminal_capture
+                and dist_xy < settle_gate
+                and current_pos[2] < target_pos[2] + 4.0
+            )
+            forced_settle = int(profile["settle_required"]) if (warehouse_terminal_commit or nonwarehouse_terminal_commit) else self.settle_ticks
             action = _direct_action(
                 current_pos,
                 target_pos,
