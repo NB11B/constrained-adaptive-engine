@@ -290,20 +290,32 @@ class DroneFlightController:
     def _extract_state(self, observation: Dict[str, np.ndarray]) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float, float, np.ndarray]:
         state = np.asarray(observation["state"], dtype=np.float64).reshape(-1)
         current_pos = state[0:3] if state.size >= 3 else np.zeros(3, dtype=np.float64)
-        current_rpy = state[3:6] if state.size >= 6 else np.zeros(3, dtype=np.float64)
-        current_vel = state[6:9] if state.size >= 9 else np.zeros(3, dtype=np.float64)
 
-        # Swarm template documents angular velocities after linear velocities.
-        # Local harness historically used index 9 as yaw rate, so use index 11
-        # when present and fall back safely.
-        yaw_rate = float(state[11]) if state.size > 11 else (float(state[9]) if state.size > 9 else 0.0)
+        # Live Swarm state probe shows the live vector begins:
+        #   0:3   position xyz
+        #   3:6   linear velocity xyz
+        #   8:11  attitude-like rotation/rpy
+        #   11    yaw-rate-like scalar
+        #
+        # The previous adapter interpreted 3:6 as RPY and 6:9 as velocity,
+        # which fed C attitude data as velocity and velocity data as attitude.
+        current_vel = state[3:6] if state.size >= 6 else np.zeros(3, dtype=np.float64)
 
-        # Template documents normalized altitude before the final search vector.
-        # The local CAE harness used state[-4] * DEPTH_MAX_RANGE. Preserve that.
+        if state.size >= 11:
+            current_rpy = state[8:11]
+        elif state.size >= 9:
+            current_rpy = state[6:9]
+        else:
+            current_rpy = np.zeros(3, dtype=np.float64)
+
+        yaw_rate = float(state[11]) if state.size > 11 else 0.0
+
+        # Preserve tail-state AGL/search behavior for warehouse canary.
+        # Although live-state probing shows these are not clean target/AGL fields,
+        # the warehouse success path depends on this accidental contract.
         agl = float(np.clip(state[-4], 0.0, 1.5) * DEPTH_MAX_RANGE) if state.size >= 4 else float(current_pos[2])
-
-        # Template documents search-area relative vector as the final three terms.
         search_vec = state[-3:].astype(np.float64) if state.size >= 3 else np.zeros(3, dtype=np.float64)
+
         return current_pos.astype(np.float64), current_rpy.astype(np.float64), current_vel.astype(np.float64), yaw_rate, agl, search_vec
 
     def _estimate_target(self, current_pos: np.ndarray, search_vec: np.ndarray) -> np.ndarray:
