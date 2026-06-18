@@ -6,7 +6,7 @@ It preserves the working branch's native C control path and terrain-aware
 assist logic, but adapts it to Swarm's submission interface:
 
     class DroneFlightController:
-        def act(self, observation) -> np.ndarray shape (5,)
+    def act(self, observation) -> np.ndarray shape (5,)
         def reset(self) -> None
 
 Expected packaged files beside this module:
@@ -19,15 +19,19 @@ The bridge will load `libadaptive_controller.so` if present or compile it from
 `src/` and `include/` when the validator container has a compiler available.
 """
 
-from __future__ import annotations
-
+import ctypes
+import json
 import math
+import os
+import sys
+import tempfile
+import zipfile
+from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 import numpy as np
 
 from constrained_adaptive_engine_bridge import ConstrainedAdaptiveEngine
-
 
 CAMERA_FOV_DEG = 90.0
 DEPTH_MAX_RANGE = 20.0
@@ -276,12 +280,18 @@ class DroneFlightController:
                 self.engine.start_adaptive()
 
         self.step_count = 0
+        self.trace_path = os.environ.get(
+            "CAE_SWARM_TRACE_PATH",
+            f"/tmp/cae_trace_{os.getpid()}.jsonl",
+        )
+        self.trace_limit = int(os.environ.get("CAE_SWARM_TRACE_LIMIT", "120"))
         self.spawn_z: Optional[float] = None
         self.target_est: Optional[np.ndarray] = None
         self.prev_target_est: Optional[np.ndarray] = None
         self.target_vel = np.zeros(3, dtype=np.float64)
         self.terrain_id = DEFAULT_PROFILE_ID
         self.min_dist_xy = 9999.0
+        self.initial_dist_xy = None
         self.descent_corridor_ticks = 0
         self.terminal_ticks = 0
         self.settle_ticks = 0
@@ -378,6 +388,25 @@ class DroneFlightController:
         yaw = math.atan2(float(delta[1]), float(delta[0]))
         return float(np.clip(yaw / math.pi, -1.0, 1.0))
 
+    def _trace_step(self, payload: dict) -> None:
+        if self.step_count >= self.trace_limit:
+            return
+        try:
+            line = json.dumps(payload, separators=(",", ":"))
+            if self.trace_path:
+                try:
+                    parent = os.path.dirname(self.trace_path)
+                    if parent:
+                        os.makedirs(parent, exist_ok=True)
+                    with open(self.trace_path, "a", encoding="utf-8") as f:
+                        f.write(line + "\n")
+                except Exception:
+                    pass
+            sys.stderr.write("CAE_TRACE " + line + "\n")
+            sys.stderr.flush()
+        except Exception:
+            pass
+
     def act(self, observation: Dict[str, np.ndarray]) -> np.ndarray:
         depth = observation.get("depth")
         current_pos, current_rpy, current_vel, yaw_rate, agl, search_vec = self._extract_state(observation)
@@ -388,6 +417,10 @@ class DroneFlightController:
         target_pos = self._estimate_target(current_pos, search_vec)
         dist_xy = float(np.linalg.norm(current_pos[:2] - target_pos[:2]))
         self.min_dist_xy = min(self.min_dist_xy, dist_xy)
+
+        # Capture initial noisy-search geometry once per episode.
+        if self.initial_dist_xy is None:
+            self.initial_dist_xy = float(dist_xy)
 
         terrain_id = self._infer_terrain(current_pos, agl, depth, dist_xy)
         self.terrain_id = terrain_id
@@ -509,10 +542,48 @@ class DroneFlightController:
         if mountain_descent_corridor:
             self.descent_corridor_ticks += 1
 
+        # Late wide-area search for large-noise search vectors.
+        # Activates only after baseline has had time to succeed.
+        if (
+            self.initial_dist_xy is not None
+            and self.initial_dist_xy > 14.0
+            and self.step_count > 900
+            and dist_xy < 10.0
+            and not bool(cs.landing_phase)
+        ):
+            phase = 0.045 * float(self.step_count - 900)
+            ring = 4.0 + 5.0 * (0.5 + 0.5 * np.sin(0.0075 * float(self.step_count)))
+            probe = np.array([
+                target_pos[0] + ring * np.cos(phase),
+                target_pos[1] + ring * np.sin(phase),
+            ], dtype=np.float64)
+            xy_vec = probe - current_pos[:2]
+            xy_dir = xy_vec / (float(np.linalg.norm(xy_vec)) + 1e-8)
+            z_dir = -0.045 if agl > 2.5 else 0.02
+            desired = np.array([xy_dir[0], xy_dir[1], z_dir], dtype=np.float64)
+            action[0:3] = _unit(desired)
+            action[3] = max(float(action[3]), 0.32)
+
         self.step_count += 1
         action = np.nan_to_num(action, nan=0.0, posinf=1.0, neginf=-1.0).astype(np.float32)
         action[:3] = np.clip(action[:3], -1.0, 1.0)
         action[3] = np.clip(action[3], 0.0, 1.0)
         action[4] = np.clip(action[4], -1.0, 1.0)
+        self._trace_step({
+            "step": int(self.step_count),
+            "terrain_id": int(terrain_id),
+            "pos": np.asarray(current_pos, dtype=float).round(4).tolist(),
+            "vel": np.asarray(current_vel, dtype=float).round(4).tolist(),
+            "target": np.asarray(target_pos, dtype=float).round(4).tolist(),
+            "search_vec": np.asarray(search_vec, dtype=float).round(4).tolist(),
+            "dist_xy": round(float(dist_xy), 4),
+            "agl": round(float(agl), 4),
+            "c_out": [round(float(x), 4) for x in [vx, vy, vz, total_speed, yaw_cmd]],
+            "yaw_norm": round(float(yaw_norm), 4),
+            "action": np.asarray(action, dtype=float).round(4).tolist(),
+            "landing": bool(cs.landing_phase),
+            "descent": bool(cs.descent_phase),
+            "collision": round(float(cs.collision_risk_score), 4),
+        })
         self.last_action = action.copy()
         return action
