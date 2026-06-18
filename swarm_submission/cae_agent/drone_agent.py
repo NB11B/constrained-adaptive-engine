@@ -345,33 +345,18 @@ class DroneFlightController:
         if self.spawn_z is None:
             self.spawn_z = float(current_pos[2])
 
-        # Flight-recorder traces showed the city seed being classified as forest
-        # from frame zero because close_fraction won before any city geometry cue.
-        # City spawns in the large urban coordinate envelope; classify that before
-        # the forest close-obstacle fallback.
-        xy_extent = float(np.max(np.abs(current_pos[:2]))) if current_pos.size >= 2 else 0.0
-        urban_extent = xy_extent > 18.0
-
-        # Avoid false mountain transitions on open maps when early commands raise
-        # AGL. Require high spawn altitude or mountain-like initial altitude.
-        if self.spawn_z > 18.0 or (self.spawn_z > 11.5 and agl > 7.0):
+        # If the benchmark ever exposes terrain id directly, honor it via obs metadata
+        # in future without changing the public interface. Otherwise infer from geometry.
+        if self.spawn_z > 18.0 or agl > 7.0:
             return 3  # Mountain-like high terrain case.
-
         if self.spawn_z < 5.0 and mid_fraction > 0.10 and dist_xy < 8.0:
             return 5  # Warehouse-like close clutter / low ceiling.
-
-        if urban_extent and close_fraction > 0.04 and dist_xy < 14.0:
-            return 1  # City: large coordinate envelope with close urban clutter.
-
         if mid_fraction > 0.20 and mean_depth < 0.55:
             return 1  # Dense city/village clutter; city is more conservative.
-
-        if close_fraction > 0.18 and mid_fraction > 0.05 and mean_depth < 0.72:
-            return 6  # Forest-like close obstacles; avoid open-map false positives.
-
+        if close_fraction > 0.10:
+            return 6  # Forest-like close obstacles.
         if mid_fraction > 0.08:
             return 4  # Village-like medium clutter.
-
         return 2
 
     def _yaw_command(self, current_pos: np.ndarray, target_pos: np.ndarray) -> float:
