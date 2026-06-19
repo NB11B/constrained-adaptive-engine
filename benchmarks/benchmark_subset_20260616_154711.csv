@@ -1,5 +1,0 @@
-Terrain,Terrain ID,Seed,Status,Steps,Time (s),Min Dist (m)
-Mountain,3,1337,TIMEOUT,1002,120.40,25.707
-Village,4,1337,SUCCESS,2881,65.66,0.226
-Warehouse,5,1337,TIMEOUT,3000,101.72,0.450
-Forest,6,1337,SUCCESS,759,48.07,2.355

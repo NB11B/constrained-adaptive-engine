@@ -1,7 +1,0 @@
-trial,label,challenge_type,terrain_name,seed,moving_platform,horizon_s,success,collision,steps,t_sim_s,t_flight_s,wall_time_s,min_clearance_m,dist_to_goal_m,score
-1,type=1 seed=39259,1,City,39259,False,60.0,False,False,3000,60.0,60.0,15.41,1.0,3.1259,0.01
-2,type=2 (MP) seed=39259,2,Open/Valley,39259,True,60.0,False,False,3000,60.0,60.0,21.49,0.395,3.1642,0.01
-3,type=3 seed=39259,3,Mountain,39259,False,60.0,False,False,3000,60.0,60.0,191.93,0.4464,10.4925,0.01
-4,type=4 seed=39259,4,Village,39259,False,60.0,False,False,3000,60.0,60.0,86.72,0.1405,3.0453,0.01
-5,type=5 seed=39259,5,Warehouse,39259,False,60.0,False,True,769,15.38,15.38,24.13,-0.0081,26.4102,0.01
-6,type=6 seed=39259,6,Forest,39259,False,60.0,False,False,3000,60.0,60.0,165.76,1.0,3.1156,0.01

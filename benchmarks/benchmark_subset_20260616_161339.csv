@@ -1,5 +1,0 @@
-Terrain,Terrain ID,Seed,Status,Steps,Time (s),Min Dist (m),Landing Phase,Descent Phase,Approach Assist Ticks,Terminal Assist Ticks,Last Phase Reason,Min Dist Step,Min Dist XY,Min AGL,AGL Floor Ticks,Descent Corridor Ticks,Settle Phase Ticks,Terminal Press Ticks
-Mountain,3,1337,COLLISION,1024,118.42,25.166,False,False,780,0,SEARCH_PHASE,986,0.635,0.06,0,0,0,0
-Village,4,1337,SUCCESS,2881,66.68,0.226,True,True,132,767,DESCENT_PHASE,2683,0.155,0.03,0,0,0,0
-Warehouse,5,1337,TIMEOUT,3000,102.15,0.124,True,True,210,2291,DESCENT_PHASE,1053,0.044,0.071,0,0,0,0
-Forest,6,1337,SUCCESS,759,47.02,2.355,True,True,63,209,DESCENT_PHASE,730,0.176,0.03,0,0,0,0

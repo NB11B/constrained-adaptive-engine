@@ -1,6 +1,0 @@
-Terrain,Terrain ID,Seed,Status,Steps,Time (s),Min Dist (m),Landing Phase,Descent Phase,Approach Assist Ticks,Terminal Assist Ticks
-City Map,1,1337,SUCCESS,1507,7.46,0.717,True,True,7,1046
-Open/Valley,2,1337,TIMEOUT,3000,22.22,1.242,True,True,104,2436
-Mountain,3,1337,TIMEOUT,1265,149.28,25.867,False,False,619,0
-Village,4,1337,TIMEOUT,3000,72.94,0.403,True,True,7,961
-Warehouse,5,1337,COLLISION,2919,107.45,0.077,True,True,135,2350
