@@ -1,0 +1,623 @@
+{
+  "batch_stats": [
+    {
+      "batch_index": 0,
+      "elapsed_sec": 11.00049352645874,
+      "seed_count": 1,
+      "seed_processing_sec": 6.035180568695068,
+      "seeds": [
+        604198
+      ],
+      "startup_overhead_sec": 4.965312957763672,
+      "worker_id": 0
+    },
+    {
+      "batch_index": 1,
+      "elapsed_sec": 10.537984848022461,
+      "seed_count": 1,
+      "seed_processing_sec": 5.676518201828003,
+      "seeds": [
+        604200
+      ],
+      "startup_overhead_sec": 4.861466646194458,
+      "worker_id": 0
+    },
+    {
+      "batch_index": 4,
+      "elapsed_sec": 14.374280452728271,
+      "seed_count": 1,
+      "seed_processing_sec": 9.456732511520386,
+      "seeds": [
+        604196
+      ],
+      "startup_overhead_sec": 4.917547941207886,
+      "worker_id": 0
+    },
+    {
+      "batch_index": 3,
+      "elapsed_sec": 27.05767059326172,
+      "seed_count": 1,
+      "seed_processing_sec": 22.161566257476807,
+      "seeds": [
+        604197
+      ],
+      "startup_overhead_sec": 4.896104335784912,
+      "worker_id": 0
+    },
+    {
+      "batch_index": 2,
+      "elapsed_sec": 25.88519048690796,
+      "seed_count": 1,
+      "seed_processing_sec": 21.066131114959717,
+      "seeds": [
+        604195
+      ],
+      "startup_overhead_sec": 4.819059371948242,
+      "worker_id": 0
+    },
+    {
+      "batch_index": 5,
+      "elapsed_sec": 73.32718920707703,
+      "seed_count": 1,
+      "seed_processing_sec": 68.58850240707397,
+      "seeds": [
+        604199
+      ],
+      "startup_overhead_sec": 4.738686800003052,
+      "worker_id": 0
+    }
+  ],
+  "execution_status_counts": {
+    "seed_done": 6
+  },
+  "extrapolation_1000_seeds": {
+    "estimated_avg_wall_per_seed_sec": 26.996827652454375,
+    "estimated_throughput_seeds_per_min": 2.22248335146686,
+    "estimated_wall_clock_sec": 26996.827652454376,
+    "parallelism_basis": 1.0,
+    "total_seed_worker_sec": 26996.827652454376,
+    "workers_used": 1
+  },
+  "group_results": {
+    "type1_city": [
+      {
+        "challenge_type": 1,
+        "estimated_resource_cost": {
+          "cpu_units": 0.9,
+          "heavy_tokens": 0,
+          "ram_mb": 2200.0,
+          "resource_class": "light"
+        },
+        "execution_ok": true,
+        "execution_status": "seed_done",
+        "group": "type1_city",
+        "processing_wall_time": 6.035180568695068,
+        "resource_class": "light",
+        "score": 0.704674175603987,
+        "seed": 604198,
+        "sim_time": 40.720000000000766,
+        "success": true,
+        "timeout_zero": false,
+        "wall_per_sim_ratio": 0.2701496445593942,
+        "wall_time": 11.00049352645874
+      }
+    ],
+    "type2_open": [
+      {
+        "challenge_type": 2,
+        "estimated_resource_cost": {
+          "cpu_units": 1.05,
+          "heavy_tokens": 1,
+          "ram_mb": 2550.0,
+          "resource_class": "medium"
+        },
+        "execution_ok": true,
+        "execution_status": "seed_done",
+        "group": "type2_open",
+        "processing_wall_time": 5.676518201828003,
+        "resource_class": "medium",
+        "score": 0.5308846204871644,
+        "seed": 604200,
+        "sim_time": 55.80000000000312,
+        "success": true,
+        "timeout_zero": false,
+        "wall_per_sim_ratio": 0.1888527750541554,
+        "wall_time": 10.537984848022461
+      }
+    ],
+    "type3_mountain": [
+      {
+        "challenge_type": 3,
+        "estimated_resource_cost": {
+          "cpu_units": 1.25,
+          "heavy_tokens": 2,
+          "ram_mb": 3300.0,
+          "resource_class": "heavy"
+        },
+        "execution_ok": true,
+        "execution_status": "seed_done",
+        "group": "type3_mountain",
+        "processing_wall_time": 21.066131114959717,
+        "resource_class": "heavy",
+        "score": 0.01,
+        "seed": 604195,
+        "sim_time": 49.980000000002214,
+        "success": false,
+        "timeout_zero": false,
+        "wall_per_sim_ratio": 0.5179109741277874,
+        "wall_time": 25.88519048690796
+      }
+    ],
+    "type4_village": [
+      {
+        "challenge_type": 4,
+        "estimated_resource_cost": {
+          "cpu_units": 1.2,
+          "heavy_tokens": 2,
+          "ram_mb": 3150.0,
+          "resource_class": "heavy"
+        },
+        "execution_ok": true,
+        "execution_status": "seed_done",
+        "group": "type4_village",
+        "processing_wall_time": 22.161566257476807,
+        "resource_class": "heavy",
+        "score": 0.5207985213873525,
+        "seed": 604197,
+        "sim_time": 55.20000000000303,
+        "success": true,
+        "timeout_zero": false,
+        "wall_per_sim_ratio": 0.4901751919068883,
+        "wall_time": 27.05767059326172
+      }
+    ],
+    "type5_warehouse": [
+      {
+        "challenge_type": 5,
+        "estimated_resource_cost": {
+          "cpu_units": 1.05,
+          "heavy_tokens": 1,
+          "ram_mb": 2650.0,
+          "resource_class": "medium"
+        },
+        "execution_ok": true,
+        "execution_status": "seed_done",
+        "group": "type5_warehouse",
+        "processing_wall_time": 9.456732511520386,
+        "resource_class": "medium",
+        "score": 0.7973229294698024,
+        "seed": 604196,
+        "sim_time": 29.219999999999466,
+        "success": true,
+        "timeout_zero": false,
+        "wall_per_sim_ratio": 0.49193293814950495,
+        "wall_time": 14.374280452728271
+      }
+    ],
+    "type6_forest": [
+      {
+        "challenge_type": 6,
+        "estimated_resource_cost": {
+          "cpu_units": 1.35,
+          "heavy_tokens": 2,
+          "ram_mb": 3600.0,
+          "resource_class": "heavy"
+        },
+        "execution_ok": true,
+        "execution_status": "seed_done",
+        "group": "type6_forest",
+        "processing_wall_time": 68.58850240707397,
+        "resource_class": "heavy",
+        "score": 0.571807716360089,
+        "seed": 604199,
+        "sim_time": 57.38000000000337,
+        "success": true,
+        "timeout_zero": false,
+        "wall_per_sim_ratio": 1.2779224330267118,
+        "wall_time": 73.32718920707703
+      }
+    ]
+  },
+  "group_summary": {
+    "type1_city": {
+      "avg_processing_wall_sec": 6.035180568695068,
+      "avg_score": 0.704674175603987,
+      "avg_sim_sec": 40.720000000000766,
+      "avg_wall_per_sim_ratio": 0.2701496445593942,
+      "avg_wall_sec": 11.00049352645874,
+      "estimated_cost": {
+        "cpu_units": 0.9,
+        "heavy_tokens": 0,
+        "ram_mb": 2200.0,
+        "resource_class": "light"
+      },
+      "execution_success_count": 1,
+      "execution_success_rate": 1.0,
+      "max_wall_sec": 11.00049352645874,
+      "median_wall_sec": 11.00049352645874,
+      "p90_wall_sec": 11.00049352645874,
+      "seed_count": 1,
+      "success_count": 1,
+      "success_rate": 1.0
+    },
+    "type2_open": {
+      "avg_processing_wall_sec": 5.676518201828003,
+      "avg_score": 0.5308846204871644,
+      "avg_sim_sec": 55.80000000000312,
+      "avg_wall_per_sim_ratio": 0.1888527750541554,
+      "avg_wall_sec": 10.537984848022461,
+      "estimated_cost": {
+        "cpu_units": 1.05,
+        "heavy_tokens": 1,
+        "ram_mb": 2550.0,
+        "resource_class": "medium"
+      },
+      "execution_success_count": 1,
+      "execution_success_rate": 1.0,
+      "max_wall_sec": 10.537984848022461,
+      "median_wall_sec": 10.537984848022461,
+      "p90_wall_sec": 10.537984848022461,
+      "seed_count": 1,
+      "success_count": 1,
+      "success_rate": 1.0
+    },
+    "type3_mountain": {
+      "avg_processing_wall_sec": 21.066131114959717,
+      "avg_score": 0.01,
+      "avg_sim_sec": 49.980000000002214,
+      "avg_wall_per_sim_ratio": 0.5179109741277874,
+      "avg_wall_sec": 25.88519048690796,
+      "estimated_cost": {
+        "cpu_units": 1.25,
+        "heavy_tokens": 2,
+        "ram_mb": 3300.0,
+        "resource_class": "heavy"
+      },
+      "execution_success_count": 1,
+      "execution_success_rate": 1.0,
+      "max_wall_sec": 25.88519048690796,
+      "median_wall_sec": 25.88519048690796,
+      "p90_wall_sec": 25.88519048690796,
+      "seed_count": 1,
+      "success_count": 0,
+      "success_rate": 0.0
+    },
+    "type4_village": {
+      "avg_processing_wall_sec": 22.161566257476807,
+      "avg_score": 0.5207985213873525,
+      "avg_sim_sec": 55.20000000000303,
+      "avg_wall_per_sim_ratio": 0.4901751919068883,
+      "avg_wall_sec": 27.05767059326172,
+      "estimated_cost": {
+        "cpu_units": 1.2,
+        "heavy_tokens": 2,
+        "ram_mb": 3150.0,
+        "resource_class": "heavy"
+      },
+      "execution_success_count": 1,
+      "execution_success_rate": 1.0,
+      "max_wall_sec": 27.05767059326172,
+      "median_wall_sec": 27.05767059326172,
+      "p90_wall_sec": 27.05767059326172,
+      "seed_count": 1,
+      "success_count": 1,
+      "success_rate": 1.0
+    },
+    "type5_warehouse": {
+      "avg_processing_wall_sec": 9.456732511520386,
+      "avg_score": 0.7973229294698024,
+      "avg_sim_sec": 29.219999999999466,
+      "avg_wall_per_sim_ratio": 0.49193293814950495,
+      "avg_wall_sec": 14.374280452728271,
+      "estimated_cost": {
+        "cpu_units": 1.05,
+        "heavy_tokens": 1,
+        "ram_mb": 2650.0,
+        "resource_class": "medium"
+      },
+      "execution_success_count": 1,
+      "execution_success_rate": 1.0,
+      "max_wall_sec": 14.374280452728271,
+      "median_wall_sec": 14.374280452728271,
+      "p90_wall_sec": 14.374280452728271,
+      "seed_count": 1,
+      "success_count": 1,
+      "success_rate": 1.0
+    },
+    "type6_forest": {
+      "avg_processing_wall_sec": 68.58850240707397,
+      "avg_score": 0.571807716360089,
+      "avg_sim_sec": 57.38000000000337,
+      "avg_wall_per_sim_ratio": 1.2779224330267118,
+      "avg_wall_sec": 73.32718920707703,
+      "estimated_cost": {
+        "cpu_units": 1.35,
+        "heavy_tokens": 2,
+        "ram_mb": 3600.0,
+        "resource_class": "heavy"
+      },
+      "execution_success_count": 1,
+      "execution_success_rate": 1.0,
+      "max_wall_sec": 73.32718920707703,
+      "median_wall_sec": 73.32718920707703,
+      "p90_wall_sec": 73.32718920707703,
+      "seed_count": 1,
+      "success_count": 1,
+      "success_rate": 1.0
+    }
+  },
+  "host_parallelism": "process",
+  "num_workers": 1,
+  "resource_class_summary": {
+    "heavy": {
+      "avg_processing_wall_sec": 37.272066593170166,
+      "avg_score": 0.3675354125824805,
+      "avg_sim_sec": 54.18666666666954,
+      "avg_wall_per_sim_ratio": 0.762002866353796,
+      "avg_wall_sec": 42.090016762415566,
+      "estimated_cost": {
+        "cpu_units": 1.2666666666666668,
+        "groups": [
+          "type4_village",
+          "type3_mountain",
+          "type6_forest"
+        ],
+        "heavy_tokens": 2,
+        "ram_mb": 3350.0,
+        "resource_class": "heavy"
+      },
+      "execution_success_count": 3,
+      "execution_success_rate": 1.0,
+      "groups": [
+        "type3_mountain",
+        "type4_village",
+        "type6_forest"
+      ],
+      "max_wall_sec": 73.32718920707703,
+      "median_wall_sec": 27.05767059326172,
+      "p90_wall_sec": 73.32718920707703,
+      "seed_count": 3,
+      "success_count": 2,
+      "success_rate": 0.6666666666666666
+    },
+    "light": {
+      "avg_processing_wall_sec": 6.035180568695068,
+      "avg_score": 0.704674175603987,
+      "avg_sim_sec": 40.720000000000766,
+      "avg_wall_per_sim_ratio": 0.2701496445593942,
+      "avg_wall_sec": 11.00049352645874,
+      "estimated_cost": {
+        "cpu_units": 0.9,
+        "groups": [
+          "type1_city"
+        ],
+        "heavy_tokens": 0,
+        "ram_mb": 2200.0,
+        "resource_class": "light"
+      },
+      "execution_success_count": 1,
+      "execution_success_rate": 1.0,
+      "groups": [
+        "type1_city"
+      ],
+      "max_wall_sec": 11.00049352645874,
+      "median_wall_sec": 11.00049352645874,
+      "p90_wall_sec": 11.00049352645874,
+      "seed_count": 1,
+      "success_count": 1,
+      "success_rate": 1.0
+    },
+    "medium": {
+      "avg_processing_wall_sec": 7.566625356674194,
+      "avg_score": 0.6641037749784835,
+      "avg_sim_sec": 42.5100000000013,
+      "avg_wall_per_sim_ratio": 0.34039285660183016,
+      "avg_wall_sec": 12.456132650375366,
+      "estimated_cost": {
+        "cpu_units": 1.05,
+        "groups": [
+          "type2_open",
+          "type5_warehouse"
+        ],
+        "heavy_tokens": 1,
+        "ram_mb": 2600.0,
+        "resource_class": "medium"
+      },
+      "execution_success_count": 2,
+      "execution_success_rate": 1.0,
+      "groups": [
+        "type2_open",
+        "type5_warehouse"
+      ],
+      "max_wall_sec": 14.374280452728271,
+      "median_wall_sec": 12.456132650375366,
+      "p90_wall_sec": 14.374280452728271,
+      "seed_count": 2,
+      "success_count": 2,
+      "success_rate": 1.0
+    }
+  },
+  "resource_cost_model_estimate": [
+    {
+      "cpu_units": 0.9,
+      "groups": [
+        "type1_city"
+      ],
+      "heavy_tokens": 0,
+      "ram_mb": 2200.0,
+      "resource_class": "light"
+    },
+    {
+      "cpu_units": 1.05,
+      "groups": [
+        "type2_open",
+        "type5_warehouse"
+      ],
+      "heavy_tokens": 1,
+      "ram_mb": 2600.0,
+      "resource_class": "medium"
+    },
+    {
+      "cpu_units": 1.2666666666666668,
+      "groups": [
+        "type4_village",
+        "type3_mountain",
+        "type6_forest"
+      ],
+      "heavy_tokens": 2,
+      "ram_mb": 3350.0,
+      "resource_class": "heavy"
+    }
+  ],
+  "run_metrics": {
+    "avg_seeds_per_container": 1.0,
+    "avg_sim_per_seed_sec": 48.050000000001994,
+    "avg_startup_overhead_per_container_sec": 4.866363008817037,
+    "avg_wall_per_seed_sec": 27.030468185742695,
+    "batch_count": 6,
+    "effective_parallelism": 0.9982710702547533,
+    "execution_success_count": 6,
+    "execution_success_rate": 1.0,
+    "median_wall_per_seed_sec": 20.129735469818115,
+    "p90_wall_per_seed_sec": 73.32718920707703,
+    "success_count": 5,
+    "throughput_per_worker_seeds_per_min": 2.2158796438042336,
+    "throughput_seeds_per_min": 2.2158796438042336,
+    "total_seed_worker_sec": 162.18280911445618,
+    "total_startup_overhead_sec": 29.19817805290222,
+    "worker_utilization": 0.9982710702547533
+  },
+  "seed_timings_note": "wall_time includes equal share of per-container startup overhead",
+  "startup_overhead_sec": 29.19817805290222,
+  "timestamp": "2026-06-19 10:39:49",
+  "top_expensive_seeds": [
+    {
+      "challenge_type": 6,
+      "estimated_resource_cost": {
+        "cpu_units": 1.35,
+        "heavy_tokens": 2,
+        "ram_mb": 3600.0,
+        "resource_class": "heavy"
+      },
+      "execution_ok": true,
+      "execution_status": "seed_done",
+      "group": "type6_forest",
+      "processing_wall_time": 68.58850240707397,
+      "resource_class": "heavy",
+      "score": 0.571807716360089,
+      "seed": 604199,
+      "sim_time": 57.38000000000337,
+      "success": true,
+      "timeout_zero": false,
+      "wall_per_sim_ratio": 1.2779224330267118,
+      "wall_time": 73.32718920707703
+    },
+    {
+      "challenge_type": 4,
+      "estimated_resource_cost": {
+        "cpu_units": 1.2,
+        "heavy_tokens": 2,
+        "ram_mb": 3150.0,
+        "resource_class": "heavy"
+      },
+      "execution_ok": true,
+      "execution_status": "seed_done",
+      "group": "type4_village",
+      "processing_wall_time": 22.161566257476807,
+      "resource_class": "heavy",
+      "score": 0.5207985213873525,
+      "seed": 604197,
+      "sim_time": 55.20000000000303,
+      "success": true,
+      "timeout_zero": false,
+      "wall_per_sim_ratio": 0.4901751919068883,
+      "wall_time": 27.05767059326172
+    },
+    {
+      "challenge_type": 3,
+      "estimated_resource_cost": {
+        "cpu_units": 1.25,
+        "heavy_tokens": 2,
+        "ram_mb": 3300.0,
+        "resource_class": "heavy"
+      },
+      "execution_ok": true,
+      "execution_status": "seed_done",
+      "group": "type3_mountain",
+      "processing_wall_time": 21.066131114959717,
+      "resource_class": "heavy",
+      "score": 0.01,
+      "seed": 604195,
+      "sim_time": 49.980000000002214,
+      "success": false,
+      "timeout_zero": false,
+      "wall_per_sim_ratio": 0.5179109741277874,
+      "wall_time": 25.88519048690796
+    },
+    {
+      "challenge_type": 5,
+      "estimated_resource_cost": {
+        "cpu_units": 1.05,
+        "heavy_tokens": 1,
+        "ram_mb": 2650.0,
+        "resource_class": "medium"
+      },
+      "execution_ok": true,
+      "execution_status": "seed_done",
+      "group": "type5_warehouse",
+      "processing_wall_time": 9.456732511520386,
+      "resource_class": "medium",
+      "score": 0.7973229294698024,
+      "seed": 604196,
+      "sim_time": 29.219999999999466,
+      "success": true,
+      "timeout_zero": false,
+      "wall_per_sim_ratio": 0.49193293814950495,
+      "wall_time": 14.374280452728271
+    },
+    {
+      "challenge_type": 1,
+      "estimated_resource_cost": {
+        "cpu_units": 0.9,
+        "heavy_tokens": 0,
+        "ram_mb": 2200.0,
+        "resource_class": "light"
+      },
+      "execution_ok": true,
+      "execution_status": "seed_done",
+      "group": "type1_city",
+      "processing_wall_time": 6.035180568695068,
+      "resource_class": "light",
+      "score": 0.704674175603987,
+      "seed": 604198,
+      "sim_time": 40.720000000000766,
+      "success": true,
+      "timeout_zero": false,
+      "wall_per_sim_ratio": 0.2701496445593942,
+      "wall_time": 11.00049352645874
+    },
+    {
+      "challenge_type": 2,
+      "estimated_resource_cost": {
+        "cpu_units": 1.05,
+        "heavy_tokens": 1,
+        "ram_mb": 2550.0,
+        "resource_class": "medium"
+      },
+      "execution_ok": true,
+      "execution_status": "seed_done",
+      "group": "type2_open",
+      "processing_wall_time": 5.676518201828003,
+      "resource_class": "medium",
+      "score": 0.5308846204871644,
+      "seed": 604200,
+      "sim_time": 55.80000000000312,
+      "success": true,
+      "timeout_zero": false,
+      "wall_per_sim_ratio": 0.1888527750541554,
+      "wall_time": 10.537984848022461
+    }
+  ],
+  "total_seeds": 6,
+  "wall_clock_sec": 162.46369743347168
+}

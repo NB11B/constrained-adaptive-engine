@@ -1,0 +1,135 @@
+[10:36:59] === FULL EVALUATION BENCHMARK ===
+[10:36:59] Model: /tmp/cae_public_verify/submission.zip
+[10:36:59] UID: 17 (from --uid)
+[10:36:59] Workers requested: 1
+[10:36:59] Workers effective:  1
+[10:36:59] Profile: debug
+[10:36:59] RPC verbosity: low
+[10:36:59] Host parallelism: process
+[10:36:59] Container mode: single-seed
+[10:36:59] Relaxed timeouts: {'MINER_COMPUTE_BUDGET_SEC': 3.0, 'CALIBRATION_OVERHEAD_CAP_SEC': 1.0, 'RPC_MAX_STRIKES_PER_SEED': 15, 'RPC_STEP_TIMEOUT_SEC': 4.0, 'DOCKER_WORKER_CPUS': '4', 'GLOBAL_EVAL_BASE_SEC': 7200.0, 'GLOBAL_EVAL_PER_SEED_SEC': 600.0, 'GLOBAL_EVAL_CAP_SEC': 7200.0}
+[10:36:59] Map types selected: type1_city, type2_open, type3_mountain, type4_village, type5_warehouse, type6_forest
+[10:36:59] Log file: /tmp/swarm_submission_6seed.log
+
+[10:36:59] Loading seeds from /tmp/swarm_6seed_target.json...
+  type1_city: [604198]
+  type2_open: [604200]
+  type3_mountain: [604195]
+  type4_village: [604197]
+  type5_warehouse: [604196]
+  type6_forest: [604199]
+  Total: 6
+
+[10:37:04] Initializing DockerSecureEvaluator...
+Seed progress:   0%|                                                              | 0/6 [00:00<?, ?seed/s][10:37:06] Worker batch timeout hard cap: 300.0s
+[10:37:06] Progress timeout extension: +30.0s (stale<=3.0s, min_sim_advance=0.020s, max_total=1800.0s)
+[10:37:06] Running evaluation (1 workers, 6 seeds, container_mode=single-seed, host_parallelism=process, batches=6)...
+[10:37:06] Scheduler machine: vcpus=24 total_ram=15.3GiB reserve_ram=2.0GiB start_workers=1 max_workers=1 start_heavy=1 max_heavy=1
+[10:37:06] Scheduler cost prior: light groups=type1_city cpu=0.90 ram=2200MiB heavy_tokens=0
+[10:37:06] Scheduler cost prior: medium groups=type2_open,type5_warehouse cpu=1.05 ram=2600MiB heavy_tokens=1
+[10:37:06] Scheduler cost prior: heavy groups=type4_village,type3_mountain,type6_forest cpu=1.27 ram=3350MiB heavy_tokens=2
+[10:37:06] Dispatch policy: cold-start ramp enabled (light_groups=city; medium_groups=open,warehouse; heavy_groups=village,mountain,forest; mountain<=1, scheduler_heavy_cap=1/1)
+[10:37:06] Adaptive scheduler: disabled (single-worker run)
+[10:37:06] Parent worker stall watchdog: 90.0s without worker heartbeat -> discard seed and replace worker
+[10:37:06] Dispatch batch 1/6 | worker=queued | group=type1_city | seeds=1 | first_seed=604198 | last_seed=604198 | active_limit=1 | heavy_limit=1 | cap=1/1 heavy=1/1 pressure=healthy cpu=0.0% load=0.00 mem_avail=13125MiB
+Seed progress:  17%|█████████                                             | 1/6 [00:10<00:53, 10.75s/seed][10:37:17] Worker 0 complete | batch 1 | seeds=1 | elapsed=11.0s | startup=5.0s
+[10:37:17] Dispatch batch 2/6 | worker=queued | group=type2_open | seeds=1 | first_seed=604200 | last_seed=604200 | active_limit=1 | heavy_limit=1 | cap=1/1 heavy=1/1 pressure=healthy cpu=4.1% load=0.01 mem_avail=12379MiB
+[10:37:21] Heartbeat: 1/6 done | elapsed 0.3m | last completion 4s ago | ETA 1.3m | cap=1/1 heavy=1/1 pressure=healthy cpu=0.0% load=0.01 mem_avail=12357MiB
+Seed progress:  33%|██████▋             | 2/6 [00:21<00:42, 10.59s/seed, done=1/6, elapsed=0.2m, eta=0.9m][10:37:28] Worker 0 complete | batch 2 | seeds=1 | elapsed=10.5s | startup=4.9s
+[10:37:28] Dispatch batch 5/6 | worker=queued | group=type5_warehouse | seeds=1 | first_seed=604196 | last_seed=604196 | active_limit=1 | heavy_limit=1 | cap=1/1 heavy=1/1 pressure=healthy cpu=4.1% load=0.01 mem_avail=12364MiB
+[10:37:35] Heartbeat: 2/6 done | elapsed 0.5m | last completion 8s ago | ETA 1.0m | cap=1/1 heavy=1/1 pressure=healthy cpu=2.8% load=0.01 mem_avail=11834MiB
+Seed progress:  50%|██████████          | 3/6 [00:35<00:36, 12.31s/seed, done=2/6, elapsed=0.4m, eta=0.7m][10:37:42] Worker 0 complete | batch 5 | seeds=1 | elapsed=14.4s | startup=4.9s
+[10:37:42] Dispatch batch 4/6 | worker=queued | group=type4_village | seeds=1 | first_seed=604197 | last_seed=604197 | active_limit=1 | heavy_limit=1 | cap=1/1 heavy=1/1 pressure=healthy cpu=3.3% load=0.02 mem_avail=11856MiB
+[10:37:50] Heartbeat: 3/6 done | elapsed 0.7m | last completion 9s ago | ETA 0.7m | cap=1/1 heavy=1/1 pressure=healthy cpu=2.5% load=0.02 mem_avail=11543MiB
+[10:38:05] Heartbeat: 3/6 done | elapsed 1.0m | last completion 23s ago | ETA 1.0m | cap=1/1 heavy=1/1 pressure=healthy cpu=4.2% load=0.02 mem_avail=11549MiB
+Seed progress:  67%|█████████████▎      | 4/6 [01:02<00:36, 18.13s/seed, done=3/6, elapsed=0.6m, eta=0.6m][10:38:09] Worker 0 complete | batch 4 | seeds=1 | elapsed=27.1s | startup=4.9s
+[10:38:09] Dispatch batch 3/6 | worker=queued | group=type3_mountain | seeds=1 | first_seed=604195 | last_seed=604195 | active_limit=1 | heavy_limit=1 | cap=1/1 heavy=1/1 pressure=healthy cpu=4.1% load=0.02 mem_avail=11549MiB
+[10:38:20] Heartbeat: 4/6 done | elapsed 1.2m | last completion 11s ago | ETA 0.6m | cap=1/1 heavy=1/1 pressure=healthy cpu=3.1% load=0.02 mem_avail=11246MiB
+[10:38:34] Heartbeat: 4/6 done | elapsed 1.5m | last completion 25s ago | ETA 0.7m | cap=1/1 heavy=1/1 pressure=healthy cpu=4.3% load=0.03 mem_avail=11251MiB
+Seed progress:  83%|████████████████▋   | 5/6 [01:28<00:21, 21.00s/seed, done=4/6, elapsed=1.0m, eta=0.5m][10:38:35] Worker 0 complete | batch 3 | seeds=1 | elapsed=25.9s | startup=4.8s
+[10:38:35] Dispatch batch 6/6 | worker=queued | group=type6_forest | seeds=1 | first_seed=604199 | last_seed=604199 | active_limit=1 | heavy_limit=1 | cap=1/1 heavy=1/1 pressure=healthy cpu=4.1% load=0.03 mem_avail=11251MiB
+[10:38:49] Heartbeat: 5/6 done | elapsed 1.7m | last completion 14s ago | ETA 0.3m | cap=1/1 heavy=1/1 pressure=healthy cpu=1.2% load=0.03 mem_avail=11244MiB
+[10:39:03] Heartbeat: 5/6 done | elapsed 2.0m | last completion 28s ago | ETA 0.4m | cap=1/1 heavy=1/1 pressure=healthy cpu=1.1% load=0.03 mem_avail=11246MiB
+[10:39:18] Heartbeat: 5/6 done | elapsed 2.2m | last completion 43s ago | ETA 0.4m | cap=1/1 heavy=1/1 pressure=healthy cpu=1.6% load=0.04 mem_avail=11227MiB
+[10:39:32] Heartbeat: 5/6 done | elapsed 2.4m | last completion 58s ago | ETA 0.5m | cap=1/1 heavy=1/1 pressure=healthy cpu=4.5% load=0.04 mem_avail=11217MiB
+[10:39:47] Heartbeat: 5/6 done | elapsed 2.7m | last completion 73s ago | ETA 0.5m | cap=1/1 heavy=1/1 pressure=healthy cpu=4.2% load=0.04 mem_avail=11220MiB
+Seed progress: 100%|████████████████████| 6/6 [02:42<00:00, 38.82s/seed, done=5/6, elapsed=1.5m, eta=0.3m][10:39:48] Worker 0 complete | batch 6 | seeds=1 | elapsed=73.3s | startup=4.7s
+Seed progress: 100%|████████████████████| 6/6 [02:42<00:00, 27.08s/seed, done=6/6, elapsed=2.7m, eta=0.0m]
+
+[10:39:49] === RESULTS ===
+
+  Group                  Seed   Score   OK?    SimT   WallT
+  ------------------ -------- ------- ----- ------- -------
+  type1_city           604198  0.7047     Y  40.72s   11.0s
+    -> AVG                     0.7047                11.0s
+
+  type2_open           604200  0.5309     Y  55.80s   10.5s
+    -> AVG                     0.5309                10.5s
+
+  type3_mountain       604195  0.0100     N  49.98s   25.9s
+    -> AVG                     0.0100                25.9s
+
+  type4_village        604197  0.5208     Y  55.20s   27.1s
+    -> AVG                     0.5208                27.1s
+
+  type5_warehouse      604196  0.7973     Y  29.22s   14.4s
+    -> AVG                     0.7973                14.4s
+
+  type6_forest         604199  0.5718     Y  57.38s   73.3s
+    -> AVG                     0.5718                73.3s
+
+  Run summary:
+    Seeds evaluated:           6
+    Success rate:              5/6 (83.3%)
+    Clean execution rate:      6/6 (100.0%)
+    Total wall-clock:          162.5s (2.7 min)
+    Avg wall / seed:           27.03s
+    Median wall / seed:        20.13s
+    P90 wall / seed:           73.33s
+    Avg sim time / seed:       48.05s
+    Total seed-worker time:    162.2s
+    Throughput:                2.22 seeds/min
+    Throughput per worker:     2.22 seeds/min/worker
+    Effective parallelism:     1.00x (utilization 99.8% of 1 workers)
+    Batches run:               6
+    Avg seeds / container:     1.00
+    Total startup overhead:    29.2s
+    Avg startup / container:   4.9s
+
+  Scheduler cost model (initial prior):
+    light  groups=type1_city cpu=0.90 ram=2200MiB heavy_tokens=0
+    medium groups=type2_open,type5_warehouse cpu=1.05 ram=2600MiB heavy_tokens=1
+    heavy  groups=type4_village,type3_mountain,type6_forest cpu=1.27 ram=3350MiB heavy_tokens=2
+
+  Observed by group:
+    type1_city         prior=light  seeds=1   success=1/1 clean=1/1 avg_wall=11.0s p90=11.0s avg_proc=6.0s avg_sim=40.7s wall/sim=0.27x
+    type2_open         prior=medium seeds=1   success=1/1 clean=1/1 avg_wall=10.5s p90=10.5s avg_proc=5.7s avg_sim=55.8s wall/sim=0.19x
+    type3_mountain     prior=heavy  seeds=1   success=0/1 clean=1/1 avg_wall=25.9s p90=25.9s avg_proc=21.1s avg_sim=50.0s wall/sim=0.52x
+    type4_village      prior=heavy  seeds=1   success=1/1 clean=1/1 avg_wall=27.1s p90=27.1s avg_proc=22.2s avg_sim=55.2s wall/sim=0.49x
+    type5_warehouse    prior=medium seeds=1   success=1/1 clean=1/1 avg_wall=14.4s p90=14.4s avg_proc=9.5s avg_sim=29.2s wall/sim=0.49x
+    type6_forest       prior=heavy  seeds=1   success=1/1 clean=1/1 avg_wall=73.3s p90=73.3s avg_proc=68.6s avg_sim=57.4s wall/sim=1.28x
+
+  Slowest seeds:
+    type6_forest       seed=604199 class=heavy wall=73.3s proc=68.6s sim=57.4s status=seed_done score=0.5718
+    type4_village      seed=604197 class=heavy wall=27.1s proc=22.2s sim=55.2s status=seed_done score=0.5208
+    type3_mountain     seed=604195 class=heavy wall=25.9s proc=21.1s sim=50.0s status=seed_done score=0.0100
+    type5_warehouse    seed=604196 class=medium wall=14.4s proc=9.5s sim=29.2s status=seed_done score=0.7973
+    type1_city         seed=604198 class=light wall=11.0s proc=6.0s sim=40.7s status=seed_done score=0.7047
+    type2_open         seed=604200 class=medium wall=10.5s proc=5.7s sim=55.8s status=seed_done score=0.5309
+
+  Extrapolation to 1,000 seeds (using measured per-seed worker time and observed effective parallelism):
+    type1_city          167 seeds x 11.00s = 1837s (observed)
+    type2_open          167 seeds x 10.54s = 1760s (observed)
+    type3_mountain      167 seeds x 25.89s = 4323s (observed)
+    type4_village       167 seeds x 27.06s = 4519s (observed)
+    type5_warehouse     166 seeds x 14.37s = 2386s (observed)
+    type6_forest        166 seeds x 73.33s = 12172s (observed)
+
+    Workers used:              1
+    Parallelism basis:         1.00x observed
+    Estimated worker-time:     26997s
+    Estimated wall-clock:      26997s (449.9 min)
+    Estimated avg wall / seed: 27.00s
+    Estimated throughput:      2.22 seeds/min
+
+[10:39:49] === BENCHMARK COMPLETE ===
