@@ -1,0 +1,372 @@
+LANDING PROFILE EDGE AUDIT V2
+
+============================================================
+Profile-related source constants
+============================================================
+
+TERRAIN_PROFILES = {
+    1: {  # City
+        "name": "city",
+        "transit_alt": 3.0,
+        "mode_v": 95.0,
+        "safety": 0.95,
+        "acq_gain": 0.58,
+        "acq_speed_max": 1.20,
+        "approach_gate_xy": 7.5,
+        "term_gate_xy": 1.10,
+        "final_center_gate": 0.18,
+        "settle_required": 20,
+        "settle_v_tol": 0.08,
+        "press_vz": -0.14,
+    },
+    2: {  # Open / Valley
+        "name": "open_valley",
+        "transit_alt": 1.2,
+        "mode_v": 145.0,
+        "safety": 1.05,
+        "acq_gain": 0.55,
+        "acq_speed_max": 1.15,
+        "approach_gate_xy": 4.75,
+        "term_gate_xy": 1.45,
+        "final_center_gate": 0.22,
+        "settle_required": 10,
+        "settle_v_tol": 0.10,
+        "press_vz": -0.16,
+    },
+    3: {  # Mountain
+        "name": "mountain",
+        "transit_alt": 6.3,
+        "mode_v": 108.0,
+        "safety": 1.28,
+        "acq_gain": 0.64,
+        "acq_speed_max": 1.55,
+        "approach_gate_xy": 22.0,
+        "term_gate_xy": 1.20,
+        "final_center_gate": 0.20,
+        "settle_required": 12,
+        "settle_v_tol": 0.10,
+        "press_vz": -0.16,
+        "ridge_floor_agl": 1.60,
+    },
+    4: {  # Village
+        "name": "village",
+        "transit_alt": 3.2,
+        "mode_v": 100.0,
+        "safety": 0.95,
+        "acq_gain": 0.60,
+        "acq_speed_max": 1.25,
+        "approach_gate_xy": 8.0,
+        "term_gate_xy": 1.10,
+        "final_center_gate": 0.18,
+        "settle_required": 20,
+        "settle_v_tol": 0.08,
+        "press_vz": -0.14,
+    },
+    5: {  # Warehouse
+        "name": "warehouse",
+        "transit_alt": 2.4,
+        "mode_v": 58.0,
+        "safety": 0.55,
+        "acq_gain": 0.52,
+        "acq_speed_max": 0.95,
+        "approach_gate_xy": 4.75,
+        "term_gate_xy": 0.34,
+        "final_center_gate": 0.12,
+        "settle_required": 24,
+        "settle_v_tol": 0.055,
+        "press_vz": -0.10,
+    },
+    6: {  # Forest
+        "name": "forest",
+        "transit_alt": 1.6,
+        "mode_v": 125.0,
+        "safety": 1.00,
+        "acq_gain": 0.55,
+        "acq_speed_max": 1.15,
+        "approach_gate_xy": 5.5,
+        "term_gate_xy": 1.25,
+        "final_center_gate": 0.20,
+        "settle_required": 12,
+        "settle_v_tol": 0.10,
+        "press_vz": -0.16,
+    },
+}
+
+DEFAULT_PROFILE_ID = 2
+
+============================================================
+_profile source
+============================================================
+  128: }
+  129: 
+  130: DEFAULT_PROFILE_ID = 2
+  131: 
+  132: 
+  133: def _profile(terrain_id: int) -> Dict[str, float]:
+  134:     return TERRAIN_PROFILES.get(int(terrain_id), TERRAIN_PROFILES[DEFAULT_PROFILE_ID])
+  135: 
+  136: 
+  137: def _safe_norm(v: np.ndarray, eps: float = 1e-8) -> float:
+  138:     return float(np.linalg.norm(v)) + eps
+  139: 
+
+============================================================
+_landing_params source
+============================================================
+  231:     dir_xyz = desired / vel_mag
+  232:     speed_norm = float(np.clip(vel_mag / C_ENGINE_MAX_SPEED, 0.0, 1.0))
+  233:     return np.array([dir_xyz[0], dir_xyz[1], dir_xyz[2], speed_norm, yaw_norm], dtype=np.float32)
+  234: 
+  235: 
+  236: def _landing_params(terrain_id: int, dist_xy: float, spawn_z: float, target_vel: np.ndarray) -> Dict[str, object]:
+  237:     profile = _profile(terrain_id)
+  238:     landing_committed = dist_xy < 4.25
+  239: 
+  240:     if landing_committed:
+  241:         cruise_altitude = 0.50
+  242:         safety_radius = 0.52 if terrain_id == 5 else 0.62
+  243:         mode_v = 36.0 if terrain_id == 5 else 42.0
+  244:         attraction_gain = 16.0
+  245:     else:
+  246:         cruise_altitude = spawn_z + float(profile["transit_alt"])
+  247:         safety_radius = float(profile["safety"])
+  248:         mode_v = float(profile["mode_v"])
+  249:         attraction_gain = 13.5
+  250: 
+  251:     return {
+  252:         "cruise_altitude": cruise_altitude,
+  253:         "max_speed": 3.0,
+  254:         "safety_radius": safety_radius,
+  255:         "mode_v": mode_v,
+  256:         "attraction_gain": attraction_gain,
+  257:         "landing_threshold_xy": 0.95 if landing_committed else 0.75,
+  258:         "landing_threshold_z": 1.20,
+  259:         "landing_descent_rate": 0.34 if terrain_id == 5 and landing_committed else (0.38 if landing_committed else 0.34),
+  260:         "platform_vel_est": list(np.asarray(target_vel, dtype=np.float64)),
+  261:     }
+  262: 
+  263: 
+  264: class DroneFlightController:
+  265:     """Production CAE controller for Swarm Subnet model submission."""
+  266: 
+
+============================================================
+Computed profile/landing params for Mountain runtime state
+============================================================
+module_import_ok=True
+
+Mountain runtime state:
+{
+  "dist_xy": 36.9353,
+  "spawn_z": 10.7177,
+  "target_vel": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}
+
+[
+  {
+    "terrain_id": 1,
+    "profile": {
+      "name": "city",
+      "transit_alt": 3.0,
+      "mode_v": 95.0,
+      "safety": 0.95,
+      "acq_gain": 0.58,
+      "acq_speed_max": 1.2,
+      "approach_gate_xy": 7.5,
+      "term_gate_xy": 1.1,
+      "final_center_gate": 0.18,
+      "settle_required": 20,
+      "settle_v_tol": 0.08,
+      "press_vz": -0.14
+    },
+    "landing_params_at_mountain_step251": {
+      "cruise_altitude": 13.7177,
+      "max_speed": 3.0,
+      "safety_radius": 0.95,
+      "mode_v": 95.0,
+      "attraction_gain": 13.5,
+      "landing_threshold_xy": 0.75,
+      "landing_threshold_z": 1.2,
+      "landing_descent_rate": 0.34,
+      "platform_vel_est": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  {
+    "terrain_id": 2,
+    "profile": {
+      "name": "open_valley",
+      "transit_alt": 1.2,
+      "mode_v": 145.0,
+      "safety": 1.05,
+      "acq_gain": 0.55,
+      "acq_speed_max": 1.15,
+      "approach_gate_xy": 4.75,
+      "term_gate_xy": 1.45,
+      "final_center_gate": 0.22,
+      "settle_required": 10,
+      "settle_v_tol": 0.1,
+      "press_vz": -0.16
+    },
+    "landing_params_at_mountain_step251": {
+      "cruise_altitude": 11.9177,
+      "max_speed": 3.0,
+      "safety_radius": 1.05,
+      "mode_v": 145.0,
+      "attraction_gain": 13.5,
+      "landing_threshold_xy": 0.75,
+      "landing_threshold_z": 1.2,
+      "landing_descent_rate": 0.34,
+      "platform_vel_est": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  {
+    "terrain_id": 3,
+    "profile": {
+      "name": "mountain",
+      "transit_alt": 6.3,
+      "mode_v": 108.0,
+      "safety": 1.28,
+      "acq_gain": 0.64,
+      "acq_speed_max": 1.55,
+      "approach_gate_xy": 22.0,
+      "term_gate_xy": 1.2,
+      "final_center_gate": 0.2,
+      "settle_required": 12,
+      "settle_v_tol": 0.1,
+      "press_vz": -0.16,
+      "ridge_floor_agl": 1.6
+    },
+    "landing_params_at_mountain_step251": {
+      "cruise_altitude": 17.0177,
+      "max_speed": 3.0,
+      "safety_radius": 1.28,
+      "mode_v": 108.0,
+      "attraction_gain": 13.5,
+      "landing_threshold_xy": 0.75,
+      "landing_threshold_z": 1.2,
+      "landing_descent_rate": 0.34,
+      "platform_vel_est": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  {
+    "terrain_id": 4,
+    "profile": {
+      "name": "village",
+      "transit_alt": 3.2,
+      "mode_v": 100.0,
+      "safety": 0.95,
+      "acq_gain": 0.6,
+      "acq_speed_max": 1.25,
+      "approach_gate_xy": 8.0,
+      "term_gate_xy": 1.1,
+      "final_center_gate": 0.18,
+      "settle_required": 20,
+      "settle_v_tol": 0.08,
+      "press_vz": -0.14
+    },
+    "landing_params_at_mountain_step251": {
+      "cruise_altitude": 13.9177,
+      "max_speed": 3.0,
+      "safety_radius": 0.95,
+      "mode_v": 100.0,
+      "attraction_gain": 13.5,
+      "landing_threshold_xy": 0.75,
+      "landing_threshold_z": 1.2,
+      "landing_descent_rate": 0.34,
+      "platform_vel_est": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  {
+    "terrain_id": 5,
+    "profile": {
+      "name": "warehouse",
+      "transit_alt": 2.4,
+      "mode_v": 58.0,
+      "safety": 0.55,
+      "acq_gain": 0.52,
+      "acq_speed_max": 0.95,
+      "approach_gate_xy": 4.75,
+      "term_gate_xy": 0.34,
+      "final_center_gate": 0.12,
+      "settle_required": 24,
+      "settle_v_tol": 0.055,
+      "press_vz": -0.1
+    },
+    "landing_params_at_mountain_step251": {
+      "cruise_altitude": 13.117700000000001,
+      "max_speed": 3.0,
+      "safety_radius": 0.55,
+      "mode_v": 58.0,
+      "attraction_gain": 13.5,
+      "landing_threshold_xy": 0.75,
+      "landing_threshold_z": 1.2,
+      "landing_descent_rate": 0.34,
+      "platform_vel_est": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  {
+    "terrain_id": 6,
+    "profile": {
+      "name": "forest",
+      "transit_alt": 1.6,
+      "mode_v": 125.0,
+      "safety": 1.0,
+      "acq_gain": 0.55,
+      "acq_speed_max": 1.15,
+      "approach_gate_xy": 5.5,
+      "term_gate_xy": 1.25,
+      "final_center_gate": 0.2,
+      "settle_required": 12,
+      "settle_v_tol": 0.1,
+      "press_vz": -0.16
+    },
+    "landing_params_at_mountain_step251": {
+      "cruise_altitude": 12.3177,
+      "max_speed": 3.0,
+      "safety_radius": 1.0,
+      "mode_v": 125.0,
+      "attraction_gain": 13.5,
+      "landing_threshold_xy": 0.75,
+      "landing_threshold_z": 1.2,
+      "landing_descent_rate": 0.34,
+      "platform_vel_est": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  }
+]
+
+COMPACT TABLE
+terrain_id	attraction_gain	cruise_altitude	landing_descent_rate	landing_threshold_xy	landing_threshold_z	max_speed	mode_v	platform_vel_est	safety_radius
+1	13.5	13.7177	0.34	0.75	1.2	3.0	95.0	[np.float64(0.0), np.float64(0.0), np.float64(0.0)]	0.95
+2	13.5	11.9177	0.34	0.75	1.2	3.0	145.0	[np.float64(0.0), np.float64(0.0), np.float64(0.0)]	1.05
+3	13.5	17.0177	0.34	0.75	1.2	3.0	108.0	[np.float64(0.0), np.float64(0.0), np.float64(0.0)]	1.28
+4	13.5	13.9177	0.34	0.75	1.2	3.0	100.0	[np.float64(0.0), np.float64(0.0), np.float64(0.0)]	0.95
+5	13.5	13.117700000000001	0.34	0.75	1.2	3.0	58.0	[np.float64(0.0), np.float64(0.0), np.float64(0.0)]	0.55
+6	13.5	12.3177	0.34	0.75	1.2	3.0	125.0	[np.float64(0.0), np.float64(0.0), np.float64(0.0)]	1.0

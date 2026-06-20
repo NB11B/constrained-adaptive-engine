@@ -1,0 +1,7 @@
+group	seed	score	success	events	corr_counts	first_corr_name	first_corr_step	first_corr_init_dist	first_corr_raw_search_dist	first_corr_pos	first_corr_target	first_corr_target_est	last_corr_step	last_corr_name	last_corr_target	last_event_step	last_event_goal_corr	last_event_pos	last_event_target	last_event_target_est	last_event_dist_xy
+type1_city	604198	0.704674175603987	True	0	{}	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None
+type2_open	604200	0.5308846204871644	True	0	{}	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None
+type3_mountain	604195	0.01	False	0	{}	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None
+type4_village	604197	0.7241622049100852	True	0	{}	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None
+type5_warehouse	604196	0.7973229294698024	True	0	{}	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None
+type6_forest	604199	0.571807716360089	True	0	{}	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None	None

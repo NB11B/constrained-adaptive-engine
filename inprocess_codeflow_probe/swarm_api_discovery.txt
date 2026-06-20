@@ -1,0 +1,119 @@
+swarm package: /mnt/c/Users/nateb/OneDrive/Documents/swarm_live/swarm
+
+
+### grep: build_world
+core/moving_drone.py:18: from swarm.core.env_builder import build_world
+core/env_builder/build.py:41: def build_world(
+core/env_builder/__init__.py:4: from .build import build_world
+
+### grep: MovingDrone
+core/moving_drone.py:57: class MovingDroneAviary(BaseRLAviary):
+utils/env_factory.py:4: using MovingDroneAviary
+
+### grep: Task
+protocol.py:30: class MapTask:
+core/moving_drone.py:60:     via an external `MapTask`.
+utils/env_factory.py:6: according to the supplied MapTask, so it can be used immediately.
+validator/forward.py:174: def _record_sse_listener_exit(self, task: asyncio.Task) -> None:
+validator/reward.py:24:     from swarm.protocol import MapTask
+validator/task_gen.py:65: from swarm.protocol import MapTask
+validator/docker/docker_evaluator_parts/batch.py:1089:         tasks: List of MapTask objects (one per seed)
+validator/utils_parts/evaluation.py:160:     inflight: List[asyncio.Task] = []
+
+### grep: challenge_type
+cli.py:122:     challenge_type: int
+constants.py:269:     city_static      = dict(challenge_type=1, distance_range=(15, 25), goal_height_range=(0.3, 0.8), moving_platform=False)
+protocol.py:36:     challenge_type: int
+benchmark/idempotency.py:43:     challenge_type: int,
+benchmark/engine_parts/dispatch.py:95:     int(challenge_type): group_name
+benchmark/engine_parts/reporting.py:108:         seed_key = (int(meta["seed"]), int(meta["challenge_type"]))
+benchmark/engine_parts/seeds.py:54: def _infer_bench_group(challenge_type: int, seed: int) -> Optional[str]:
+benchmark/engine_parts/workers.py:544:             bench_type = BENCH_GROUP_TO_TYPE.get(group_name, int(task.challenge_type))
+core/moving_drone.py:713:         challenge_type = int(getattr(self.task, "challenge_type", 0))
+core/env_builder/build.py:14:     challenge_type: int,
+core/env_builder/generation.py:146:     challenge_type: int,
+validator/reward.py:56:     min_clearance: float, collision: bool, challenge_type: int = 0
+validator/task_gen.py:100: def get_type_params(challenge_type: int) -> dict:
+validator/docker/docker_evaluator_parts/batch.py:299:             "challenge_type": int(getattr(task_obj, "challenge_type", -1)),
+validator/docker/docker_evaluator_parts/parallel.py:47: def _task_challenge_type(task: Any) -> int:
+validator/docker/docker_evaluator_parts/rpc.py:81:                 "challenge_type": int(getattr(task_obj, "challenge_type", -1)),
+validator/docker/docker_evaluator_parts/_shared.py:114:         if getattr(t, "challenge_type", 0) in _HEAVY_CHALLENGE_TYPES
+validator/utils_parts/evaluation.py:54:     challenge_type_to_name = {
+
+### grep: search_radius
+protocol.py:37:     search_radius: float = 10.0
+core/moving_drone.py:513:         search_radius = getattr(self.task, 'search_radius', 10.0)
+core/forest_generator_parts/placement.py:46:     def count_neighbors(self, x: float, y: float, search_radius: float) -> int:
+validator/task_gen.py:134:     search_radius = search_rng.uniform(SEARCH_RADIUS_MIN, SEARCH_RADIUS_MAX)
+
+### grep: flight_reward
+core/moving_drone.py:19: from swarm.validator.reward import flight_reward
+validator/reward.py:37: __all__ = ["flight_reward"]
+validator/docker/docker_evaluator_parts/rpc.py:26: from swarm.validator.reward import flight_reward
+validator/docker/docker_evaluator_parts/_shared.py:49: from swarm.validator.reward import flight_reward
+
+### grep: env.step
+validator/docker/docker_evaluator_parts/rpc.py:507:                             obs, _r, terminated, truncated, info = env.step(
+
+### grep: seed_file
+cli.py:352:     if args.seed_file is not None:
+benchmark/engine_parts/entry.py:107:         if args.seed_file is not None:
+benchmark/engine_parts/seeds.py:45: def _load_type_seeds(seed_file: Path) -> Dict[str, List[int]]:
+
+### grep: group_results
+cli.py:446:     raw_groups = payload.get("group_results")
+benchmark/engine_parts/reporting.py:98:     group_results: Dict[str, List[Dict[str, Any]]] = {}
+
+### grep: generate
+cli.py:723:         from scripts.generate_video import main as video_main
+core/moving_drone.py:507:     def _generate_search_area_center(self, seed: int = None) -> np.ndarray:
+core/city_generator_parts/generation.py:68: def generate_road_positions(rng, min_spacing, target_area, tile_size=None):
+core/city_generator_parts/spawning.py:2: from .generation import Block, Building, Rect, RoadTile, SeededRNG, generate_city
+core/forest_generator_parts/hills.py:160:         f.write("# Auto-generated merged hills + far ground\n")
+core/maps/open/builder.py:89: def _generate_terrain_obj(seed: int) -> str:
+core/mountain_generator_parts/terrain.py:107: def _generate_terrain_tiles(
+core/warehouse/storage.py:983:             "storage_rack_reason": "Storage rack grid generated but no valid rack spawn points remained.",
+core/warehouse/factory_parts/barriers.py:113:             "factory_barrier_reason": "No barrier segments could be generated.",
+core/warehouse/factory_parts/belts.py:4:     _generate_step1_path_seeded,
+core/warehouse/factory_parts/pathing.py:147: def _generate_step1_path_seeded(cols, rows, seed):
+core/warehouse/helpers_parts/mesh_spawn.py:65: def _spawn_generated_mesh(
+core/warehouse/helpers_parts/obj_processing.py:15: def _purge_generated_model_artifacts(model_path):
+core/warehouse/operations_parts/machining.py:2: from .support import _purge_generated_model_artifacts
+core/warehouse/operations_parts/support.py:16: def _purge_generated_model_artifacts(model_path):
+core/warehouse/structure_parts/roof.py:6:     _spawn_generated_mesh(
+core/warehouse/structure_parts/_shared.py:48:     _spawn_generated_mesh,
+utils/misc.py:73:     Internal generator function used by the `ttl_cache` decorator to generate a new hash value at regular
+validator/forward.py:137:         _invalidate_local_state_for_regenerated_seeds(self)
+validator/seed_manager.py:24: def _generate_random_seeds(count: int) -> List[int]:
+
+### grep: benchmark
+cli.py:291: def _check_benchmark_engine() -> DoctorCheck:
+constants.py:102: # Docker parallel workers for validator and benchmark evaluation.
+base/validator.py:142:         Forward loop can block for up to ~1h during benchmark evaluation,
+benchmark/engine.py:2: """Public benchmark engine facade.
+benchmark/__main__.py:1: from swarm.benchmark.engine import main
+benchmark/engine_parts/config.py:154:         description="Full Docker evaluation benchmark across all challenge types.",
+benchmark/engine_parts/entry.py:32: from .workers import _run_benchmark
+benchmark/engine_parts/seeds.py:29:         raise ValueError("Seed file must contain a JSON object mapping benchmark groups to seed lists.")
+benchmark/engine_parts/workers.py:43:     import swarm.benchmark.engine as engine
+benchmark/engine_parts/__init__.py:1: """Internal benchmark engine modules."""
+core/maps/__init__.py:1: """Canonical map-family package for benchmark environments."""
+core/maps/open/builder.py:1: """Builders for the Type 2 open-world benchmark map."""
+core/maps/village/builder.py:1: """Builders for the Type 4 village benchmark map."""
+submission_template/agent_server.py:64:         benchmark_ns = time.perf_counter_ns() - t0
+validator/backend_api.py:11: - POST /validators/models/{uid}/score   - Submit full benchmark score (1000 seeds)
+validator/forward.py:7:   * ``cancel_flag`` — set on STOP / screening_failed / benchmark_done /
+validator/runtime_dashboard.py:73:     benchmark = evaluation.get("benchmark", {})
+validator/runtime_telemetry.py:129:                 "benchmark": _new_stage_state(),
+validator/seed_manager.py:30:     """Per-epoch screening and benchmark seeds."""
+validator/sse_listener.py:28: _CANCEL_TYPES = {"screening_failed", "benchmark_done", "stop"}
+validator/docker/docker_evaluator_parts/batch.py:329:         """Run cleanup docker command without letting hangs block benchmark completion."""
+validator/docker/docker_evaluator_parts/parallel.py:3: This mirrors the benchmark scheduler:
+validator/docker/docker_evaluator_parts/rpc.py:703:     The round-trip time includes both network overhead and benchmark compute.
+validator/utils_parts/backend_submission.py:99:                 benchmark_version=pub.get("benchmark_version"),
+validator/utils_parts/evaluation.py:43:     description: str = "benchmark",
+validator/utils_parts/heartbeat.py:83:                         "benchmark_version": matched.get("benchmark_version"),
+validator/utils_parts/queue_worker.py:79:             benchmark_version=BENCHMARK_VERSION,
+validator/utils_parts/run_task.py:25: from .evaluation import _run_full_benchmark, _run_screening
+validator/utils_parts/state.py:123: def clear_benchmark_cache() -> None:
+validator/utils_parts/_shared.py:48: CACHE_FILE = STATE_DIR / "benchmark_cache.json"

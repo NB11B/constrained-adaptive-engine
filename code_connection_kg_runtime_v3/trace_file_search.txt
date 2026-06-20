@@ -1,0 +1,7 @@
+Search timestamp: Sat Jun 20 18:18:59 EDT 2026
+
+Candidate dir traces:
+
+/tmp traces:
+
+Swarm dir traces:

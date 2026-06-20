@@ -1,0 +1,6549 @@
+{
+  "generated_at": "2026-06-20T18:09:17.159652",
+  "source": "/mnt/c/Users/nateb/OneDrive/Documents/constrained-adaptive-engine_NEXT_CANDIDATE/code_connection_kg_v1/candidate/runtime/cae_agent_impl.py",
+  "nodes": [
+    {
+      "id": "var:observation",
+      "kind": "var",
+      "name": "observation",
+      "label": "observation"
+    },
+    {
+      "id": "var:current_pos",
+      "kind": "var",
+      "name": "current_pos",
+      "label": "current_pos"
+    },
+    {
+      "id": "var:current_vel",
+      "kind": "var",
+      "name": "current_vel",
+      "label": "current_vel"
+    },
+    {
+      "id": "var:agl",
+      "kind": "var",
+      "name": "agl",
+      "label": "agl"
+    },
+    {
+      "id": "var:search_vec",
+      "kind": "var",
+      "name": "search_vec",
+      "label": "search_vec"
+    },
+    {
+      "id": "var:target_pos",
+      "kind": "var",
+      "name": "target_pos",
+      "label": "target_pos"
+    },
+    {
+      "id": "var:raw_search_target",
+      "kind": "var",
+      "name": "raw_search_target",
+      "label": "raw_search_target"
+    },
+    {
+      "id": "var:raw_search_dist_xy",
+      "kind": "var",
+      "name": "raw_search_dist_xy",
+      "label": "raw_search_dist_xy"
+    },
+    {
+      "id": "var:initial_dist_xy",
+      "kind": "var",
+      "name": "initial_dist_xy",
+      "label": "initial_dist_xy"
+    },
+    {
+      "id": "var:goal_corrections",
+      "kind": "var",
+      "name": "goal_corrections",
+      "label": "goal_corrections"
+    },
+    {
+      "id": "var:dist_xy",
+      "kind": "var",
+      "name": "dist_xy",
+      "label": "dist_xy"
+    },
+    {
+      "id": "var:terrain_id",
+      "kind": "var",
+      "name": "terrain_id",
+      "label": "terrain_id"
+    },
+    {
+      "id": "var:profile",
+      "kind": "var",
+      "name": "profile",
+      "label": "profile"
+    },
+    {
+      "id": "var:landing_params",
+      "kind": "var",
+      "name": "landing_params",
+      "label": "landing_params"
+    },
+    {
+      "id": "var:engine_target",
+      "kind": "var",
+      "name": "engine_target",
+      "label": "engine_target"
+    },
+    {
+      "id": "var:sensor_data",
+      "kind": "var",
+      "name": "sensor_data",
+      "label": "sensor_data"
+    },
+    {
+      "id": "var:control_output",
+      "kind": "var",
+      "name": "control_output",
+      "label": "control_output"
+    },
+    {
+      "id": "var:action",
+      "kind": "var",
+      "name": "action",
+      "label": "action"
+    },
+    {
+      "id": "concept:critical_path",
+      "kind": "concept",
+      "name": "critical_path",
+      "label": "Critical execution path"
+    },
+    {
+      "id": "concept:score_village_gain",
+      "kind": "concept",
+      "name": "score_village_gain",
+      "label": "Village score improved to ~0.7242"
+    },
+    {
+      "id": "concept:mountain_fail",
+      "kind": "concept",
+      "name": "mountain_fail",
+      "label": "Mountain remains failed at 0.0100"
+    },
+    {
+      "id": "concept:package_outer_zip",
+      "kind": "concept",
+      "name": "package_outer_zip",
+      "label": "Valid outer submission zip"
+    },
+    {
+      "id": "concept:package_inner_runtime_zip",
+      "kind": "concept",
+      "name": "package_inner_runtime_zip",
+      "label": "Nested cae_runtime.zip only"
+    },
+    {
+      "id": "func:_profile",
+      "kind": "func",
+      "name": "_profile",
+      "label": "_profile() @ L133",
+      "line": 133,
+      "end_line": 134
+    },
+    {
+      "id": "func:_safe_norm",
+      "kind": "func",
+      "name": "_safe_norm",
+      "label": "_safe_norm() @ L137",
+      "line": 137,
+      "end_line": 138
+    },
+    {
+      "id": "func:_unit",
+      "kind": "func",
+      "name": "_unit",
+      "label": "_unit() @ L141",
+      "line": 141,
+      "end_line": 142
+    },
+    {
+      "id": "func:_depth_metrics",
+      "kind": "func",
+      "name": "_depth_metrics",
+      "label": "_depth_metrics() @ L145",
+      "line": 145,
+      "end_line": 157
+    },
+    {
+      "id": "func:_action_from_velocity",
+      "kind": "func",
+      "name": "_action_from_velocity",
+      "label": "_action_from_velocity() @ L160",
+      "line": 160,
+      "end_line": 165
+    },
+    {
+      "id": "func:_direct_action",
+      "kind": "func",
+      "name": "_direct_action",
+      "label": "_direct_action() @ L168",
+      "line": 168,
+      "end_line": 233
+    },
+    {
+      "id": "func:_landing_params",
+      "kind": "func",
+      "name": "_landing_params",
+      "label": "_landing_params() @ L236",
+      "line": 236,
+      "end_line": 261
+    },
+    {
+      "id": "class:DroneFlightController",
+      "kind": "class",
+      "name": "DroneFlightController",
+      "label": "DroneFlightController() @ L264",
+      "line": 264,
+      "end_line": 800
+    },
+    {
+      "id": "func:__init__",
+      "kind": "func",
+      "name": "__init__",
+      "label": "__init__() @ L267",
+      "line": 267,
+      "end_line": 270
+    },
+    {
+      "id": "func:reset",
+      "kind": "func",
+      "name": "reset",
+      "label": "reset() @ L272",
+      "line": 272,
+      "end_line": 301
+    },
+    {
+      "id": "func:_extract_state",
+      "kind": "func",
+      "name": "_extract_state",
+      "label": "_extract_state() @ L303",
+      "line": 303,
+      "end_line": 332
+    },
+    {
+      "id": "func:_estimate_target",
+      "kind": "func",
+      "name": "_estimate_target",
+      "label": "_estimate_target() @ L334",
+      "line": 334,
+      "end_line": 365
+    },
+    {
+      "id": "func:_infer_terrain",
+      "kind": "func",
+      "name": "_infer_terrain",
+      "label": "_infer_terrain() @ L367",
+      "line": 367,
+      "end_line": 385
+    },
+    {
+      "id": "func:_detect_platform_bearing",
+      "kind": "func",
+      "name": "_detect_platform_bearing",
+      "label": "_detect_platform_bearing() @ L387",
+      "line": 387,
+      "end_line": 455
+    },
+    {
+      "id": "func:_yaw_command",
+      "kind": "func",
+      "name": "_yaw_command",
+      "label": "_yaw_command() @ L457",
+      "line": 457,
+      "end_line": 462
+    },
+    {
+      "id": "func:_trace_step",
+      "kind": "func",
+      "name": "_trace_step",
+      "label": "_trace_step() @ L464",
+      "line": 464,
+      "end_line": 481
+    },
+    {
+      "id": "func:act",
+      "kind": "func",
+      "name": "act",
+      "label": "act() @ L483",
+      "line": 483,
+      "end_line": 800
+    },
+    {
+      "id": "call:TERRAIN_PROFILES.get@L134",
+      "kind": "call",
+      "name": "TERRAIN_PROFILES.get@L134",
+      "label": "TERRAIN_PROFILES.get() @ L134",
+      "line": 134
+    },
+    {
+      "id": "call:np.asarray@L149",
+      "kind": "call",
+      "name": "np.asarray@L149",
+      "label": "np.asarray() @ L149",
+      "line": 149
+    },
+    {
+      "id": "call:np.nan_to_num@L152",
+      "kind": "call",
+      "name": "np.nan_to_num@L152",
+      "label": "np.nan_to_num() @ L152",
+      "line": 152
+    },
+    {
+      "id": "call:np.clip@L153",
+      "kind": "call",
+      "name": "np.clip@L153",
+      "label": "np.clip() @ L153",
+      "line": 153
+    },
+    {
+      "id": "call:float@L154",
+      "kind": "call",
+      "name": "float@L154",
+      "label": "float() @ L154",
+      "line": 154
+    },
+    {
+      "id": "call:float@L155",
+      "kind": "call",
+      "name": "float@L155",
+      "label": "float() @ L155",
+      "line": 155
+    },
+    {
+      "id": "call:float@L156",
+      "kind": "call",
+      "name": "float@L156",
+      "label": "float() @ L156",
+      "line": 156
+    },
+    {
+      "id": "call:np.array@L161",
+      "kind": "call",
+      "name": "np.array@L161",
+      "label": "np.array() @ L161",
+      "line": 161
+    },
+    {
+      "id": "call:_unit@L162",
+      "kind": "call",
+      "name": "_unit@L162",
+      "label": "_unit() @ L162",
+      "line": 162
+    },
+    {
+      "id": "call:float@L163",
+      "kind": "call",
+      "name": "float@L163",
+      "label": "float() @ L163",
+      "line": 163
+    },
+    {
+      "id": "call:float@L164",
+      "kind": "call",
+      "name": "float@L164",
+      "label": "float() @ L164",
+      "line": 164
+    },
+    {
+      "id": "call:np.array@L165",
+      "kind": "call",
+      "name": "np.array@L165",
+      "label": "np.array() @ L165",
+      "line": 165
+    },
+    {
+      "id": "call:_profile@L180",
+      "kind": "call",
+      "name": "_profile@L180",
+      "label": "_profile() @ L180",
+      "line": 180
+    },
+    {
+      "id": "call:float@L182",
+      "kind": "call",
+      "name": "float@L182",
+      "label": "float() @ L182",
+      "line": 182
+    },
+    {
+      "id": "call:max@L183",
+      "kind": "call",
+      "name": "max@L183",
+      "label": "max() @ L183",
+      "line": 183
+    },
+    {
+      "id": "call:float@L232",
+      "kind": "call",
+      "name": "float@L232",
+      "label": "float() @ L232",
+      "line": 232
+    },
+    {
+      "id": "call:np.array@L233",
+      "kind": "call",
+      "name": "np.array@L233",
+      "label": "np.array() @ L233",
+      "line": 233
+    },
+    {
+      "id": "call:_profile@L237",
+      "kind": "call",
+      "name": "_profile@L237",
+      "label": "_profile() @ L237",
+      "line": 237
+    },
+    {
+      "id": "call:int@L134",
+      "kind": "call",
+      "name": "int@L134",
+      "label": "int() @ L134",
+      "line": 134
+    },
+    {
+      "id": "call:float@L138",
+      "kind": "call",
+      "name": "float@L138",
+      "label": "float() @ L138",
+      "line": 138
+    },
+    {
+      "id": "call:_safe_norm@L142",
+      "kind": "call",
+      "name": "_safe_norm@L142",
+      "label": "_safe_norm() @ L142",
+      "line": 142
+    },
+    {
+      "id": "call:np.mean@L154",
+      "kind": "call",
+      "name": "np.mean@L154",
+      "label": "np.mean() @ L154",
+      "line": 154
+    },
+    {
+      "id": "call:np.mean@L155",
+      "kind": "call",
+      "name": "np.mean@L155",
+      "label": "np.mean() @ L155",
+      "line": 155
+    },
+    {
+      "id": "call:np.mean@L156",
+      "kind": "call",
+      "name": "np.mean@L156",
+      "label": "np.mean() @ L156",
+      "line": 156
+    },
+    {
+      "id": "call:np.clip@L163",
+      "kind": "call",
+      "name": "np.clip@L163",
+      "label": "np.clip() @ L163",
+      "line": 163
+    },
+    {
+      "id": "call:np.clip@L164",
+      "kind": "call",
+      "name": "np.clip@L164",
+      "label": "np.clip() @ L164",
+      "line": 164
+    },
+    {
+      "id": "call:norm@L182",
+      "kind": "call",
+      "name": "norm@L182",
+      "label": "norm() @ L182",
+      "line": 182
+    },
+    {
+      "id": "call:float@L183",
+      "kind": "call",
+      "name": "float@L183",
+      "label": "float() @ L183",
+      "line": 183
+    },
+    {
+      "id": "call:float@L186",
+      "kind": "call",
+      "name": "float@L186",
+      "label": "float() @ L186",
+      "line": 186
+    },
+    {
+      "id": "call:int@L187",
+      "kind": "call",
+      "name": "int@L187",
+      "label": "int() @ L187",
+      "line": 187
+    },
+    {
+      "id": "call:float@L188",
+      "kind": "call",
+      "name": "float@L188",
+      "label": "float() @ L188",
+      "line": 188
+    },
+    {
+      "id": "call:min@L214",
+      "kind": "call",
+      "name": "min@L214",
+      "label": "min() @ L214",
+      "line": 214
+    },
+    {
+      "id": "call:float@L222",
+      "kind": "call",
+      "name": "float@L222",
+      "label": "float() @ L222",
+      "line": 222
+    },
+    {
+      "id": "call:np.array@L223",
+      "kind": "call",
+      "name": "np.array@L223",
+      "label": "np.array() @ L223",
+      "line": 223
+    },
+    {
+      "id": "call:float@L230",
+      "kind": "call",
+      "name": "float@L230",
+      "label": "float() @ L230",
+      "line": 230
+    },
+    {
+      "id": "call:np.clip@L232",
+      "kind": "call",
+      "name": "np.clip@L232",
+      "label": "np.clip() @ L232",
+      "line": 232
+    },
+    {
+      "id": "call:float@L247",
+      "kind": "call",
+      "name": "float@L247",
+      "label": "float() @ L247",
+      "line": 247
+    },
+    {
+      "id": "call:float@L248",
+      "kind": "call",
+      "name": "float@L248",
+      "label": "float() @ L248",
+      "line": 248
+    },
+    {
+      "id": "call:list@L260",
+      "kind": "call",
+      "name": "list@L260",
+      "label": "list() @ L260",
+      "line": 260
+    },
+    {
+      "id": "call:ConstrainedAdaptiveEngine@L268",
+      "kind": "call",
+      "name": "ConstrainedAdaptiveEngine@L268",
+      "label": "ConstrainedAdaptiveEngine() @ L268",
+      "line": 268
+    },
+    {
+      "id": "call:start_adaptive@L269",
+      "kind": "call",
+      "name": "start_adaptive@L269",
+      "label": "start_adaptive() @ L269",
+      "line": 269
+    },
+    {
+      "id": "call:self.reset@L270",
+      "kind": "call",
+      "name": "self.reset@L270",
+      "label": "self.reset() @ L270",
+      "line": 270
+    },
+    {
+      "id": "call:get@L283",
+      "kind": "call",
+      "name": "get@L283",
+      "label": "get() @ L283",
+      "line": 283
+    },
+    {
+      "id": "call:int@L287",
+      "kind": "call",
+      "name": "int@L287",
+      "label": "int() @ L287",
+      "line": 287
+    },
+    {
+      "id": "call:np.zeros@L291",
+      "kind": "call",
+      "name": "np.zeros@L291",
+      "label": "np.zeros() @ L291",
+      "line": 291
+    },
+    {
+      "id": "call:np.array@L298",
+      "kind": "call",
+      "name": "np.array@L298",
+      "label": "np.array() @ L298",
+      "line": 298
+    },
+    {
+      "id": "call:reshape@L304",
+      "kind": "call",
+      "name": "reshape@L304",
+      "label": "reshape() @ L304",
+      "line": 304
+    },
+    {
+      "id": "call:np.nan_to_num@L335",
+      "kind": "call",
+      "name": "np.nan_to_num@L335",
+      "label": "np.nan_to_num() @ L335",
+      "line": 335
+    },
+    {
+      "id": "call:float@L336",
+      "kind": "call",
+      "name": "float@L336",
+      "label": "float() @ L336",
+      "line": 336
+    },
+    {
+      "id": "call:copy@L364",
+      "kind": "call",
+      "name": "copy@L364",
+      "label": "copy() @ L364",
+      "line": 364
+    },
+    {
+      "id": "call:copy@L365",
+      "kind": "call",
+      "name": "copy@L365",
+      "label": "copy() @ L365",
+      "line": 365
+    },
+    {
+      "id": "call:_depth_metrics@L368",
+      "kind": "call",
+      "name": "_depth_metrics@L368",
+      "label": "_depth_metrics() @ L368",
+      "line": 368
+    },
+    {
+      "id": "call:squeeze@L398",
+      "kind": "call",
+      "name": "squeeze@L398",
+      "label": "squeeze() @ L398",
+      "line": 398
+    },
+    {
+      "id": "call:np.nan_to_num@L402",
+      "kind": "call",
+      "name": "np.nan_to_num@L402",
+      "label": "np.nan_to_num() @ L402",
+      "line": 402
+    },
+    {
+      "id": "call:int@L409",
+      "kind": "call",
+      "name": "int@L409",
+      "label": "int() @ L409",
+      "line": 409
+    },
+    {
+      "id": "call:int@L410",
+      "kind": "call",
+      "name": "int@L410",
+      "label": "int() @ L410",
+      "line": 410
+    },
+    {
+      "id": "call:int@L411",
+      "kind": "call",
+      "name": "int@L411",
+      "label": "int() @ L411",
+      "line": 411
+    },
+    {
+      "id": "call:int@L412",
+      "kind": "call",
+      "name": "int@L412",
+      "label": "int() @ L412",
+      "line": 412
+    },
+    {
+      "id": "call:float@L418",
+      "kind": "call",
+      "name": "float@L418",
+      "label": "float() @ L418",
+      "line": 418
+    },
+    {
+      "id": "call:float@L419",
+      "kind": "call",
+      "name": "float@L419",
+      "label": "float() @ L419",
+      "line": 419
+    },
+    {
+      "id": "call:float@L420",
+      "kind": "call",
+      "name": "float@L420",
+      "label": "float() @ L420",
+      "line": 420
+    },
+    {
+      "id": "call:float@L427",
+      "kind": "call",
+      "name": "float@L427",
+      "label": "float() @ L427",
+      "line": 427
+    },
+    {
+      "id": "call:np.nonzero@L433",
+      "kind": "call",
+      "name": "np.nonzero@L433",
+      "label": "np.nonzero() @ L433",
+      "line": 433
+    },
+    {
+      "id": "call:float@L438",
+      "kind": "call",
+      "name": "float@L438",
+      "label": "float() @ L438",
+      "line": 438
+    },
+    {
+      "id": "call:float@L439",
+      "kind": "call",
+      "name": "float@L439",
+      "label": "float() @ L439",
+      "line": 439
+    },
+    {
+      "id": "call:float@L445",
+      "kind": "call",
+      "name": "float@L445",
+      "label": "float() @ L445",
+      "line": 445
+    },
+    {
+      "id": "call:float@L446",
+      "kind": "call",
+      "name": "float@L446",
+      "label": "float() @ L446",
+      "line": 446
+    },
+    {
+      "id": "call:np.deg2rad@L453",
+      "kind": "call",
+      "name": "np.deg2rad@L453",
+      "label": "np.deg2rad() @ L453",
+      "line": 453
+    },
+    {
+      "id": "call:float@L455",
+      "kind": "call",
+      "name": "float@L455",
+      "label": "float() @ L455",
+      "line": 455
+    },
+    {
+      "id": "call:math.atan2@L461",
+      "kind": "call",
+      "name": "math.atan2@L461",
+      "label": "math.atan2() @ L461",
+      "line": 461
+    },
+    {
+      "id": "call:float@L462",
+      "kind": "call",
+      "name": "float@L462",
+      "label": "float() @ L462",
+      "line": 462
+    },
+    {
+      "id": "call:observation.get@L484",
+      "kind": "call",
+      "name": "observation.get@L484",
+      "label": "observation.get() @ L484",
+      "line": 484
+    },
+    {
+      "id": "call:self._extract_state@L485",
+      "kind": "call",
+      "name": "self._extract_state@L485",
+      "label": "self._extract_state() @ L485",
+      "line": 485
+    },
+    {
+      "id": "call:self._estimate_target@L490",
+      "kind": "call",
+      "name": "self._estimate_target@L490",
+      "label": "self._estimate_target() @ L490",
+      "line": 490
+    },
+    {
+      "id": "call:float@L491",
+      "kind": "call",
+      "name": "float@L491",
+      "label": "float() @ L491",
+      "line": 491
+    },
+    {
+      "id": "call:min@L492",
+      "kind": "call",
+      "name": "min@L492",
+      "label": "min() @ L492",
+      "line": 492
+    },
+    {
+      "id": "call:float@L512",
+      "kind": "call",
+      "name": "float@L512",
+      "label": "float() @ L512",
+      "line": 512
+    },
+    {
+      "id": "call:self._infer_terrain@L589",
+      "kind": "call",
+      "name": "self._infer_terrain@L589",
+      "label": "self._infer_terrain() @ L589",
+      "line": 589
+    },
+    {
+      "id": "call:_profile@L591",
+      "kind": "call",
+      "name": "_profile@L591",
+      "label": "_profile() @ L591",
+      "line": 591
+    },
+    {
+      "id": "call:set_flight_params@L593",
+      "kind": "call",
+      "name": "set_flight_params@L593",
+      "label": "set_flight_params() @ L593",
+      "line": 593
+    },
+    {
+      "id": "call:set_target_pos@L594",
+      "kind": "call",
+      "name": "set_target_pos@L594",
+      "label": "set_target_pos() @ L594",
+      "line": 594
+    },
+    {
+      "id": "call:process_sensor_data@L595",
+      "kind": "call",
+      "name": "process_sensor_data@L595",
+      "label": "process_sensor_data() @ L595",
+      "line": 595
+    },
+    {
+      "id": "call:update@L608",
+      "kind": "call",
+      "name": "update@L608",
+      "label": "update() @ L608",
+      "line": 608
+    },
+    {
+      "id": "call:get_state@L610",
+      "kind": "call",
+      "name": "get_state@L610",
+      "label": "get_state() @ L610",
+      "line": 610
+    },
+    {
+      "id": "call:_action_from_velocity@L616",
+      "kind": "call",
+      "name": "_action_from_velocity@L616",
+      "label": "_action_from_velocity() @ L616",
+      "line": 616
+    },
+    {
+      "id": "call:float@L694",
+      "kind": "call",
+      "name": "float@L694",
+      "label": "float() @ L694",
+      "line": 694
+    },
+    {
+      "id": "call:float@L695",
+      "kind": "call",
+      "name": "float@L695",
+      "label": "float() @ L695",
+      "line": 695
+    },
+    {
+      "id": "call:float@L696",
+      "kind": "call",
+      "name": "float@L696",
+      "label": "float() @ L696",
+      "line": 696
+    },
+    {
+      "id": "call:astype@L778",
+      "kind": "call",
+      "name": "astype@L778",
+      "label": "astype() @ L778",
+      "line": 778
+    },
+    {
+      "id": "call:np.clip@L779",
+      "kind": "call",
+      "name": "np.clip@L779",
+      "label": "np.clip() @ L779",
+      "line": 779
+    },
+    {
+      "id": "call:np.clip@L780",
+      "kind": "call",
+      "name": "np.clip@L780",
+      "label": "np.clip() @ L780",
+      "line": 780
+    },
+    {
+      "id": "call:np.clip@L781",
+      "kind": "call",
+      "name": "np.clip@L781",
+      "label": "np.clip() @ L781",
+      "line": 781
+    },
+    {
+      "id": "call:self._trace_step@L782",
+      "kind": "call",
+      "name": "self._trace_step@L782",
+      "label": "self._trace_step() @ L782",
+      "line": 782
+    },
+    {
+      "id": "call:action.copy@L799",
+      "kind": "call",
+      "name": "action.copy@L799",
+      "label": "action.copy() @ L799",
+      "line": 799
+    },
+    {
+      "id": "call:norm@L138",
+      "kind": "call",
+      "name": "norm@L138",
+      "label": "norm() @ L138",
+      "line": 138
+    },
+    {
+      "id": "call:np.array@L203",
+      "kind": "call",
+      "name": "np.array@L203",
+      "label": "np.array() @ L203",
+      "line": 203
+    },
+    {
+      "id": "call:min@L205",
+      "kind": "call",
+      "name": "min@L205",
+      "label": "min() @ L205",
+      "line": 205
+    },
+    {
+      "id": "call:np.array@L207",
+      "kind": "call",
+      "name": "np.array@L207",
+      "label": "np.array() @ L207",
+      "line": 207
+    },
+    {
+      "id": "call:float@L214",
+      "kind": "call",
+      "name": "float@L214",
+      "label": "float() @ L214",
+      "line": 214
+    },
+    {
+      "id": "call:max@L214",
+      "kind": "call",
+      "name": "max@L214",
+      "label": "max() @ L214",
+      "line": 214
+    },
+    {
+      "id": "call:np.clip@L222",
+      "kind": "call",
+      "name": "np.clip@L222",
+      "label": "np.clip() @ L222",
+      "line": 222
+    },
+    {
+      "id": "call:norm@L230",
+      "kind": "call",
+      "name": "norm@L230",
+      "label": "norm() @ L230",
+      "line": 230
+    },
+    {
+      "id": "call:float@L246",
+      "kind": "call",
+      "name": "float@L246",
+      "label": "float() @ L246",
+      "line": 246
+    },
+    {
+      "id": "call:np.asarray@L260",
+      "kind": "call",
+      "name": "np.asarray@L260",
+      "label": "np.asarray() @ L260",
+      "line": 260
+    },
+    {
+      "id": "call:hasattr@L273",
+      "kind": "call",
+      "name": "hasattr@L273",
+      "label": "hasattr() @ L273",
+      "line": 273
+    },
+    {
+      "id": "call:get@L287",
+      "kind": "call",
+      "name": "get@L287",
+      "label": "get() @ L287",
+      "line": 287
+    },
+    {
+      "id": "call:np.zeros@L305",
+      "kind": "call",
+      "name": "np.zeros@L305",
+      "label": "np.zeros() @ L305",
+      "line": 305
+    },
+    {
+      "id": "call:np.zeros@L315",
+      "kind": "call",
+      "name": "np.zeros@L315",
+      "label": "np.zeros() @ L315",
+      "line": 315
+    },
+    {
+      "id": "call:float@L324",
+      "kind": "call",
+      "name": "float@L324",
+      "label": "float() @ L324",
+      "line": 324
+    },
+    {
+      "id": "call:float@L329",
+      "kind": "call",
+      "name": "float@L329",
+      "label": "float() @ L329",
+      "line": 329
+    },
+    {
+      "id": "call:astype@L330",
+      "kind": "call",
+      "name": "astype@L330",
+      "label": "astype() @ L330",
+      "line": 330
+    },
+    {
+      "id": "call:np.zeros@L330",
+      "kind": "call",
+      "name": "np.zeros@L330",
+      "label": "np.zeros() @ L330",
+      "line": 330
+    },
+    {
+      "id": "call:current_pos.astype@L332",
+      "kind": "call",
+      "name": "current_pos.astype@L332",
+      "label": "current_pos.astype() @ L332",
+      "line": 332
+    },
+    {
+      "id": "call:current_rpy.astype@L332",
+      "kind": "call",
+      "name": "current_rpy.astype@L332",
+      "label": "current_rpy.astype() @ L332",
+      "line": 332
+    },
+    {
+      "id": "call:current_vel.astype@L332",
+      "kind": "call",
+      "name": "current_vel.astype@L332",
+      "label": "current_vel.astype() @ L332",
+      "line": 332
+    },
+    {
+      "id": "call:search_vec.astype@L335",
+      "kind": "call",
+      "name": "search_vec.astype@L335",
+      "label": "search_vec.astype() @ L335",
+      "line": 335
+    },
+    {
+      "id": "call:norm@L336",
+      "kind": "call",
+      "name": "norm@L336",
+      "label": "norm() @ L336",
+      "line": 336
+    },
+    {
+      "id": "call:abs@L348",
+      "kind": "call",
+      "name": "abs@L348",
+      "label": "abs() @ L348",
+      "line": 348
+    },
+    {
+      "id": "call:max@L351",
+      "kind": "call",
+      "name": "max@L351",
+      "label": "max() @ L351",
+      "line": 351
+    },
+    {
+      "id": "call:raw_target.astype@L354",
+      "kind": "call",
+      "name": "raw_target.astype@L354",
+      "label": "raw_target.astype() @ L354",
+      "line": 354
+    },
+    {
+      "id": "call:np.clip@L361",
+      "kind": "call",
+      "name": "np.clip@L361",
+      "label": "np.clip() @ L361",
+      "line": 361
+    },
+    {
+      "id": "call:np.zeros@L363",
+      "kind": "call",
+      "name": "np.zeros@L363",
+      "label": "np.zeros() @ L363",
+      "line": 363
+    },
+    {
+      "id": "call:float@L371",
+      "kind": "call",
+      "name": "float@L371",
+      "label": "float() @ L371",
+      "line": 371
+    },
+    {
+      "id": "call:np.clip@L406",
+      "kind": "call",
+      "name": "np.clip@L406",
+      "label": "np.clip() @ L406",
+      "line": 406
+    },
+    {
+      "id": "call:np.median@L418",
+      "kind": "call",
+      "name": "np.median@L418",
+      "label": "np.median() @ L418",
+      "line": 418
+    },
+    {
+      "id": "call:np.quantile@L419",
+      "kind": "call",
+      "name": "np.quantile@L419",
+      "label": "np.quantile() @ L419",
+      "line": 419
+    },
+    {
+      "id": "call:np.quantile@L420",
+      "kind": "call",
+      "name": "np.quantile@L420",
+      "label": "np.quantile() @ L420",
+      "line": 420
+    },
+    {
+      "id": "call:max@L426",
+      "kind": "call",
+      "name": "max@L426",
+      "label": "max() @ L426",
+      "line": 426
+    },
+    {
+      "id": "call:mask.mean@L427",
+      "kind": "call",
+      "name": "mask.mean@L427",
+      "label": "mask.mean() @ L427",
+      "line": 427
+    },
+    {
+      "id": "call:np.clip@L455",
+      "kind": "call",
+      "name": "np.clip@L455",
+      "label": "np.clip() @ L455",
+      "line": 455
+    },
+    {
+      "id": "call:float@L459",
+      "kind": "call",
+      "name": "float@L459",
+      "label": "float() @ L459",
+      "line": 459
+    },
+    {
+      "id": "call:float@L461",
+      "kind": "call",
+      "name": "float@L461",
+      "label": "float() @ L461",
+      "line": 461
+    },
+    {
+      "id": "call:np.clip@L462",
+      "kind": "call",
+      "name": "np.clip@L462",
+      "label": "np.clip() @ L462",
+      "line": 462
+    },
+    {
+      "id": "call:json.dumps@L468",
+      "kind": "call",
+      "name": "json.dumps@L468",
+      "label": "json.dumps() @ L468",
+      "line": 468
+    },
+    {
+      "id": "call:write@L478",
+      "kind": "call",
+      "name": "write@L478",
+      "label": "write() @ L478",
+      "line": 478
+    },
+    {
+      "id": "call:flush@L479",
+      "kind": "call",
+      "name": "flush@L479",
+      "label": "flush() @ L479",
+      "line": 479
+    },
+    {
+      "id": "call:float@L488",
+      "kind": "call",
+      "name": "float@L488",
+      "label": "float() @ L488",
+      "line": 488
+    },
+    {
+      "id": "call:norm@L491",
+      "kind": "call",
+      "name": "norm@L491",
+      "label": "norm() @ L491",
+      "line": 491
+    },
+    {
+      "id": "call:float@L496",
+      "kind": "call",
+      "name": "float@L496",
+      "label": "float() @ L496",
+      "line": 496
+    },
+    {
+      "id": "call:np.asarray@L511",
+      "kind": "call",
+      "name": "np.asarray@L511",
+      "label": "np.asarray() @ L511",
+      "line": 511
+    },
+    {
+      "id": "call:norm@L512",
+      "kind": "call",
+      "name": "norm@L512",
+      "label": "norm() @ L512",
+      "line": 512
+    },
+    {
+      "id": "call:copy@L612",
+      "kind": "call",
+      "name": "copy@L612",
+      "label": "copy() @ L612",
+      "line": 612
+    },
+    {
+      "id": "call:self._yaw_command@L615",
+      "kind": "call",
+      "name": "self._yaw_command@L615",
+      "label": "self._yaw_command() @ L615",
+      "line": 615
+    },
+    {
+      "id": "call:float@L615",
+      "kind": "call",
+      "name": "float@L615",
+      "label": "float() @ L615",
+      "line": 615
+    },
+    {
+      "id": "call:min@L628",
+      "kind": "call",
+      "name": "min@L628",
+      "label": "min() @ L628",
+      "line": 628
+    },
+    {
+      "id": "call:float@L647",
+      "kind": "call",
+      "name": "float@L647",
+      "label": "float() @ L647",
+      "line": 647
+    },
+    {
+      "id": "call:float@L650",
+      "kind": "call",
+      "name": "float@L650",
+      "label": "float() @ L650",
+      "line": 650
+    },
+    {
+      "id": "call:_action_from_velocity@L656",
+      "kind": "call",
+      "name": "_action_from_velocity@L656",
+      "label": "_action_from_velocity() @ L656",
+      "line": 656
+    },
+    {
+      "id": "call:action.astype@L663",
+      "kind": "call",
+      "name": "action.astype@L663",
+      "label": "action.astype() @ L663",
+      "line": 663
+    },
+    {
+      "id": "call:copy@L665",
+      "kind": "call",
+      "name": "copy@L665",
+      "label": "copy() @ L665",
+      "line": 665
+    },
+    {
+      "id": "call:_direct_action@L714",
+      "kind": "call",
+      "name": "_direct_action@L714",
+      "label": "_direct_action() @ L714",
+      "line": 714
+    },
+    {
+      "id": "call:np.array@L766",
+      "kind": "call",
+      "name": "np.array@L766",
+      "label": "np.array() @ L766",
+      "line": 766
+    },
+    {
+      "id": "call:np.array@L773",
+      "kind": "call",
+      "name": "np.array@L773",
+      "label": "np.array() @ L773",
+      "line": 773
+    },
+    {
+      "id": "call:_unit@L774",
+      "kind": "call",
+      "name": "_unit@L774",
+      "label": "_unit() @ L774",
+      "line": 774
+    },
+    {
+      "id": "call:max@L775",
+      "kind": "call",
+      "name": "max@L775",
+      "label": "max() @ L775",
+      "line": 775
+    },
+    {
+      "id": "call:max@L205",
+      "kind": "call",
+      "name": "max@L205",
+      "label": "max() @ L205",
+      "line": 205
+    },
+    {
+      "id": "call:reset@L275",
+      "kind": "call",
+      "name": "reset@L275",
+      "label": "reset() @ L275",
+      "line": 275
+    },
+    {
+      "id": "call:start_adaptive@L276",
+      "kind": "call",
+      "name": "start_adaptive@L276",
+      "label": "start_adaptive() @ L276",
+      "line": 276
+    },
+    {
+      "id": "call:np.asarray@L304",
+      "kind": "call",
+      "name": "np.asarray@L304",
+      "label": "np.asarray() @ L304",
+      "line": 304
+    },
+    {
+      "id": "call:np.zeros@L322",
+      "kind": "call",
+      "name": "np.zeros@L322",
+      "label": "np.zeros() @ L322",
+      "line": 322
+    },
+    {
+      "id": "call:copy@L342",
+      "kind": "call",
+      "name": "copy@L342",
+      "label": "copy() @ L342",
+      "line": 342
+    },
+    {
+      "id": "call:np.asarray@L398",
+      "kind": "call",
+      "name": "np.asarray@L398",
+      "label": "np.asarray() @ L398",
+      "line": 398
+    },
+    {
+      "id": "call:xs.mean@L445",
+      "kind": "call",
+      "name": "xs.mean@L445",
+      "label": "xs.mean() @ L445",
+      "line": 445
+    },
+    {
+      "id": "call:ys.mean@L446",
+      "kind": "call",
+      "name": "ys.mean@L446",
+      "label": "ys.mean() @ L446",
+      "line": 446
+    },
+    {
+      "id": "call:max@L454",
+      "kind": "call",
+      "name": "max@L454",
+      "label": "max() @ L454",
+      "line": 454
+    },
+    {
+      "id": "call:norm@L459",
+      "kind": "call",
+      "name": "norm@L459",
+      "label": "norm() @ L459",
+      "line": 459
+    },
+    {
+      "id": "call:np.array@L522",
+      "kind": "call",
+      "name": "np.array@L522",
+      "label": "np.array() @ L522",
+      "line": 522
+    },
+    {
+      "id": "call:np.array@L532",
+      "kind": "call",
+      "name": "np.array@L532",
+      "label": "np.array() @ L532",
+      "line": 532
+    },
+    {
+      "id": "call:np.array@L542",
+      "kind": "call",
+      "name": "np.array@L542",
+      "label": "np.array() @ L542",
+      "line": 542
+    },
+    {
+      "id": "call:np.array@L555",
+      "kind": "call",
+      "name": "np.array@L555",
+      "label": "np.array() @ L555",
+      "line": 555
+    },
+    {
+      "id": "call:np.array@L568",
+      "kind": "call",
+      "name": "np.array@L568",
+      "label": "np.array() @ L568",
+      "line": 568
+    },
+    {
+      "id": "call:_landing_params@L593",
+      "kind": "call",
+      "name": "_landing_params@L593",
+      "label": "_landing_params() @ L593",
+      "line": 593
+    },
+    {
+      "id": "call:abs@L615",
+      "kind": "call",
+      "name": "abs@L615",
+      "label": "abs() @ L615",
+      "line": 615
+    },
+    {
+      "id": "call:np.clip@L615",
+      "kind": "call",
+      "name": "np.clip@L615",
+      "label": "np.clip() @ L615",
+      "line": 615
+    },
+    {
+      "id": "call:bool@L626",
+      "kind": "call",
+      "name": "bool@L626",
+      "label": "bool() @ L626",
+      "line": 626
+    },
+    {
+      "id": "call:float@L628",
+      "kind": "call",
+      "name": "float@L628",
+      "label": "float() @ L628",
+      "line": 628
+    },
+    {
+      "id": "call:float@L645",
+      "kind": "call",
+      "name": "float@L645",
+      "label": "float() @ L645",
+      "line": 645
+    },
+    {
+      "id": "call:float@L646",
+      "kind": "call",
+      "name": "float@L646",
+      "label": "float() @ L646",
+      "line": 646
+    },
+    {
+      "id": "call:np.clip@L647",
+      "kind": "call",
+      "name": "np.clip@L647",
+      "label": "np.clip() @ L647",
+      "line": 647
+    },
+    {
+      "id": "call:norm@L650",
+      "kind": "call",
+      "name": "norm@L650",
+      "label": "norm() @ L650",
+      "line": 650
+    },
+    {
+      "id": "call:np.zeros@L654",
+      "kind": "call",
+      "name": "np.zeros@L654",
+      "label": "np.zeros() @ L654",
+      "line": 654
+    },
+    {
+      "id": "call:float@L657",
+      "kind": "call",
+      "name": "float@L657",
+      "label": "float() @ L657",
+      "line": 657
+    },
+    {
+      "id": "call:float@L658",
+      "kind": "call",
+      "name": "float@L658",
+      "label": "float() @ L658",
+      "line": 658
+    },
+    {
+      "id": "call:float@L660",
+      "kind": "call",
+      "name": "float@L660",
+      "label": "float() @ L660",
+      "line": 660
+    },
+    {
+      "id": "call:float@L669",
+      "kind": "call",
+      "name": "float@L669",
+      "label": "float() @ L669",
+      "line": 669
+    },
+    {
+      "id": "call:bool@L671",
+      "kind": "call",
+      "name": "bool@L671",
+      "label": "bool() @ L671",
+      "line": 671
+    },
+    {
+      "id": "call:float@L683",
+      "kind": "call",
+      "name": "float@L683",
+      "label": "float() @ L683",
+      "line": 683
+    },
+    {
+      "id": "call:bool@L691",
+      "kind": "call",
+      "name": "bool@L691",
+      "label": "bool() @ L691",
+      "line": 691
+    },
+    {
+      "id": "call:bool@L710",
+      "kind": "call",
+      "name": "bool@L710",
+      "label": "bool() @ L710",
+      "line": 710
+    },
+    {
+      "id": "call:bool@L711",
+      "kind": "call",
+      "name": "bool@L711",
+      "label": "bool() @ L711",
+      "line": 711
+    },
+    {
+      "id": "call:int@L713",
+      "kind": "call",
+      "name": "int@L713",
+      "label": "int() @ L713",
+      "line": 713
+    },
+    {
+      "id": "call:_direct_action@L742",
+      "kind": "call",
+      "name": "_direct_action@L742",
+      "label": "_direct_action() @ L742",
+      "line": 742
+    },
+    {
+      "id": "call:bool@L762",
+      "kind": "call",
+      "name": "bool@L762",
+      "label": "bool() @ L762",
+      "line": 762
+    },
+    {
+      "id": "call:float@L764",
+      "kind": "call",
+      "name": "float@L764",
+      "label": "float() @ L764",
+      "line": 764
+    },
+    {
+      "id": "call:float@L775",
+      "kind": "call",
+      "name": "float@L775",
+      "label": "float() @ L775",
+      "line": 775
+    },
+    {
+      "id": "call:np.nan_to_num@L778",
+      "kind": "call",
+      "name": "np.nan_to_num@L778",
+      "label": "np.nan_to_num() @ L778",
+      "line": 778
+    },
+    {
+      "id": "call:int@L783",
+      "kind": "call",
+      "name": "int@L783",
+      "label": "int() @ L783",
+      "line": 783
+    },
+    {
+      "id": "call:int@L784",
+      "kind": "call",
+      "name": "int@L784",
+      "label": "int() @ L784",
+      "line": 784
+    },
+    {
+      "id": "call:tolist@L785",
+      "kind": "call",
+      "name": "tolist@L785",
+      "label": "tolist() @ L785",
+      "line": 785
+    },
+    {
+      "id": "call:tolist@L786",
+      "kind": "call",
+      "name": "tolist@L786",
+      "label": "tolist() @ L786",
+      "line": 786
+    },
+    {
+      "id": "call:tolist@L787",
+      "kind": "call",
+      "name": "tolist@L787",
+      "label": "tolist() @ L787",
+      "line": 787
+    },
+    {
+      "id": "call:tolist@L788",
+      "kind": "call",
+      "name": "tolist@L788",
+      "label": "tolist() @ L788",
+      "line": 788
+    },
+    {
+      "id": "call:round@L790",
+      "kind": "call",
+      "name": "round@L790",
+      "label": "round() @ L790",
+      "line": 790
+    },
+    {
+      "id": "call:round@L791",
+      "kind": "call",
+      "name": "round@L791",
+      "label": "round() @ L791",
+      "line": 791
+    },
+    {
+      "id": "call:round@L793",
+      "kind": "call",
+      "name": "round@L793",
+      "label": "round() @ L793",
+      "line": 793
+    },
+    {
+      "id": "call:tolist@L794",
+      "kind": "call",
+      "name": "tolist@L794",
+      "label": "tolist() @ L794",
+      "line": 794
+    },
+    {
+      "id": "call:bool@L795",
+      "kind": "call",
+      "name": "bool@L795",
+      "label": "bool() @ L795",
+      "line": 795
+    },
+    {
+      "id": "call:bool@L796",
+      "kind": "call",
+      "name": "bool@L796",
+      "label": "bool() @ L796",
+      "line": 796
+    },
+    {
+      "id": "call:round@L797",
+      "kind": "call",
+      "name": "round@L797",
+      "label": "round() @ L797",
+      "line": 797
+    },
+    {
+      "id": "call:close@L278",
+      "kind": "call",
+      "name": "close@L278",
+      "label": "close() @ L278",
+      "line": 278
+    },
+    {
+      "id": "call:ConstrainedAdaptiveEngine@L279",
+      "kind": "call",
+      "name": "ConstrainedAdaptiveEngine@L279",
+      "label": "ConstrainedAdaptiveEngine() @ L279",
+      "line": 279
+    },
+    {
+      "id": "call:start_adaptive@L280",
+      "kind": "call",
+      "name": "start_adaptive@L280",
+      "label": "start_adaptive() @ L280",
+      "line": 280
+    },
+    {
+      "id": "call:os.getpid@L285",
+      "kind": "call",
+      "name": "os.getpid@L285",
+      "label": "os.getpid() @ L285",
+      "line": 285
+    },
+    {
+      "id": "call:np.clip@L329",
+      "kind": "call",
+      "name": "np.clip@L329",
+      "label": "np.clip() @ L329",
+      "line": 329
+    },
+    {
+      "id": "call:np.array@L344",
+      "kind": "call",
+      "name": "np.array@L344",
+      "label": "np.array() @ L344",
+      "line": 344
+    },
+    {
+      "id": "call:norm@L357",
+      "kind": "call",
+      "name": "norm@L357",
+      "label": "norm() @ L357",
+      "line": 357
+    },
+    {
+      "id": "call:xs.max@L438",
+      "kind": "call",
+      "name": "xs.max@L438",
+      "label": "xs.max() @ L438",
+      "line": 438
+    },
+    {
+      "id": "call:xs.min@L438",
+      "kind": "call",
+      "name": "xs.min@L438",
+      "label": "xs.min() @ L438",
+      "line": 438
+    },
+    {
+      "id": "call:ys.max@L439",
+      "kind": "call",
+      "name": "ys.max@L439",
+      "label": "ys.max() @ L439",
+      "line": 439
+    },
+    {
+      "id": "call:ys.min@L439",
+      "kind": "call",
+      "name": "ys.min@L439",
+      "label": "ys.min() @ L439",
+      "line": 439
+    },
+    {
+      "id": "call:dirname@L471",
+      "kind": "call",
+      "name": "dirname@L471",
+      "label": "dirname() @ L471",
+      "line": 471
+    },
+    {
+      "id": "call:np.zeros@L584",
+      "kind": "call",
+      "name": "np.zeros@L584",
+      "label": "np.zeros() @ L584",
+      "line": 584
+    },
+    {
+      "id": "call:float@L585",
+      "kind": "call",
+      "name": "float@L585",
+      "label": "float() @ L585",
+      "line": 585
+    },
+    {
+      "id": "call:str@L586",
+      "kind": "call",
+      "name": "str@L586",
+      "label": "str() @ L586",
+      "line": 586
+    },
+    {
+      "id": "call:min@L652",
+      "kind": "call",
+      "name": "min@L652",
+      "label": "min() @ L652",
+      "line": 652
+    },
+    {
+      "id": "call:norm@L660",
+      "kind": "call",
+      "name": "norm@L660",
+      "label": "norm() @ L660",
+      "line": 660
+    },
+    {
+      "id": "call:profile.get@L669",
+      "kind": "call",
+      "name": "profile.get@L669",
+      "label": "profile.get() @ L669",
+      "line": 669
+    },
+    {
+      "id": "call:float@L676",
+      "kind": "call",
+      "name": "float@L676",
+      "label": "float() @ L676",
+      "line": 676
+    },
+    {
+      "id": "call:profile.get@L683",
+      "kind": "call",
+      "name": "profile.get@L683",
+      "label": "profile.get() @ L683",
+      "line": 683
+    },
+    {
+      "id": "call:float@L689",
+      "kind": "call",
+      "name": "float@L689",
+      "label": "float() @ L689",
+      "line": 689
+    },
+    {
+      "id": "call:abs@L700",
+      "kind": "call",
+      "name": "abs@L700",
+      "label": "abs() @ L700",
+      "line": 700
+    },
+    {
+      "id": "call:bool@L728",
+      "kind": "call",
+      "name": "bool@L728",
+      "label": "bool() @ L728",
+      "line": 728
+    },
+    {
+      "id": "call:float@L771",
+      "kind": "call",
+      "name": "float@L771",
+      "label": "float() @ L771",
+      "line": 771
+    },
+    {
+      "id": "call:float@L790",
+      "kind": "call",
+      "name": "float@L790",
+      "label": "float() @ L790",
+      "line": 790
+    },
+    {
+      "id": "call:float@L791",
+      "kind": "call",
+      "name": "float@L791",
+      "label": "float() @ L791",
+      "line": 791
+    },
+    {
+      "id": "call:round@L792",
+      "kind": "call",
+      "name": "round@L792",
+      "label": "round() @ L792",
+      "line": 792
+    },
+    {
+      "id": "call:float@L793",
+      "kind": "call",
+      "name": "float@L793",
+      "label": "float() @ L793",
+      "line": 793
+    },
+    {
+      "id": "call:float@L797",
+      "kind": "call",
+      "name": "float@L797",
+      "label": "float() @ L797",
+      "line": 797
+    },
+    {
+      "id": "call:os.makedirs@L473",
+      "kind": "call",
+      "name": "os.makedirs@L473",
+      "label": "os.makedirs() @ L473",
+      "line": 473
+    },
+    {
+      "id": "call:open@L474",
+      "kind": "call",
+      "name": "open@L474",
+      "label": "open() @ L474",
+      "line": 474
+    },
+    {
+      "id": "call:f.write@L475",
+      "kind": "call",
+      "name": "f.write@L475",
+      "label": "f.write() @ L475",
+      "line": 475
+    },
+    {
+      "id": "call:float@L577",
+      "kind": "call",
+      "name": "float@L577",
+      "label": "float() @ L577",
+      "line": 577
+    },
+    {
+      "id": "call:float@L578",
+      "kind": "call",
+      "name": "float@L578",
+      "label": "float() @ L578",
+      "line": 578
+    },
+    {
+      "id": "call:int@L579",
+      "kind": "call",
+      "name": "int@L579",
+      "label": "int() @ L579",
+      "line": 579
+    },
+    {
+      "id": "call:max@L583",
+      "kind": "call",
+      "name": "max@L583",
+      "label": "max() @ L583",
+      "line": 583
+    },
+    {
+      "id": "call:norm@L585",
+      "kind": "call",
+      "name": "norm@L585",
+      "label": "norm() @ L585",
+      "line": 585
+    },
+    {
+      "id": "call:profile.get@L689",
+      "kind": "call",
+      "name": "profile.get@L689",
+      "label": "profile.get() @ L689",
+      "line": 689
+    },
+    {
+      "id": "call:float@L700",
+      "kind": "call",
+      "name": "float@L700",
+      "label": "float() @ L700",
+      "line": 700
+    },
+    {
+      "id": "call:float@L724",
+      "kind": "call",
+      "name": "float@L724",
+      "label": "float() @ L724",
+      "line": 724
+    },
+    {
+      "id": "call:max@L732",
+      "kind": "call",
+      "name": "max@L732",
+      "label": "max() @ L732",
+      "line": 732
+    },
+    {
+      "id": "call:norm@L771",
+      "kind": "call",
+      "name": "norm@L771",
+      "label": "norm() @ L771",
+      "line": 771
+    },
+    {
+      "id": "call:round@L785",
+      "kind": "call",
+      "name": "round@L785",
+      "label": "round() @ L785",
+      "line": 785
+    },
+    {
+      "id": "call:round@L786",
+      "kind": "call",
+      "name": "round@L786",
+      "label": "round() @ L786",
+      "line": 786
+    },
+    {
+      "id": "call:round@L787",
+      "kind": "call",
+      "name": "round@L787",
+      "label": "round() @ L787",
+      "line": 787
+    },
+    {
+      "id": "call:round@L788",
+      "kind": "call",
+      "name": "round@L788",
+      "label": "round() @ L788",
+      "line": 788
+    },
+    {
+      "id": "call:float@L792",
+      "kind": "call",
+      "name": "float@L792",
+      "label": "float() @ L792",
+      "line": 792
+    },
+    {
+      "id": "call:round@L794",
+      "kind": "call",
+      "name": "round@L794",
+      "label": "round() @ L794",
+      "line": 794
+    },
+    {
+      "id": "call:float@L583",
+      "kind": "call",
+      "name": "float@L583",
+      "label": "float() @ L583",
+      "line": 583
+    },
+    {
+      "id": "call:profile.get@L724",
+      "kind": "call",
+      "name": "profile.get@L724",
+      "label": "profile.get() @ L724",
+      "line": 724
+    },
+    {
+      "id": "call:np.sin@L765",
+      "kind": "call",
+      "name": "np.sin@L765",
+      "label": "np.sin() @ L765",
+      "line": 765
+    },
+    {
+      "id": "call:np.cos@L767",
+      "kind": "call",
+      "name": "np.cos@L767",
+      "label": "np.cos() @ L767",
+      "line": 767
+    },
+    {
+      "id": "call:np.sin@L768",
+      "kind": "call",
+      "name": "np.sin@L768",
+      "label": "np.sin() @ L768",
+      "line": 768
+    },
+    {
+      "id": "call:np.asarray@L785",
+      "kind": "call",
+      "name": "np.asarray@L785",
+      "label": "np.asarray() @ L785",
+      "line": 785
+    },
+    {
+      "id": "call:np.asarray@L786",
+      "kind": "call",
+      "name": "np.asarray@L786",
+      "label": "np.asarray() @ L786",
+      "line": 786
+    },
+    {
+      "id": "call:np.asarray@L787",
+      "kind": "call",
+      "name": "np.asarray@L787",
+      "label": "np.asarray() @ L787",
+      "line": 787
+    },
+    {
+      "id": "call:np.asarray@L788",
+      "kind": "call",
+      "name": "np.asarray@L788",
+      "label": "np.asarray() @ L788",
+      "line": 788
+    },
+    {
+      "id": "call:np.asarray@L794",
+      "kind": "call",
+      "name": "np.asarray@L794",
+      "label": "np.asarray() @ L794",
+      "line": 794
+    },
+    {
+      "id": "call:float@L765",
+      "kind": "call",
+      "name": "float@L765",
+      "label": "float() @ L765",
+      "line": 765
+    },
+    {
+      "id": "scope:module",
+      "kind": "scope",
+      "name": "module",
+      "label": "module"
+    },
+    {
+      "id": "if:if@L147",
+      "kind": "if",
+      "name": "if@L147",
+      "label": "if L147: depth is None",
+      "line": 147,
+      "predicate": "depth is None"
+    },
+    {
+      "id": "if:if@L150",
+      "kind": "if",
+      "name": "if@L150",
+      "label": "if L150: d.size == 0",
+      "line": 150,
+      "predicate": "d.size == 0"
+    },
+    {
+      "id": "assign:profile@L180",
+      "kind": "assign",
+      "name": "profile@L180",
+      "label": "profile = ... @ L180",
+      "line": 180,
+      "text": "profile = _profile(terrain_id)"
+    },
+    {
+      "id": "if:if@L185",
+      "kind": "if",
+      "name": "if@L185",
+      "label": "if L185: descent",
+      "line": 185,
+      "predicate": "descent"
+    },
+    {
+      "id": "if:if@L190",
+      "kind": "if",
+      "name": "if@L190",
+      "label": "if L190: xy_dist < final_center_gate",
+      "line": 190,
+      "predicate": "xy_dist < final_center_gate"
+    },
+    {
+      "id": "if:if@L191",
+      "kind": "if",
+      "name": "if@L191",
+      "label": "if L191: settle_ticks >= settle_required",
+      "line": 191,
+      "predicate": "settle_ticks >= settle_required"
+    },
+    {
+      "id": "if:if@L192",
+      "kind": "if",
+      "name": "if@L192",
+      "label": "if L192: terrain_id == 5",
+      "line": 192,
+      "predicate": "terrain_id == 5"
+    },
+    {
+      "id": "if:if@L193",
+      "kind": "if",
+      "name": "if@L193",
+      "label": "if L193: h_rem > 0.22",
+      "line": 193,
+      "predicate": "h_rem > 0.22"
+    },
+    {
+      "id": "var:vz",
+      "kind": "var",
+      "name": "vz",
+      "label": "vz"
+    },
+    {
+      "id": "assign:vz@L194",
+      "kind": "assign",
+      "name": "vz@L194",
+      "label": "vz = ... @ L194",
+      "line": 194,
+      "text": "vz = press_vz"
+    },
+    {
+      "id": "if:if@L195",
+      "kind": "if",
+      "name": "if@L195",
+      "label": "if L195: h_rem > 0.08",
+      "line": 195,
+      "predicate": "h_rem > 0.08"
+    },
+    {
+      "id": "assign:vz@L196",
+      "kind": "assign",
+      "name": "vz@L196",
+      "label": "vz = ... @ L196",
+      "line": 196,
+      "text": "vz = -0.08"
+    },
+    {
+      "id": "assign:vz@L198",
+      "kind": "assign",
+      "name": "vz@L198",
+      "label": "vz = ... @ L198",
+      "line": 198,
+      "text": "vz = -0.05"
+    },
+    {
+      "id": "assign:vz@L200",
+      "kind": "assign",
+      "name": "vz@L200",
+      "label": "vz = ... @ L200",
+      "line": 200,
+      "text": "vz = press_vz if h_rem > 0.12 else (press_vz * 0.60)"
+    },
+    {
+      "id": "assign:vz@L202",
+      "kind": "assign",
+      "name": "vz@L202",
+      "label": "vz = ... @ L202",
+      "line": 202,
+      "text": "vz = -0.003 if terrain_id == 5 else -0.01"
+    },
+    {
+      "id": "assign:vz@L206",
+      "kind": "assign",
+      "name": "vz@L206",
+      "label": "vz = ... @ L206",
+      "line": 206,
+      "text": "vz = -0.005 if terrain_id == 5 else (-0.10 if h_rem > 0.38 else -0.04)"
+    },
+    {
+      "id": "assign:vz@L222",
+      "kind": "assign",
+      "name": "vz@L222",
+      "label": "vz = ... @ L222",
+      "line": 222,
+      "text": "vz = float(np.clip((desired_z - current_pos[2]) * descent_gain, max_desc, 0.55))"
+    },
+    {
+      "id": "assign:profile@L237",
+      "kind": "assign",
+      "name": "profile@L237",
+      "label": "profile = ... @ L237",
+      "line": 237,
+      "text": "profile = _profile(terrain_id)"
+    },
+    {
+      "id": "if:if@L240",
+      "kind": "if",
+      "name": "if@L240",
+      "label": "if L240: landing_committed",
+      "line": 240,
+      "predicate": "landing_committed"
+    },
+    {
+      "id": "if:if@L273",
+      "kind": "if",
+      "name": "if@L273",
+      "label": "if L273: hasattr(self, \"engine\") and self.engine is not None",
+      "line": 273,
+      "predicate": "hasattr(self, \"engine\") and self.engine is not None"
+    },
+    {
+      "id": "assign:current_pos@L305",
+      "kind": "assign",
+      "name": "current_pos@L305",
+      "label": "current_pos = ... @ L305",
+      "line": 305,
+      "text": "current_pos = state[0:3] if state.size >= 3 else np.zeros(3, dtype=np.float64)"
+    },
+    {
+      "id": "assign:current_vel@L315",
+      "kind": "assign",
+      "name": "current_vel@L315",
+      "label": "current_vel = ... @ L315",
+      "line": 315,
+      "text": "current_vel = state[3:6] if state.size >= 6 else np.zeros(3, dtype=np.float64)"
+    },
+    {
+      "id": "if:if@L317",
+      "kind": "if",
+      "name": "if@L317",
+      "label": "if L317: state.size >= 11",
+      "line": 317,
+      "predicate": "state.size >= 11"
+    },
+    {
+      "id": "if:if@L319",
+      "kind": "if",
+      "name": "if@L319",
+      "label": "if L319: state.size >= 9",
+      "line": 319,
+      "predicate": "state.size >= 9"
+    },
+    {
+      "id": "assign:agl@L329",
+      "kind": "assign",
+      "name": "agl@L329",
+      "label": "agl = ... @ L329",
+      "line": 329,
+      "text": "agl = float(np.clip(state[-4], 0.0, 1.5) * DEPTH_MAX_RANGE) if state.size >= 4 else float(current_pos[2])"
+    },
+    {
+      "id": "assign:search_vec@L330",
+      "kind": "assign",
+      "name": "search_vec@L330",
+      "label": "search_vec = ... @ L330",
+      "line": 330,
+      "text": "search_vec = state[-3:].astype(np.float64) if state.size >= 3 else np.zeros(3, dtype=np.float64)"
+    },
+    {
+      "id": "assign:search_vec@L335",
+      "kind": "assign",
+      "name": "search_vec@L335",
+      "label": "search_vec = ... @ L335",
+      "line": 335,
+      "text": "search_vec = np.nan_to_num(search_vec.astype(np.float64), nan=0.0, posinf=0.0, neginf=0.0)"
+    },
+    {
+      "id": "if:if@L338",
+      "kind": "if",
+      "name": "if@L338",
+      "label": "if L338: search_norm > 0.05",
+      "line": 338,
+      "predicate": "search_norm > 0.05"
+    },
+    {
+      "id": "if:if@L341",
+      "kind": "if",
+      "name": "if@L341",
+      "label": "if L341: self.target_est is not None",
+      "line": 341,
+      "predicate": "self.target_est is not None"
+    },
+    {
+      "id": "if:if@L348",
+      "kind": "if",
+      "name": "if@L348",
+      "label": "if L348: abs(search_vec[2]) < 0.25",
+      "line": 348,
+      "predicate": "abs(search_vec[2]) < 0.25"
+    },
+    {
+      "id": "if:if@L353",
+      "kind": "if",
+      "name": "if@L353",
+      "label": "if L353: self.target_est is None",
+      "line": 353,
+      "predicate": "self.target_est is None"
+    },
+    {
+      "id": "if:if@L360",
+      "kind": "if",
+      "name": "if@L360",
+      "label": "if L360: self.prev_target_est is not None",
+      "line": 360,
+      "predicate": "self.prev_target_est is not None"
+    },
+    {
+      "id": "if:if@L370",
+      "kind": "if",
+      "name": "if@L370",
+      "label": "if L370: self.spawn_z is None",
+      "line": 370,
+      "predicate": "self.spawn_z is None"
+    },
+    {
+      "id": "if:if@L375",
+      "kind": "if",
+      "name": "if@L375",
+      "label": "if L375: self.spawn_z > 18.0 or agl > 7.0",
+      "line": 375,
+      "predicate": "self.spawn_z > 18.0 or agl > 7.0"
+    },
+    {
+      "id": "if:if@L377",
+      "kind": "if",
+      "name": "if@L377",
+      "label": "if L377: self.spawn_z < 5.0 and mid_fraction > 0.10 and dist_xy < 8.0",
+      "line": 377,
+      "predicate": "self.spawn_z < 5.0 and mid_fraction > 0.10 and dist_xy < 8.0"
+    },
+    {
+      "id": "if:if@L379",
+      "kind": "if",
+      "name": "if@L379",
+      "label": "if L379: mid_fraction > 0.20 and mean_depth < 0.55",
+      "line": 379,
+      "predicate": "mid_fraction > 0.20 and mean_depth < 0.55"
+    },
+    {
+      "id": "if:if@L381",
+      "kind": "if",
+      "name": "if@L381",
+      "label": "if L381: close_fraction > 0.10",
+      "line": 381,
+      "predicate": "close_fraction > 0.10"
+    },
+    {
+      "id": "if:if@L383",
+      "kind": "if",
+      "name": "if@L383",
+      "label": "if L383: mid_fraction > 0.08",
+      "line": 383,
+      "predicate": "mid_fraction > 0.08"
+    },
+    {
+      "id": "if:if@L395",
+      "kind": "if",
+      "name": "if@L395",
+      "label": "if L395: depth is None",
+      "line": 395,
+      "predicate": "depth is None"
+    },
+    {
+      "id": "if:if@L399",
+      "kind": "if",
+      "name": "if@L399",
+      "label": "if L399: d.ndim != 2 or d.size == 0",
+      "line": 399,
+      "predicate": "d.ndim != 2 or d.size == 0"
+    },
+    {
+      "id": "if:if@L414",
+      "kind": "if",
+      "name": "if@L414",
+      "label": "if L414: roi.size < 64",
+      "line": 414,
+      "predicate": "roi.size < 64"
+    },
+    {
+      "id": "if:if@L423",
+      "kind": "if",
+      "name": "if@L423",
+      "label": "if L423: contrast < 0.08",
+      "line": 423,
+      "predicate": "contrast < 0.08"
+    },
+    {
+      "id": "if:if@L430",
+      "kind": "if",
+      "name": "if@L430",
+      "label": "if L430: frac < 0.002 or frac > 0.18",
+      "line": 430,
+      "predicate": "frac < 0.002 or frac > 0.18"
+    },
+    {
+      "id": "if:if@L434",
+      "kind": "if",
+      "name": "if@L434",
+      "label": "if L434: xs.size < 8",
+      "line": 434,
+      "predicate": "xs.size < 8"
+    },
+    {
+      "id": "if:if@L440",
+      "kind": "if",
+      "name": "if@L440",
+      "label": "if L440: x_span > 0.45 * (x1 - x0)",
+      "line": 440,
+      "predicate": "x_span > 0.45 * (x1 - x0)"
+    },
+    {
+      "id": "if:if@L442",
+      "kind": "if",
+      "name": "if@L442",
+      "label": "if L442: y_span > 0.45 * (y1 - y0)",
+      "line": 442,
+      "predicate": "y_span > 0.45 * (y1 - y0)"
+    },
+    {
+      "id": "if:if@L449",
+      "kind": "if",
+      "name": "if@L449",
+      "label": "if L449: cx < 0.15 * w or cx > 0.85 * w",
+      "line": 449,
+      "predicate": "cx < 0.15 * w or cx > 0.85 * w"
+    },
+    {
+      "id": "if:if@L459",
+      "kind": "if",
+      "name": "if@L459",
+      "label": "if L459: float(np.linalg.norm(delta)) < 1e-5",
+      "line": 459,
+      "predicate": "float(np.linalg.norm(delta)) < 1e-5"
+    },
+    {
+      "id": "if:if@L465",
+      "kind": "if",
+      "name": "if@L465",
+      "label": "if L465: self.step_count >= self.trace_limit",
+      "line": 465,
+      "predicate": "self.step_count >= self.trace_limit"
+    },
+    {
+      "id": "if:if@L469",
+      "kind": "if",
+      "name": "if@L469",
+      "label": "if L469: self.trace_path",
+      "line": 469,
+      "predicate": "self.trace_path"
+    },
+    {
+      "id": "if:if@L472",
+      "kind": "if",
+      "name": "if@L472",
+      "label": "if L472: parent",
+      "line": 472,
+      "predicate": "parent"
+    },
+    {
+      "id": "assign:current_pos@L485",
+      "kind": "assign",
+      "name": "current_pos@L485",
+      "label": "current_pos = ... @ L485",
+      "line": 485,
+      "text": "current_pos, current_rpy, current_vel, yaw_rate, agl, search_vec = self._extract_state(observation)"
+    },
+    {
+      "id": "assign:current_vel@L485",
+      "kind": "assign",
+      "name": "current_vel@L485",
+      "label": "current_vel = ... @ L485",
+      "line": 485,
+      "text": "current_pos, current_rpy, current_vel, yaw_rate, agl, search_vec = self._extract_state(observation)"
+    },
+    {
+      "id": "assign:agl@L485",
+      "kind": "assign",
+      "name": "agl@L485",
+      "label": "agl = ... @ L485",
+      "line": 485,
+      "text": "current_pos, current_rpy, current_vel, yaw_rate, agl, search_vec = self._extract_state(observation)"
+    },
+    {
+      "id": "assign:search_vec@L485",
+      "kind": "assign",
+      "name": "search_vec@L485",
+      "label": "search_vec = ... @ L485",
+      "line": 485,
+      "text": "current_pos, current_rpy, current_vel, yaw_rate, agl, search_vec = self._extract_state(observation)"
+    },
+    {
+      "id": "if:if@L487",
+      "kind": "if",
+      "name": "if@L487",
+      "label": "if L487: self.spawn_z is None",
+      "line": 487,
+      "predicate": "self.spawn_z is None"
+    },
+    {
+      "id": "assign:target_pos@L490",
+      "kind": "assign",
+      "name": "target_pos@L490",
+      "label": "target_pos = ... @ L490",
+      "line": 490,
+      "text": "target_pos = self._estimate_target(current_pos, search_vec)"
+    },
+    {
+      "id": "assign:dist_xy@L491",
+      "kind": "assign",
+      "name": "dist_xy@L491",
+      "label": "dist_xy = ... @ L491",
+      "line": 491,
+      "text": "dist_xy = float(np.linalg.norm(current_pos[:2] - target_pos[:2]))"
+    },
+    {
+      "id": "if:if@L495",
+      "kind": "if",
+      "name": "if@L495",
+      "label": "if L495: self.initial_dist_xy is None",
+      "line": 495,
+      "predicate": "self.initial_dist_xy is None"
+    },
+    {
+      "id": "assign:raw_search_target@L511",
+      "kind": "assign",
+      "name": "raw_search_target@L511",
+      "label": "raw_search_target = ... @ L511",
+      "line": 511,
+      "text": "raw_search_target = current_pos + np.asarray(search_vec, dtype=np.float64)"
+    },
+    {
+      "id": "assign:raw_search_dist_xy@L512",
+      "kind": "assign",
+      "name": "raw_search_dist_xy@L512",
+      "label": "raw_search_dist_xy = ... @ L512",
+      "line": 512,
+      "text": "raw_search_dist_xy = float(np.linalg.norm(current_pos[:2] - raw_search_target[:2]))"
+    },
+    {
+      "id": "var:applied_goal_correction",
+      "kind": "var",
+      "name": "applied_goal_correction",
+      "label": "applied_goal_correction"
+    },
+    {
+      "id": "assign:applied_goal_correction@L573",
+      "kind": "assign",
+      "name": "applied_goal_correction@L573",
+      "label": "applied_goal_correction = ... @ L573",
+      "line": 573,
+      "text": "applied_goal_correction = None"
+    },
+    {
+      "id": "if:if@L574",
+      "kind": "if",
+      "name": "if@L574",
+      "label": "if L574: self.initial_dist_xy is not None",
+      "line": 574,
+      "predicate": "self.initial_dist_xy is not None"
+    },
+    {
+      "id": "if:if@L576",
+      "kind": "if",
+      "name": "if@L576",
+      "label": "if L576: float(corr[\"init_min\"]) < float(self.initial_dist_xy) <= float(corr[\"init_max\"])",
+      "line": 576,
+      "predicate": "float(corr[\"init_min\"]) < float(self.initial_dist_xy) <= float(corr[\"init_max\"])\n                    and float(corr[\"raw_min\"]) < float(raw_search_dist_xy) <= float(corr[\"raw_max\"])\n                    and int(self.step_count) > int(corr[\"step_min\"])"
+    },
+    {
+      "id": "assign:target_pos@L581",
+      "kind": "assign",
+      "name": "target_pos@L581",
+      "label": "target_pos = ... @ L581",
+      "line": 581,
+      "text": "target_pos = raw_search_target + corr[\"offset\"]"
+    },
+    {
+      "id": "if:if@L582",
+      "kind": "if",
+      "name": "if@L582",
+      "label": "if L582: corr[\"z_floor\"] is not None",
+      "line": 582,
+      "predicate": "corr[\"z_floor\"] is not None"
+    },
+    {
+      "id": "assign:target_pos@L583",
+      "kind": "assign",
+      "name": "target_pos@L583",
+      "label": "target_pos = ... @ L583",
+      "line": 583,
+      "text": "target_pos[2] = max(float(target_pos[2]), float(corr[\"z_floor\"]))"
+    },
+    {
+      "id": "assign:dist_xy@L585",
+      "kind": "assign",
+      "name": "dist_xy@L585",
+      "label": "dist_xy = ... @ L585",
+      "line": 585,
+      "text": "dist_xy = float(np.linalg.norm(current_pos[:2] - target_pos[:2]))"
+    },
+    {
+      "id": "assign:applied_goal_correction@L586",
+      "kind": "assign",
+      "name": "applied_goal_correction@L586",
+      "label": "applied_goal_correction = ... @ L586",
+      "line": 586,
+      "text": "applied_goal_correction = str(corr[\"name\"])"
+    },
+    {
+      "id": "assign:terrain_id@L589",
+      "kind": "assign",
+      "name": "terrain_id@L589",
+      "label": "terrain_id = ... @ L589",
+      "line": 589,
+      "text": "terrain_id = self._infer_terrain(current_pos, agl, depth, dist_xy)"
+    },
+    {
+      "id": "assign:profile@L591",
+      "kind": "assign",
+      "name": "profile@L591",
+      "label": "profile = ... @ L591",
+      "line": 591,
+      "text": "profile = _profile(terrain_id)"
+    },
+    {
+      "id": "if:if@L611",
+      "kind": "if",
+      "name": "if@L611",
+      "label": "if L611: cs is None",
+      "line": 611,
+      "predicate": "cs is None"
+    },
+    {
+      "id": "var:vx",
+      "kind": "var",
+      "name": "vx",
+      "label": "vx"
+    },
+    {
+      "id": "assign:vx@L614",
+      "kind": "assign",
+      "name": "vx@L614",
+      "label": "vx = ... @ L614",
+      "line": 614,
+      "text": "vx, vy, vz, total_speed, yaw_cmd = cs.control_output"
+    },
+    {
+      "id": "var:vy",
+      "kind": "var",
+      "name": "vy",
+      "label": "vy"
+    },
+    {
+      "id": "assign:vy@L614",
+      "kind": "assign",
+      "name": "vy@L614",
+      "label": "vy = ... @ L614",
+      "line": 614,
+      "text": "vx, vy, vz, total_speed, yaw_cmd = cs.control_output"
+    },
+    {
+      "id": "assign:vz@L614",
+      "kind": "assign",
+      "name": "vz@L614",
+      "label": "vz = ... @ L614",
+      "line": 614,
+      "text": "vx, vy, vz, total_speed, yaw_cmd = cs.control_output"
+    },
+    {
+      "id": "var:total_speed",
+      "kind": "var",
+      "name": "total_speed",
+      "label": "total_speed"
+    },
+    {
+      "id": "assign:total_speed@L614",
+      "kind": "assign",
+      "name": "total_speed@L614",
+      "label": "total_speed = ... @ L614",
+      "line": 614,
+      "text": "vx, vy, vz, total_speed, yaw_cmd = cs.control_output"
+    },
+    {
+      "id": "var:yaw_cmd",
+      "kind": "var",
+      "name": "yaw_cmd",
+      "label": "yaw_cmd"
+    },
+    {
+      "id": "assign:yaw_cmd@L614",
+      "kind": "assign",
+      "name": "yaw_cmd@L614",
+      "label": "yaw_cmd = ... @ L614",
+      "line": 614,
+      "text": "vx, vy, vz, total_speed, yaw_cmd = cs.control_output"
+    },
+    {
+      "id": "assign:action@L616",
+      "kind": "assign",
+      "name": "action@L616",
+      "label": "action = ... @ L616",
+      "line": 616,
+      "text": "action = _action_from_velocity(vx, vy, vz, total_speed, yaw_norm)"
+    },
+    {
+      "id": "if:if@L622",
+      "kind": "if",
+      "name": "if@L622",
+      "label": "if L622: self.initial_dist_xy is not None\n            and self.initial_dist_xy < 8.5\n    ",
+      "line": 622,
+      "predicate": "self.initial_dist_xy is not None\n            and self.initial_dist_xy < 8.5\n            and self.step_count < 2200\n            and not bool(cs.landing_phase)"
+    },
+    {
+      "id": "assign:action@L628",
+      "kind": "assign",
+      "name": "action@L628",
+      "label": "action = ... @ L628",
+      "line": 628,
+      "text": "action[3] = min(float(action[3]), 0.07)"
+    },
+    {
+      "id": "if:if@L636",
+      "kind": "if",
+      "name": "if@L636",
+      "label": "if L636: self.initial_dist_xy is not None\n            and 14.0 < self.initial_dist_xy < 1",
+      "line": 636,
+      "predicate": "self.initial_dist_xy is not None\n            and 14.0 < self.initial_dist_xy < 19.5\n            and dist_xy < 0.70\n            and current_pos[2] < target_pos[2] + 0.45"
+    },
+    {
+      "id": "if:if@L651",
+      "kind": "if",
+      "name": "if@L651",
+      "label": "if L651: xy_d > 1e-6",
+      "line": 651,
+      "predicate": "xy_d > 1e-6"
+    },
+    {
+      "id": "assign:action@L656",
+      "kind": "assign",
+      "name": "action@L656",
+      "label": "action = ... @ L656",
+      "line": 656,
+      "text": "action = _action_from_velocity("
+    },
+    {
+      "id": "if:if@L698",
+      "kind": "if",
+      "name": "if@L698",
+      "label": "if L698: dist_xy < term_gate_xy and agl < TERMINAL_ASSIST_AGL_M and is_near_ground_level",
+      "line": 698,
+      "predicate": "dist_xy < term_gate_xy and agl < TERMINAL_ASSIST_AGL_M and is_near_ground_level"
+    },
+    {
+      "id": "if:if@L700",
+      "kind": "if",
+      "name": "if@L700",
+      "label": "if L700: dist_xy < settle_gate and abs(float(target_rel_v[0])) < settle_v_tol and abs(flo",
+      "line": 700,
+      "predicate": "dist_xy < settle_gate and abs(float(target_rel_v[0])) < settle_v_tol and abs(float(target_rel_v[1])) < settle_v_tol"
+    },
+    {
+      "id": "assign:action@L714",
+      "kind": "assign",
+      "name": "action@L714",
+      "label": "action = ... @ L714",
+      "line": 714,
+      "text": "action = _direct_action("
+    },
+    {
+      "id": "if:if@L723",
+      "kind": "if",
+      "name": "if@L723",
+      "label": "if L723: (\n            dist_xy < float(profile.get(\"approach_gate_xy\", 4.75))\n           ",
+      "line": 723,
+      "predicate": "(\n            dist_xy < float(profile.get(\"approach_gate_xy\", 4.75))\n            or mountain_safety_climb\n            or mountain_descent_corridor\n            or mountain_centered_descent\n        ) and not bool(cs.landing_phase)"
+    },
+    {
+      "id": "if:if@L729",
+      "kind": "if",
+      "name": "if@L729",
+      "label": "if L729: mountain_low_agl_guard",
+      "line": 729,
+      "predicate": "mountain_low_agl_guard"
+    },
+    {
+      "id": "if:if@L731",
+      "kind": "if",
+      "name": "if@L731",
+      "label": "if L731: mountain_safety_climb",
+      "line": 731,
+      "predicate": "mountain_safety_climb"
+    },
+    {
+      "id": "if:if@L733",
+      "kind": "if",
+      "name": "if@L733",
+      "label": "if L733: mountain_centered_descent",
+      "line": 733,
+      "predicate": "mountain_centered_descent"
+    },
+    {
+      "id": "if:if@L735",
+      "kind": "if",
+      "name": "if@L735",
+      "label": "if L735: mountain_descent_corridor",
+      "line": 735,
+      "predicate": "mountain_descent_corridor"
+    },
+    {
+      "id": "if:if@L737",
+      "kind": "if",
+      "name": "if@L737",
+      "label": "if L737: terrain_id == 3 and dist_xy > 5.0",
+      "line": 737,
+      "predicate": "terrain_id == 3 and dist_xy > 5.0"
+    },
+    {
+      "id": "assign:action@L742",
+      "kind": "assign",
+      "name": "action@L742",
+      "label": "action = ... @ L742",
+      "line": 742,
+      "text": "action = _direct_action("
+    },
+    {
+      "id": "if:if@L752",
+      "kind": "if",
+      "name": "if@L752",
+      "label": "if L752: mountain_descent_corridor",
+      "line": 752,
+      "predicate": "mountain_descent_corridor"
+    },
+    {
+      "id": "if:if@L757",
+      "kind": "if",
+      "name": "if@L757",
+      "label": "if L757: self.initial_dist_xy is not None\n            and self.initial_dist_xy > 14.0\n   ",
+      "line": 757,
+      "predicate": "self.initial_dist_xy is not None\n            and self.initial_dist_xy > 14.0\n            and self.step_count > 900\n            and dist_xy < 10.0\n            and not bool(cs.landing_phase)"
+    },
+    {
+      "id": "assign:action@L774",
+      "kind": "assign",
+      "name": "action@L774",
+      "label": "action = ... @ L774",
+      "line": 774,
+      "text": "action[0:3] = _unit(desired)"
+    },
+    {
+      "id": "assign:action@L775",
+      "kind": "assign",
+      "name": "action@L775",
+      "label": "action = ... @ L775",
+      "line": 775,
+      "text": "action[3] = max(float(action[3]), 0.32)"
+    },
+    {
+      "id": "assign:action@L778",
+      "kind": "assign",
+      "name": "action@L778",
+      "label": "action = ... @ L778",
+      "line": 778,
+      "text": "action = np.nan_to_num(action, nan=0.0, posinf=1.0, neginf=-1.0).astype(np.float32)"
+    },
+    {
+      "id": "assign:action@L779",
+      "kind": "assign",
+      "name": "action@L779",
+      "label": "action = ... @ L779",
+      "line": 779,
+      "text": "action[:3] = np.clip(action[:3], -1.0, 1.0)"
+    },
+    {
+      "id": "assign:action@L780",
+      "kind": "assign",
+      "name": "action@L780",
+      "label": "action = ... @ L780",
+      "line": 780,
+      "text": "action[3] = np.clip(action[3], 0.0, 1.0)"
+    },
+    {
+      "id": "assign:action@L781",
+      "kind": "assign",
+      "name": "action@L781",
+      "label": "action = ... @ L781",
+      "line": 781,
+      "text": "action[4] = np.clip(action[4], -1.0, 1.0)"
+    },
+    {
+      "id": "call:self.engine.set_target_pos@L594",
+      "kind": "call",
+      "name": "self.engine.set_target_pos@L594",
+      "label": "self.engine.set_target_pos@L594"
+    },
+    {
+      "id": "call:self.engine.set_flight_params@L593",
+      "kind": "call",
+      "name": "self.engine.set_flight_params@L593",
+      "label": "self.engine.set_flight_params@L593"
+    },
+    {
+      "id": "call:self.engine.process_sensor_data@L595",
+      "kind": "call",
+      "name": "self.engine.process_sensor_data@L595",
+      "label": "self.engine.process_sensor_data@L595"
+    },
+    {
+      "id": "call:self.engine.update@L608",
+      "kind": "call",
+      "name": "self.engine.update@L608",
+      "label": "self.engine.update@L608"
+    },
+    {
+      "id": "goal_corr:city",
+      "kind": "goal_corr",
+      "name": "city",
+      "label": "goal_corr:city @ L515",
+      "line": 515,
+      "init_min": -1.0,
+      "init_max": 8.5,
+      "raw_min": -1.0,
+      "raw_max": 3.5,
+      "step_min": 0,
+      "offset": "np.array([-0.25, -1.42, -1.02], dtype=np.float64)",
+      "z_floor": null
+    },
+    {
+      "id": "goal_corr:open",
+      "kind": "goal_corr",
+      "name": "open",
+      "label": "goal_corr:open @ L525",
+      "line": 525,
+      "init_min": 14.0,
+      "init_max": 19.5,
+      "raw_min": -1.0,
+      "raw_max": 9.0,
+      "step_min": 250,
+      "offset": "np.array([1.73, -6.25, 0.20], dtype=np.float64)",
+      "z_floor": 0.2
+    },
+    {
+      "id": "goal_corr:forest",
+      "kind": "goal_corr",
+      "name": "forest",
+      "label": "goal_corr:forest @ L535",
+      "line": 535,
+      "init_min": 18.0,
+      "init_max": 30.0,
+      "raw_min": -1.0,
+      "raw_max": 8.5,
+      "step_min": 250,
+      "offset": "np.array([6.51, -3.53, 1.63], dtype=np.float64)",
+      "z_floor": 1.83
+    },
+    {
+      "id": "goal_corr:mountain",
+      "kind": "goal_corr",
+      "name": "mountain",
+      "label": "goal_corr:mountain @ L545",
+      "line": 545,
+      "init_min": 40.0,
+      "init_max": 50.0,
+      "raw_min": 20.0,
+      "raw_max": 999.0,
+      "step_min": 250,
+      "offset": "np.array([0.0, 0.0, 2.0], dtype=np.float64)",
+      "z_floor": 2.2
+    },
+    {
+      "id": "goal_corr:village",
+      "kind": "goal_corr",
+      "name": "village",
+      "label": "goal_corr:village @ L558",
+      "line": 558,
+      "init_min": 40.0,
+      "init_max": 50.0,
+      "raw_min": 10.0,
+      "raw_max": 20.0,
+      "step_min": 250,
+      "offset": "np.array([0.0, 0.0, 0.0], dtype=np.float64)",
+      "z_floor": null
+    },
+    {
+      "id": "diff_hunk:hunk_1",
+      "kind": "diff_hunk",
+      "name": "hunk_1",
+      "label": "diff hunk 1: @@ -495,53 +495,96 @@",
+      "header": "@@ -495,53 +495,96 @@"
+    },
+    {
+      "id": "diff_hunk:hunk_2",
+      "kind": "diff_hunk",
+      "name": "hunk_2",
+      "label": "diff hunk 2: @@ -743,6 +786,7 @@",
+      "header": "@@ -743,6 +786,7 @@"
+    },
+    {
+      "id": "disconnect:VILLAGE_GAIN_WITH_NEUTRAL_VILLAGE_BLOCK",
+      "kind": "disconnect",
+      "name": "VILLAGE_GAIN_WITH_NEUTRAL_VILLAGE_BLOCK",
+      "label": "HIGH: VILLAGE_GAIN_WITH_NEUTRAL_VILLAGE_BLOCK",
+      "code": "VILLAGE_GAIN_WITH_NEUTRAL_VILLAGE_BLOCK",
+      "severity": "high",
+      "finding": "The candidate comments say Village is neutral, but the confirmed score improvement is on Village.",
+      "evidence": "village correction line 558 offset=np.array([0.0, 0.0, 0.0], dtype=np.float64) z_floor=None"
+    },
+    {
+      "id": "disconnect:MOUNTAIN_CORRECTION_NOT_ACTUAL_PLATFORM",
+      "kind": "disconnect",
+      "name": "MOUNTAIN_CORRECTION_NOT_ACTUAL_PLATFORM",
+      "label": "HIGH: MOUNTAIN_CORRECTION_NOT_ACTUAL_PLATFORM",
+      "code": "MOUNTAIN_CORRECTION_NOT_ACTUAL_PLATFORM",
+      "severity": "high",
+      "finding": "Mountain correction only adds z +2 / z_floor 2.20, but the adjusted Mountain platform is around z=28.10.",
+      "evidence": "mountain correction line 545 offset=np.array([0.0, 0.0, 2.0], dtype=np.float64) z_floor=2.2"
+    },
+    {
+      "id": "disconnect:MOUNTAIN_CLASSIFIER_START_Z_GAP",
+      "kind": "disconnect",
+      "name": "MOUNTAIN_CLASSIFIER_START_Z_GAP",
+      "label": "MEDIUM: MOUNTAIN_CLASSIFIER_START_Z_GAP",
+      "code": "MOUNTAIN_CLASSIFIER_START_Z_GAP",
+      "severity": "medium",
+      "finding": "Candidate v1 classifier still uses spawn_z > 18.0, while adjusted Mountain start is z\u224810.72.",
+      "evidence": "terrain classifier line contains `if self.spawn_z > 18.0 or agl > 7.0:`"
+    },
+    {
+      "id": "disconnect:TARGET_ESTIMATE_Z_CLAMP",
+      "kind": "disconnect",
+      "name": "TARGET_ESTIMATE_Z_CLAMP",
+      "label": "MEDIUM: TARGET_ESTIMATE_Z_CLAMP",
+      "code": "TARGET_ESTIMATE_Z_CLAMP",
+      "severity": "medium",
+      "finding": "Initial target estimate clamps z near ground, so Mountain's high adjusted platform altitude cannot be inferred through _estimate_target.",
+      "evidence": "lines near _estimate_target clamp raw_target[2] to 0.20 or >=0.10"
+    },
+    {
+      "id": "disconnect:LOCAL_TARGET_POS_NOT_PERSISTED_TO_TARGET_EST",
+      "kind": "disconnect",
+      "name": "LOCAL_TARGET_POS_NOT_PERSISTED_TO_TARGET_EST",
+      "label": "MEDIUM: LOCAL_TARGET_POS_NOT_PERSISTED_TO_TARGET_EST",
+      "code": "LOCAL_TARGET_POS_NOT_PERSISTED_TO_TARGET_EST",
+      "severity": "medium",
+      "finding": "Goal corrections overwrite local target_pos but do not persist it into self.target_est; correction must re-trigger every step.",
+      "evidence": "target_pos is sent to engine, but self.target_est is not updated in the correction block"
+    },
+    {
+      "id": "disconnect:GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "kind": "disconnect",
+      "name": "GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "label": "LOW: GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "code": "GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "severity": "low",
+      "finding": "Correction predicates overlap: forest and open. First match wins.",
+      "evidence": "forest L535 vs open L525"
+    }
+  ],
+  "edges": [
+    {
+      "source": "func:_profile",
+      "target": "call:TERRAIN_PROFILES.get@L134",
+      "relation": "calls",
+      "line": 134
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:np.asarray@L149",
+      "relation": "calls",
+      "line": 149
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:np.nan_to_num@L152",
+      "relation": "calls",
+      "line": 152
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:np.clip@L153",
+      "relation": "calls",
+      "line": 153
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:float@L154",
+      "relation": "calls",
+      "line": 154
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:float@L155",
+      "relation": "calls",
+      "line": 155
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:float@L156",
+      "relation": "calls",
+      "line": 156
+    },
+    {
+      "source": "func:_action_from_velocity",
+      "target": "call:np.array@L161",
+      "relation": "calls",
+      "line": 161
+    },
+    {
+      "source": "func:_action_from_velocity",
+      "target": "call:_unit@L162",
+      "relation": "calls",
+      "line": 162
+    },
+    {
+      "source": "call:_unit@L162",
+      "target": "func:_unit",
+      "relation": "resolves_to",
+      "line": 162
+    },
+    {
+      "source": "func:_action_from_velocity",
+      "target": "call:float@L163",
+      "relation": "calls",
+      "line": 163
+    },
+    {
+      "source": "func:_action_from_velocity",
+      "target": "call:float@L164",
+      "relation": "calls",
+      "line": 164
+    },
+    {
+      "source": "func:_action_from_velocity",
+      "target": "call:np.array@L165",
+      "relation": "calls",
+      "line": 165
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:_profile@L180",
+      "relation": "calls",
+      "line": 180
+    },
+    {
+      "source": "call:_profile@L180",
+      "target": "func:_profile",
+      "relation": "resolves_to",
+      "line": 180
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L182",
+      "relation": "calls",
+      "line": 182
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:max@L183",
+      "relation": "calls",
+      "line": 183
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L232",
+      "relation": "calls",
+      "line": 232
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:np.array@L233",
+      "relation": "calls",
+      "line": 233
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "call:_profile@L237",
+      "relation": "calls",
+      "line": 237
+    },
+    {
+      "source": "call:_profile@L237",
+      "target": "func:_profile",
+      "relation": "resolves_to",
+      "line": 237
+    },
+    {
+      "source": "func:_profile",
+      "target": "call:int@L134",
+      "relation": "calls",
+      "line": 134
+    },
+    {
+      "source": "func:_safe_norm",
+      "target": "call:float@L138",
+      "relation": "calls",
+      "line": 138
+    },
+    {
+      "source": "func:_unit",
+      "target": "call:_safe_norm@L142",
+      "relation": "calls",
+      "line": 142
+    },
+    {
+      "source": "call:_safe_norm@L142",
+      "target": "func:_safe_norm",
+      "relation": "resolves_to",
+      "line": 142
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:np.mean@L154",
+      "relation": "calls",
+      "line": 154
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:np.mean@L155",
+      "relation": "calls",
+      "line": 155
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "call:np.mean@L156",
+      "relation": "calls",
+      "line": 156
+    },
+    {
+      "source": "func:_action_from_velocity",
+      "target": "call:np.clip@L163",
+      "relation": "calls",
+      "line": 163
+    },
+    {
+      "source": "func:_action_from_velocity",
+      "target": "call:np.clip@L164",
+      "relation": "calls",
+      "line": 164
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:norm@L182",
+      "relation": "calls",
+      "line": 182
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L183",
+      "relation": "calls",
+      "line": 183
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L186",
+      "relation": "calls",
+      "line": 186
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:int@L187",
+      "relation": "calls",
+      "line": 187
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L188",
+      "relation": "calls",
+      "line": 188
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:min@L214",
+      "relation": "calls",
+      "line": 214
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L222",
+      "relation": "calls",
+      "line": 222
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:np.array@L223",
+      "relation": "calls",
+      "line": 223
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L230",
+      "relation": "calls",
+      "line": 230
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:np.clip@L232",
+      "relation": "calls",
+      "line": 232
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "call:float@L247",
+      "relation": "calls",
+      "line": 247
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "call:float@L248",
+      "relation": "calls",
+      "line": 248
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "call:list@L260",
+      "relation": "calls",
+      "line": 260
+    },
+    {
+      "source": "func:__init__",
+      "target": "call:ConstrainedAdaptiveEngine@L268",
+      "relation": "calls",
+      "line": 268
+    },
+    {
+      "source": "func:__init__",
+      "target": "call:start_adaptive@L269",
+      "relation": "calls",
+      "line": 269
+    },
+    {
+      "source": "func:__init__",
+      "target": "call:self.reset@L270",
+      "relation": "calls",
+      "line": 270
+    },
+    {
+      "source": "call:self.reset@L270",
+      "target": "func:reset",
+      "relation": "resolves_to",
+      "line": 270
+    },
+    {
+      "source": "func:reset",
+      "target": "call:get@L283",
+      "relation": "calls",
+      "line": 283
+    },
+    {
+      "source": "func:reset",
+      "target": "call:int@L287",
+      "relation": "calls",
+      "line": 287
+    },
+    {
+      "source": "func:reset",
+      "target": "call:np.zeros@L291",
+      "relation": "calls",
+      "line": 291
+    },
+    {
+      "source": "func:reset",
+      "target": "call:np.array@L298",
+      "relation": "calls",
+      "line": 298
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:reshape@L304",
+      "relation": "calls",
+      "line": 304
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:np.nan_to_num@L335",
+      "relation": "calls",
+      "line": 335
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:float@L336",
+      "relation": "calls",
+      "line": 336
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:copy@L364",
+      "relation": "calls",
+      "line": 364
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:copy@L365",
+      "relation": "calls",
+      "line": 365
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "call:_depth_metrics@L368",
+      "relation": "calls",
+      "line": 368
+    },
+    {
+      "source": "call:_depth_metrics@L368",
+      "target": "func:_depth_metrics",
+      "relation": "resolves_to",
+      "line": 368
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:squeeze@L398",
+      "relation": "calls",
+      "line": 398
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.nan_to_num@L402",
+      "relation": "calls",
+      "line": 402
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:int@L409",
+      "relation": "calls",
+      "line": 409
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:int@L410",
+      "relation": "calls",
+      "line": 410
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:int@L411",
+      "relation": "calls",
+      "line": 411
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:int@L412",
+      "relation": "calls",
+      "line": 412
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L418",
+      "relation": "calls",
+      "line": 418
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L419",
+      "relation": "calls",
+      "line": 419
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L420",
+      "relation": "calls",
+      "line": 420
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L427",
+      "relation": "calls",
+      "line": 427
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.nonzero@L433",
+      "relation": "calls",
+      "line": 433
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L438",
+      "relation": "calls",
+      "line": 438
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L439",
+      "relation": "calls",
+      "line": 439
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L445",
+      "relation": "calls",
+      "line": 445
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L446",
+      "relation": "calls",
+      "line": 446
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.deg2rad@L453",
+      "relation": "calls",
+      "line": 453
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:float@L455",
+      "relation": "calls",
+      "line": 455
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "call:math.atan2@L461",
+      "relation": "calls",
+      "line": 461
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "call:float@L462",
+      "relation": "calls",
+      "line": 462
+    },
+    {
+      "source": "func:act",
+      "target": "call:observation.get@L484",
+      "relation": "calls",
+      "line": 484
+    },
+    {
+      "source": "func:act",
+      "target": "call:self._extract_state@L485",
+      "relation": "calls",
+      "line": 485
+    },
+    {
+      "source": "call:self._extract_state@L485",
+      "target": "func:_extract_state",
+      "relation": "resolves_to",
+      "line": 485
+    },
+    {
+      "source": "func:act",
+      "target": "call:self._estimate_target@L490",
+      "relation": "calls",
+      "line": 490
+    },
+    {
+      "source": "call:self._estimate_target@L490",
+      "target": "func:_estimate_target",
+      "relation": "resolves_to",
+      "line": 490
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L491",
+      "relation": "calls",
+      "line": 491
+    },
+    {
+      "source": "func:act",
+      "target": "call:min@L492",
+      "relation": "calls",
+      "line": 492
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L512",
+      "relation": "calls",
+      "line": 512
+    },
+    {
+      "source": "func:act",
+      "target": "call:self._infer_terrain@L589",
+      "relation": "calls",
+      "line": 589
+    },
+    {
+      "source": "call:self._infer_terrain@L589",
+      "target": "func:_infer_terrain",
+      "relation": "resolves_to",
+      "line": 589
+    },
+    {
+      "source": "func:act",
+      "target": "call:_profile@L591",
+      "relation": "calls",
+      "line": 591
+    },
+    {
+      "source": "call:_profile@L591",
+      "target": "func:_profile",
+      "relation": "resolves_to",
+      "line": 591
+    },
+    {
+      "source": "func:act",
+      "target": "call:set_flight_params@L593",
+      "relation": "calls",
+      "line": 593
+    },
+    {
+      "source": "func:act",
+      "target": "call:set_target_pos@L594",
+      "relation": "calls",
+      "line": 594
+    },
+    {
+      "source": "func:act",
+      "target": "call:process_sensor_data@L595",
+      "relation": "calls",
+      "line": 595
+    },
+    {
+      "source": "func:act",
+      "target": "call:update@L608",
+      "relation": "calls",
+      "line": 608
+    },
+    {
+      "source": "func:act",
+      "target": "call:get_state@L610",
+      "relation": "calls",
+      "line": 610
+    },
+    {
+      "source": "func:act",
+      "target": "call:_action_from_velocity@L616",
+      "relation": "calls",
+      "line": 616
+    },
+    {
+      "source": "call:_action_from_velocity@L616",
+      "target": "func:_action_from_velocity",
+      "relation": "resolves_to",
+      "line": 616
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L694",
+      "relation": "calls",
+      "line": 694
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L695",
+      "relation": "calls",
+      "line": 695
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L696",
+      "relation": "calls",
+      "line": 696
+    },
+    {
+      "source": "func:act",
+      "target": "call:astype@L778",
+      "relation": "calls",
+      "line": 778
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.clip@L779",
+      "relation": "calls",
+      "line": 779
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.clip@L780",
+      "relation": "calls",
+      "line": 780
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.clip@L781",
+      "relation": "calls",
+      "line": 781
+    },
+    {
+      "source": "func:act",
+      "target": "call:self._trace_step@L782",
+      "relation": "calls",
+      "line": 782
+    },
+    {
+      "source": "call:self._trace_step@L782",
+      "target": "func:_trace_step",
+      "relation": "resolves_to",
+      "line": 782
+    },
+    {
+      "source": "func:act",
+      "target": "call:action.copy@L799",
+      "relation": "calls",
+      "line": 799
+    },
+    {
+      "source": "func:_safe_norm",
+      "target": "call:norm@L138",
+      "relation": "calls",
+      "line": 138
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:np.array@L203",
+      "relation": "calls",
+      "line": 203
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:min@L205",
+      "relation": "calls",
+      "line": 205
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:np.array@L207",
+      "relation": "calls",
+      "line": 207
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L214",
+      "relation": "calls",
+      "line": 214
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:max@L214",
+      "relation": "calls",
+      "line": 214
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:np.clip@L222",
+      "relation": "calls",
+      "line": 222
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:norm@L230",
+      "relation": "calls",
+      "line": 230
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "call:float@L246",
+      "relation": "calls",
+      "line": 246
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "call:np.asarray@L260",
+      "relation": "calls",
+      "line": 260
+    },
+    {
+      "source": "func:reset",
+      "target": "call:hasattr@L273",
+      "relation": "calls",
+      "line": 273
+    },
+    {
+      "source": "func:reset",
+      "target": "call:get@L287",
+      "relation": "calls",
+      "line": 287
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:np.zeros@L305",
+      "relation": "calls",
+      "line": 305
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:np.zeros@L315",
+      "relation": "calls",
+      "line": 315
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:float@L324",
+      "relation": "calls",
+      "line": 324
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:float@L329",
+      "relation": "calls",
+      "line": 329
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:float@L329",
+      "relation": "calls",
+      "line": 329
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:astype@L330",
+      "relation": "calls",
+      "line": 330
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:np.zeros@L330",
+      "relation": "calls",
+      "line": 330
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:current_pos.astype@L332",
+      "relation": "calls",
+      "line": 332
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:current_rpy.astype@L332",
+      "relation": "calls",
+      "line": 332
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:current_vel.astype@L332",
+      "relation": "calls",
+      "line": 332
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:search_vec.astype@L335",
+      "relation": "calls",
+      "line": 335
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:norm@L336",
+      "relation": "calls",
+      "line": 336
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:abs@L348",
+      "relation": "calls",
+      "line": 348
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:max@L351",
+      "relation": "calls",
+      "line": 351
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:raw_target.astype@L354",
+      "relation": "calls",
+      "line": 354
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:np.clip@L361",
+      "relation": "calls",
+      "line": 361
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:np.zeros@L363",
+      "relation": "calls",
+      "line": 363
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "call:float@L371",
+      "relation": "calls",
+      "line": 371
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.clip@L406",
+      "relation": "calls",
+      "line": 406
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.median@L418",
+      "relation": "calls",
+      "line": 418
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.quantile@L419",
+      "relation": "calls",
+      "line": 419
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.quantile@L420",
+      "relation": "calls",
+      "line": 420
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:max@L426",
+      "relation": "calls",
+      "line": 426
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:mask.mean@L427",
+      "relation": "calls",
+      "line": 427
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.clip@L455",
+      "relation": "calls",
+      "line": 455
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "call:float@L459",
+      "relation": "calls",
+      "line": 459
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "call:float@L461",
+      "relation": "calls",
+      "line": 461
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "call:float@L461",
+      "relation": "calls",
+      "line": 461
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "call:np.clip@L462",
+      "relation": "calls",
+      "line": 462
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "call:json.dumps@L468",
+      "relation": "calls",
+      "line": 468
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "call:write@L478",
+      "relation": "calls",
+      "line": 478
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "call:flush@L479",
+      "relation": "calls",
+      "line": 479
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L488",
+      "relation": "calls",
+      "line": 488
+    },
+    {
+      "source": "func:act",
+      "target": "call:norm@L491",
+      "relation": "calls",
+      "line": 491
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L496",
+      "relation": "calls",
+      "line": 496
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.asarray@L511",
+      "relation": "calls",
+      "line": 511
+    },
+    {
+      "source": "func:act",
+      "target": "call:norm@L512",
+      "relation": "calls",
+      "line": 512
+    },
+    {
+      "source": "func:act",
+      "target": "call:copy@L612",
+      "relation": "calls",
+      "line": 612
+    },
+    {
+      "source": "func:act",
+      "target": "call:self._yaw_command@L615",
+      "relation": "calls",
+      "line": 615
+    },
+    {
+      "source": "call:self._yaw_command@L615",
+      "target": "func:_yaw_command",
+      "relation": "resolves_to",
+      "line": 615
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L615",
+      "relation": "calls",
+      "line": 615
+    },
+    {
+      "source": "func:act",
+      "target": "call:min@L628",
+      "relation": "calls",
+      "line": 628
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L647",
+      "relation": "calls",
+      "line": 647
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L650",
+      "relation": "calls",
+      "line": 650
+    },
+    {
+      "source": "func:act",
+      "target": "call:_action_from_velocity@L656",
+      "relation": "calls",
+      "line": 656
+    },
+    {
+      "source": "call:_action_from_velocity@L656",
+      "target": "func:_action_from_velocity",
+      "relation": "resolves_to",
+      "line": 656
+    },
+    {
+      "source": "func:act",
+      "target": "call:action.astype@L663",
+      "relation": "calls",
+      "line": 663
+    },
+    {
+      "source": "func:act",
+      "target": "call:copy@L665",
+      "relation": "calls",
+      "line": 665
+    },
+    {
+      "source": "func:act",
+      "target": "call:_direct_action@L714",
+      "relation": "calls",
+      "line": 714
+    },
+    {
+      "source": "call:_direct_action@L714",
+      "target": "func:_direct_action",
+      "relation": "resolves_to",
+      "line": 714
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.array@L766",
+      "relation": "calls",
+      "line": 766
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.array@L773",
+      "relation": "calls",
+      "line": 773
+    },
+    {
+      "source": "func:act",
+      "target": "call:_unit@L774",
+      "relation": "calls",
+      "line": 774
+    },
+    {
+      "source": "call:_unit@L774",
+      "target": "func:_unit",
+      "relation": "resolves_to",
+      "line": 774
+    },
+    {
+      "source": "func:act",
+      "target": "call:max@L775",
+      "relation": "calls",
+      "line": 775
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:max@L205",
+      "relation": "calls",
+      "line": 205
+    },
+    {
+      "source": "func:reset",
+      "target": "call:reset@L275",
+      "relation": "calls",
+      "line": 275
+    },
+    {
+      "source": "call:reset@L275",
+      "target": "func:reset",
+      "relation": "resolves_to",
+      "line": 275
+    },
+    {
+      "source": "func:reset",
+      "target": "call:start_adaptive@L276",
+      "relation": "calls",
+      "line": 276
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:np.asarray@L304",
+      "relation": "calls",
+      "line": 304
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:np.zeros@L322",
+      "relation": "calls",
+      "line": 322
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:copy@L342",
+      "relation": "calls",
+      "line": 342
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:np.asarray@L398",
+      "relation": "calls",
+      "line": 398
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:xs.mean@L445",
+      "relation": "calls",
+      "line": 445
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:ys.mean@L446",
+      "relation": "calls",
+      "line": 446
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:max@L454",
+      "relation": "calls",
+      "line": 454
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "call:norm@L459",
+      "relation": "calls",
+      "line": 459
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.array@L522",
+      "relation": "calls",
+      "line": 522
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.array@L532",
+      "relation": "calls",
+      "line": 532
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.array@L542",
+      "relation": "calls",
+      "line": 542
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.array@L555",
+      "relation": "calls",
+      "line": 555
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.array@L568",
+      "relation": "calls",
+      "line": 568
+    },
+    {
+      "source": "func:act",
+      "target": "call:_landing_params@L593",
+      "relation": "calls",
+      "line": 593
+    },
+    {
+      "source": "call:_landing_params@L593",
+      "target": "func:_landing_params",
+      "relation": "resolves_to",
+      "line": 593
+    },
+    {
+      "source": "func:act",
+      "target": "call:abs@L615",
+      "relation": "calls",
+      "line": 615
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.clip@L615",
+      "relation": "calls",
+      "line": 615
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L626",
+      "relation": "calls",
+      "line": 626
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L628",
+      "relation": "calls",
+      "line": 628
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L645",
+      "relation": "calls",
+      "line": 645
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L646",
+      "relation": "calls",
+      "line": 646
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.clip@L647",
+      "relation": "calls",
+      "line": 647
+    },
+    {
+      "source": "func:act",
+      "target": "call:norm@L650",
+      "relation": "calls",
+      "line": 650
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.zeros@L654",
+      "relation": "calls",
+      "line": 654
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L657",
+      "relation": "calls",
+      "line": 657
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L658",
+      "relation": "calls",
+      "line": 658
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L660",
+      "relation": "calls",
+      "line": 660
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L669",
+      "relation": "calls",
+      "line": 669
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L671",
+      "relation": "calls",
+      "line": 671
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L683",
+      "relation": "calls",
+      "line": 683
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L691",
+      "relation": "calls",
+      "line": 691
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L710",
+      "relation": "calls",
+      "line": 710
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L711",
+      "relation": "calls",
+      "line": 711
+    },
+    {
+      "source": "func:act",
+      "target": "call:int@L713",
+      "relation": "calls",
+      "line": 713
+    },
+    {
+      "source": "func:act",
+      "target": "call:_direct_action@L742",
+      "relation": "calls",
+      "line": 742
+    },
+    {
+      "source": "call:_direct_action@L742",
+      "target": "func:_direct_action",
+      "relation": "resolves_to",
+      "line": 742
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L762",
+      "relation": "calls",
+      "line": 762
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L764",
+      "relation": "calls",
+      "line": 764
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L775",
+      "relation": "calls",
+      "line": 775
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.nan_to_num@L778",
+      "relation": "calls",
+      "line": 778
+    },
+    {
+      "source": "func:act",
+      "target": "call:int@L783",
+      "relation": "calls",
+      "line": 783
+    },
+    {
+      "source": "func:act",
+      "target": "call:int@L784",
+      "relation": "calls",
+      "line": 784
+    },
+    {
+      "source": "func:act",
+      "target": "call:tolist@L785",
+      "relation": "calls",
+      "line": 785
+    },
+    {
+      "source": "func:act",
+      "target": "call:tolist@L786",
+      "relation": "calls",
+      "line": 786
+    },
+    {
+      "source": "func:act",
+      "target": "call:tolist@L787",
+      "relation": "calls",
+      "line": 787
+    },
+    {
+      "source": "func:act",
+      "target": "call:tolist@L788",
+      "relation": "calls",
+      "line": 788
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L790",
+      "relation": "calls",
+      "line": 790
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L791",
+      "relation": "calls",
+      "line": 791
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L793",
+      "relation": "calls",
+      "line": 793
+    },
+    {
+      "source": "func:act",
+      "target": "call:tolist@L794",
+      "relation": "calls",
+      "line": 794
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L795",
+      "relation": "calls",
+      "line": 795
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L796",
+      "relation": "calls",
+      "line": 796
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L797",
+      "relation": "calls",
+      "line": 797
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "call:float@L214",
+      "relation": "calls",
+      "line": 214
+    },
+    {
+      "source": "func:reset",
+      "target": "call:close@L278",
+      "relation": "calls",
+      "line": 278
+    },
+    {
+      "source": "func:reset",
+      "target": "call:ConstrainedAdaptiveEngine@L279",
+      "relation": "calls",
+      "line": 279
+    },
+    {
+      "source": "func:reset",
+      "target": "call:start_adaptive@L280",
+      "relation": "calls",
+      "line": 280
+    },
+    {
+      "source": "func:reset",
+      "target": "call:os.getpid@L285",
+      "relation": "calls",
+      "line": 285
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "call:np.clip@L329",
+      "relation": "calls",
+      "line": 329
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:np.array@L344",
+      "relation": "calls",
+      "line": 344
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "call:norm@L357",
+      "relation": "calls",
+      "line": 357
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:xs.max@L438",
+      "relation": "calls",
+      "line": 438
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:xs.min@L438",
+      "relation": "calls",
+      "line": 438
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:ys.max@L439",
+      "relation": "calls",
+      "line": 439
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "call:ys.min@L439",
+      "relation": "calls",
+      "line": 439
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "call:dirname@L471",
+      "relation": "calls",
+      "line": 471
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.zeros@L584",
+      "relation": "calls",
+      "line": 584
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L585",
+      "relation": "calls",
+      "line": 585
+    },
+    {
+      "source": "func:act",
+      "target": "call:str@L586",
+      "relation": "calls",
+      "line": 586
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L615",
+      "relation": "calls",
+      "line": 615
+    },
+    {
+      "source": "func:act",
+      "target": "call:min@L652",
+      "relation": "calls",
+      "line": 652
+    },
+    {
+      "source": "func:act",
+      "target": "call:norm@L660",
+      "relation": "calls",
+      "line": 660
+    },
+    {
+      "source": "func:act",
+      "target": "call:profile.get@L669",
+      "relation": "calls",
+      "line": 669
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L676",
+      "relation": "calls",
+      "line": 676
+    },
+    {
+      "source": "func:act",
+      "target": "call:profile.get@L683",
+      "relation": "calls",
+      "line": 683
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L689",
+      "relation": "calls",
+      "line": 689
+    },
+    {
+      "source": "func:act",
+      "target": "call:abs@L700",
+      "relation": "calls",
+      "line": 700
+    },
+    {
+      "source": "func:act",
+      "target": "call:abs@L700",
+      "relation": "calls",
+      "line": 700
+    },
+    {
+      "source": "func:act",
+      "target": "call:bool@L728",
+      "relation": "calls",
+      "line": 728
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L771",
+      "relation": "calls",
+      "line": 771
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L790",
+      "relation": "calls",
+      "line": 790
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L791",
+      "relation": "calls",
+      "line": 791
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L792",
+      "relation": "calls",
+      "line": 792
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L793",
+      "relation": "calls",
+      "line": 793
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L797",
+      "relation": "calls",
+      "line": 797
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "call:os.makedirs@L473",
+      "relation": "calls",
+      "line": 473
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "call:open@L474",
+      "relation": "calls",
+      "line": 474
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "call:f.write@L475",
+      "relation": "calls",
+      "line": 475
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L577",
+      "relation": "calls",
+      "line": 577
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L577",
+      "relation": "calls",
+      "line": 577
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L577",
+      "relation": "calls",
+      "line": 577
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L578",
+      "relation": "calls",
+      "line": 578
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L578",
+      "relation": "calls",
+      "line": 578
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L578",
+      "relation": "calls",
+      "line": 578
+    },
+    {
+      "source": "func:act",
+      "target": "call:int@L579",
+      "relation": "calls",
+      "line": 579
+    },
+    {
+      "source": "func:act",
+      "target": "call:int@L579",
+      "relation": "calls",
+      "line": 579
+    },
+    {
+      "source": "func:act",
+      "target": "call:max@L583",
+      "relation": "calls",
+      "line": 583
+    },
+    {
+      "source": "func:act",
+      "target": "call:norm@L585",
+      "relation": "calls",
+      "line": 585
+    },
+    {
+      "source": "func:act",
+      "target": "call:profile.get@L689",
+      "relation": "calls",
+      "line": 689
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L700",
+      "relation": "calls",
+      "line": 700
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L700",
+      "relation": "calls",
+      "line": 700
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L724",
+      "relation": "calls",
+      "line": 724
+    },
+    {
+      "source": "func:act",
+      "target": "call:max@L732",
+      "relation": "calls",
+      "line": 732
+    },
+    {
+      "source": "func:act",
+      "target": "call:norm@L771",
+      "relation": "calls",
+      "line": 771
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L785",
+      "relation": "calls",
+      "line": 785
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L786",
+      "relation": "calls",
+      "line": 786
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L787",
+      "relation": "calls",
+      "line": 787
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L788",
+      "relation": "calls",
+      "line": 788
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L792",
+      "relation": "calls",
+      "line": 792
+    },
+    {
+      "source": "func:act",
+      "target": "call:round@L794",
+      "relation": "calls",
+      "line": 794
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L583",
+      "relation": "calls",
+      "line": 583
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L583",
+      "relation": "calls",
+      "line": 583
+    },
+    {
+      "source": "func:act",
+      "target": "call:profile.get@L724",
+      "relation": "calls",
+      "line": 724
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.sin@L765",
+      "relation": "calls",
+      "line": 765
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.cos@L767",
+      "relation": "calls",
+      "line": 767
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.sin@L768",
+      "relation": "calls",
+      "line": 768
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.asarray@L785",
+      "relation": "calls",
+      "line": 785
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.asarray@L786",
+      "relation": "calls",
+      "line": 786
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.asarray@L787",
+      "relation": "calls",
+      "line": 787
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.asarray@L788",
+      "relation": "calls",
+      "line": 788
+    },
+    {
+      "source": "func:act",
+      "target": "call:np.asarray@L794",
+      "relation": "calls",
+      "line": 794
+    },
+    {
+      "source": "func:act",
+      "target": "call:float@L765",
+      "relation": "calls",
+      "line": 765
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "if:if@L147",
+      "relation": "branches_on",
+      "line": 147
+    },
+    {
+      "source": "func:_depth_metrics",
+      "target": "if:if@L150",
+      "relation": "branches_on",
+      "line": 150
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:profile@L180",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:profile@L180",
+      "target": "var:profile",
+      "relation": "writes",
+      "line": 180
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "assign:profile@L180",
+      "relation": "read_by",
+      "line": 180
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "if:if@L185",
+      "relation": "branches_on",
+      "line": 185
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "if:if@L190",
+      "relation": "branches_on",
+      "line": 190
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "if:if@L191",
+      "relation": "branches_on",
+      "line": 191
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "if:if@L192",
+      "relation": "branches_on",
+      "line": 192
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "if:if@L192",
+      "relation": "predicate_reads",
+      "line": 192
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "if:if@L193",
+      "relation": "branches_on",
+      "line": 193
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:vz@L194",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L194",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 194
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "if:if@L195",
+      "relation": "branches_on",
+      "line": 195
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:vz@L196",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L196",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 196
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:vz@L198",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L198",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 198
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:vz@L200",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L200",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 200
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:vz@L202",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L202",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 202
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "assign:vz@L202",
+      "relation": "read_by",
+      "line": 202
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:vz@L206",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L206",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 206
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "assign:vz@L206",
+      "relation": "read_by",
+      "line": 206
+    },
+    {
+      "source": "func:_direct_action",
+      "target": "assign:vz@L222",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L222",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 222
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:vz@L222",
+      "relation": "read_by",
+      "line": 222
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "assign:profile@L237",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:profile@L237",
+      "target": "var:profile",
+      "relation": "writes",
+      "line": 237
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "assign:profile@L237",
+      "relation": "read_by",
+      "line": 237
+    },
+    {
+      "source": "func:_landing_params",
+      "target": "if:if@L240",
+      "relation": "branches_on",
+      "line": 240
+    },
+    {
+      "source": "func:reset",
+      "target": "if:if@L273",
+      "relation": "branches_on",
+      "line": 273
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "assign:current_pos@L305",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:current_pos@L305",
+      "target": "var:current_pos",
+      "relation": "writes",
+      "line": 305
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "assign:current_vel@L315",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:current_vel@L315",
+      "target": "var:current_vel",
+      "relation": "writes",
+      "line": 315
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "if:if@L317",
+      "relation": "branches_on",
+      "line": 317
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "if:if@L319",
+      "relation": "branches_on",
+      "line": 319
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "assign:agl@L329",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:agl@L329",
+      "target": "var:agl",
+      "relation": "writes",
+      "line": 329
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:agl@L329",
+      "relation": "read_by",
+      "line": 329
+    },
+    {
+      "source": "func:_extract_state",
+      "target": "assign:search_vec@L330",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:search_vec@L330",
+      "target": "var:search_vec",
+      "relation": "writes",
+      "line": 330
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "assign:search_vec@L335",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:search_vec@L335",
+      "target": "var:search_vec",
+      "relation": "writes",
+      "line": 335
+    },
+    {
+      "source": "var:search_vec",
+      "target": "assign:search_vec@L335",
+      "relation": "read_by",
+      "line": 335
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "if:if@L338",
+      "relation": "branches_on",
+      "line": 338
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "if:if@L341",
+      "relation": "branches_on",
+      "line": 341
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "if:if@L348",
+      "relation": "branches_on",
+      "line": 348
+    },
+    {
+      "source": "var:search_vec",
+      "target": "if:if@L348",
+      "relation": "predicate_reads",
+      "line": 348
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "if:if@L353",
+      "relation": "branches_on",
+      "line": 353
+    },
+    {
+      "source": "func:_estimate_target",
+      "target": "if:if@L360",
+      "relation": "branches_on",
+      "line": 360
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "if:if@L370",
+      "relation": "branches_on",
+      "line": 370
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "if:if@L375",
+      "relation": "branches_on",
+      "line": 375
+    },
+    {
+      "source": "var:agl",
+      "target": "if:if@L375",
+      "relation": "predicate_reads",
+      "line": 375
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "if:if@L377",
+      "relation": "branches_on",
+      "line": 377
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "if:if@L377",
+      "relation": "predicate_reads",
+      "line": 377
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "if:if@L379",
+      "relation": "branches_on",
+      "line": 379
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "if:if@L381",
+      "relation": "branches_on",
+      "line": 381
+    },
+    {
+      "source": "func:_infer_terrain",
+      "target": "if:if@L383",
+      "relation": "branches_on",
+      "line": 383
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L395",
+      "relation": "branches_on",
+      "line": 395
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L399",
+      "relation": "branches_on",
+      "line": 399
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L414",
+      "relation": "branches_on",
+      "line": 414
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L423",
+      "relation": "branches_on",
+      "line": 423
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L430",
+      "relation": "branches_on",
+      "line": 430
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L434",
+      "relation": "branches_on",
+      "line": 434
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L440",
+      "relation": "branches_on",
+      "line": 440
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L442",
+      "relation": "branches_on",
+      "line": 442
+    },
+    {
+      "source": "func:_detect_platform_bearing",
+      "target": "if:if@L449",
+      "relation": "branches_on",
+      "line": 449
+    },
+    {
+      "source": "func:_yaw_command",
+      "target": "if:if@L459",
+      "relation": "branches_on",
+      "line": 459
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "if:if@L465",
+      "relation": "branches_on",
+      "line": 465
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "if:if@L469",
+      "relation": "branches_on",
+      "line": 469
+    },
+    {
+      "source": "func:_trace_step",
+      "target": "if:if@L472",
+      "relation": "branches_on",
+      "line": 472
+    },
+    {
+      "source": "func:act",
+      "target": "assign:current_pos@L485",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:current_pos@L485",
+      "target": "var:current_pos",
+      "relation": "writes",
+      "line": 485
+    },
+    {
+      "source": "func:act",
+      "target": "assign:current_vel@L485",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:current_vel@L485",
+      "target": "var:current_vel",
+      "relation": "writes",
+      "line": 485
+    },
+    {
+      "source": "func:act",
+      "target": "assign:agl@L485",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:agl@L485",
+      "target": "var:agl",
+      "relation": "writes",
+      "line": 485
+    },
+    {
+      "source": "func:act",
+      "target": "assign:search_vec@L485",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:search_vec@L485",
+      "target": "var:search_vec",
+      "relation": "writes",
+      "line": 485
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L487",
+      "relation": "branches_on",
+      "line": 487
+    },
+    {
+      "source": "func:act",
+      "target": "assign:target_pos@L490",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:target_pos@L490",
+      "target": "var:target_pos",
+      "relation": "writes",
+      "line": 490
+    },
+    {
+      "source": "var:search_vec",
+      "target": "assign:target_pos@L490",
+      "relation": "read_by",
+      "line": 490
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:target_pos@L490",
+      "relation": "read_by",
+      "line": 490
+    },
+    {
+      "source": "func:act",
+      "target": "assign:dist_xy@L491",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:dist_xy@L491",
+      "target": "var:dist_xy",
+      "relation": "writes",
+      "line": 491
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:dist_xy@L491",
+      "relation": "read_by",
+      "line": 491
+    },
+    {
+      "source": "var:target_pos",
+      "target": "assign:dist_xy@L491",
+      "relation": "read_by",
+      "line": 491
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L495",
+      "relation": "branches_on",
+      "line": 495
+    },
+    {
+      "source": "func:act",
+      "target": "assign:raw_search_target@L511",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:raw_search_target@L511",
+      "target": "var:raw_search_target",
+      "relation": "writes",
+      "line": 511
+    },
+    {
+      "source": "var:search_vec",
+      "target": "assign:raw_search_target@L511",
+      "relation": "read_by",
+      "line": 511
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:raw_search_target@L511",
+      "relation": "read_by",
+      "line": 511
+    },
+    {
+      "source": "func:act",
+      "target": "assign:raw_search_dist_xy@L512",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:raw_search_dist_xy@L512",
+      "target": "var:raw_search_dist_xy",
+      "relation": "writes",
+      "line": 512
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:raw_search_dist_xy@L512",
+      "relation": "read_by",
+      "line": 512
+    },
+    {
+      "source": "var:raw_search_target",
+      "target": "assign:raw_search_dist_xy@L512",
+      "relation": "read_by",
+      "line": 512
+    },
+    {
+      "source": "func:act",
+      "target": "assign:applied_goal_correction@L573",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:applied_goal_correction@L573",
+      "target": "var:applied_goal_correction",
+      "relation": "writes",
+      "line": 573
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L574",
+      "relation": "branches_on",
+      "line": 574
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L576",
+      "relation": "branches_on",
+      "line": 576
+    },
+    {
+      "source": "var:raw_search_dist_xy",
+      "target": "if:if@L576",
+      "relation": "predicate_reads",
+      "line": 576
+    },
+    {
+      "source": "func:act",
+      "target": "assign:target_pos@L581",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:target_pos@L581",
+      "target": "var:target_pos",
+      "relation": "writes",
+      "line": 581
+    },
+    {
+      "source": "var:raw_search_target",
+      "target": "assign:target_pos@L581",
+      "relation": "read_by",
+      "line": 581
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L582",
+      "relation": "branches_on",
+      "line": 582
+    },
+    {
+      "source": "func:act",
+      "target": "assign:target_pos@L583",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:target_pos@L583",
+      "target": "var:target_pos",
+      "relation": "writes",
+      "line": 583
+    },
+    {
+      "source": "var:target_pos",
+      "target": "assign:target_pos@L583",
+      "relation": "read_by",
+      "line": 583
+    },
+    {
+      "source": "func:act",
+      "target": "assign:dist_xy@L585",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:dist_xy@L585",
+      "target": "var:dist_xy",
+      "relation": "writes",
+      "line": 585
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:dist_xy@L585",
+      "relation": "read_by",
+      "line": 585
+    },
+    {
+      "source": "var:target_pos",
+      "target": "assign:dist_xy@L585",
+      "relation": "read_by",
+      "line": 585
+    },
+    {
+      "source": "func:act",
+      "target": "assign:applied_goal_correction@L586",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:applied_goal_correction@L586",
+      "target": "var:applied_goal_correction",
+      "relation": "writes",
+      "line": 586
+    },
+    {
+      "source": "func:act",
+      "target": "assign:terrain_id@L589",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:terrain_id@L589",
+      "target": "var:terrain_id",
+      "relation": "writes",
+      "line": 589
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:terrain_id@L589",
+      "relation": "read_by",
+      "line": 589
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "assign:terrain_id@L589",
+      "relation": "read_by",
+      "line": 589
+    },
+    {
+      "source": "var:agl",
+      "target": "assign:terrain_id@L589",
+      "relation": "read_by",
+      "line": 589
+    },
+    {
+      "source": "func:act",
+      "target": "assign:profile@L591",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:profile@L591",
+      "target": "var:profile",
+      "relation": "writes",
+      "line": 591
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "assign:profile@L591",
+      "relation": "read_by",
+      "line": 591
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L611",
+      "relation": "branches_on",
+      "line": 611
+    },
+    {
+      "source": "func:act",
+      "target": "assign:vx@L614",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vx@L614",
+      "target": "var:vx",
+      "relation": "writes",
+      "line": 614
+    },
+    {
+      "source": "func:act",
+      "target": "assign:vy@L614",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vy@L614",
+      "target": "var:vy",
+      "relation": "writes",
+      "line": 614
+    },
+    {
+      "source": "func:act",
+      "target": "assign:vz@L614",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:vz@L614",
+      "target": "var:vz",
+      "relation": "writes",
+      "line": 614
+    },
+    {
+      "source": "func:act",
+      "target": "assign:total_speed@L614",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:total_speed@L614",
+      "target": "var:total_speed",
+      "relation": "writes",
+      "line": 614
+    },
+    {
+      "source": "func:act",
+      "target": "assign:yaw_cmd@L614",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:yaw_cmd@L614",
+      "target": "var:yaw_cmd",
+      "relation": "writes",
+      "line": 614
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L616",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L616",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 616
+    },
+    {
+      "source": "var:vx",
+      "target": "assign:action@L616",
+      "relation": "read_by",
+      "line": 616
+    },
+    {
+      "source": "var:total_speed",
+      "target": "assign:action@L616",
+      "relation": "read_by",
+      "line": 616
+    },
+    {
+      "source": "var:vz",
+      "target": "assign:action@L616",
+      "relation": "read_by",
+      "line": 616
+    },
+    {
+      "source": "var:vy",
+      "target": "assign:action@L616",
+      "relation": "read_by",
+      "line": 616
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L622",
+      "relation": "branches_on",
+      "line": 622
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L628",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L628",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 628
+    },
+    {
+      "source": "var:action",
+      "target": "assign:action@L628",
+      "relation": "read_by",
+      "line": 628
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L636",
+      "relation": "branches_on",
+      "line": 636
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "if:if@L636",
+      "relation": "predicate_reads",
+      "line": 636
+    },
+    {
+      "source": "var:current_pos",
+      "target": "if:if@L636",
+      "relation": "predicate_reads",
+      "line": 636
+    },
+    {
+      "source": "var:target_pos",
+      "target": "if:if@L636",
+      "relation": "predicate_reads",
+      "line": 636
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L651",
+      "relation": "branches_on",
+      "line": 651
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L656",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L656",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 656
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L698",
+      "relation": "branches_on",
+      "line": 698
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "if:if@L698",
+      "relation": "predicate_reads",
+      "line": 698
+    },
+    {
+      "source": "var:agl",
+      "target": "if:if@L698",
+      "relation": "predicate_reads",
+      "line": 698
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L700",
+      "relation": "branches_on",
+      "line": 700
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "if:if@L700",
+      "relation": "predicate_reads",
+      "line": 700
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L714",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L714",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 714
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:action@L714",
+      "relation": "read_by",
+      "line": 714
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "assign:action@L714",
+      "relation": "read_by",
+      "line": 714
+    },
+    {
+      "source": "var:target_pos",
+      "target": "assign:action@L714",
+      "relation": "read_by",
+      "line": 714
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L723",
+      "relation": "branches_on",
+      "line": 723
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "if:if@L723",
+      "relation": "predicate_reads",
+      "line": 723
+    },
+    {
+      "source": "var:profile",
+      "target": "if:if@L723",
+      "relation": "predicate_reads",
+      "line": 723
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L729",
+      "relation": "branches_on",
+      "line": 729
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L731",
+      "relation": "branches_on",
+      "line": 731
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L733",
+      "relation": "branches_on",
+      "line": 733
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L735",
+      "relation": "branches_on",
+      "line": 735
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L737",
+      "relation": "branches_on",
+      "line": 737
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "if:if@L737",
+      "relation": "predicate_reads",
+      "line": 737
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "if:if@L737",
+      "relation": "predicate_reads",
+      "line": 737
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L742",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L742",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 742
+    },
+    {
+      "source": "var:current_pos",
+      "target": "assign:action@L742",
+      "relation": "read_by",
+      "line": 742
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "assign:action@L742",
+      "relation": "read_by",
+      "line": 742
+    },
+    {
+      "source": "var:target_pos",
+      "target": "assign:action@L742",
+      "relation": "read_by",
+      "line": 742
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L752",
+      "relation": "branches_on",
+      "line": 752
+    },
+    {
+      "source": "func:act",
+      "target": "if:if@L757",
+      "relation": "branches_on",
+      "line": 757
+    },
+    {
+      "source": "var:dist_xy",
+      "target": "if:if@L757",
+      "relation": "predicate_reads",
+      "line": 757
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L774",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L774",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 774
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L775",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L775",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 775
+    },
+    {
+      "source": "var:action",
+      "target": "assign:action@L775",
+      "relation": "read_by",
+      "line": 775
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L778",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L778",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 778
+    },
+    {
+      "source": "var:action",
+      "target": "assign:action@L778",
+      "relation": "read_by",
+      "line": 778
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L779",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L779",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 779
+    },
+    {
+      "source": "var:action",
+      "target": "assign:action@L779",
+      "relation": "read_by",
+      "line": 779
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L780",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L780",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 780
+    },
+    {
+      "source": "var:action",
+      "target": "assign:action@L780",
+      "relation": "read_by",
+      "line": 780
+    },
+    {
+      "source": "func:act",
+      "target": "assign:action@L781",
+      "relation": "contains"
+    },
+    {
+      "source": "assign:action@L781",
+      "target": "var:action",
+      "relation": "writes",
+      "line": 781
+    },
+    {
+      "source": "var:action",
+      "target": "assign:action@L781",
+      "relation": "read_by",
+      "line": 781
+    },
+    {
+      "source": "var:observation",
+      "target": "func:act",
+      "relation": "enters",
+      "path": "critical"
+    },
+    {
+      "source": "func:act",
+      "target": "call:self._extract_state@L485",
+      "relation": "calls",
+      "path": "critical"
+    },
+    {
+      "source": "call:self._extract_state@L485",
+      "target": "var:current_pos",
+      "relation": "produces",
+      "path": "critical"
+    },
+    {
+      "source": "call:self._extract_state@L485",
+      "target": "var:current_vel",
+      "relation": "produces",
+      "path": "critical"
+    },
+    {
+      "source": "call:self._extract_state@L485",
+      "target": "var:agl",
+      "relation": "produces",
+      "path": "critical"
+    },
+    {
+      "source": "call:self._extract_state@L485",
+      "target": "var:search_vec",
+      "relation": "produces",
+      "path": "critical"
+    },
+    {
+      "source": "func:act",
+      "target": "call:self._estimate_target@L490",
+      "relation": "calls",
+      "path": "critical"
+    },
+    {
+      "source": "var:current_pos",
+      "target": "call:self._estimate_target@L490",
+      "relation": "input",
+      "path": "critical"
+    },
+    {
+      "source": "var:search_vec",
+      "target": "call:self._estimate_target@L490",
+      "relation": "input",
+      "path": "critical"
+    },
+    {
+      "source": "call:self._estimate_target@L490",
+      "target": "var:target_pos",
+      "relation": "produces_initial",
+      "path": "critical"
+    },
+    {
+      "source": "var:target_pos",
+      "target": "var:dist_xy",
+      "relation": "computes",
+      "path": "critical"
+    },
+    {
+      "source": "var:current_pos",
+      "target": "var:raw_search_target",
+      "relation": "plus_search_vec",
+      "path": "critical"
+    },
+    {
+      "source": "var:search_vec",
+      "target": "var:raw_search_target",
+      "relation": "plus_current_pos",
+      "path": "critical"
+    },
+    {
+      "source": "var:raw_search_target",
+      "target": "var:raw_search_dist_xy",
+      "relation": "computes",
+      "path": "critical"
+    },
+    {
+      "source": "var:initial_dist_xy",
+      "target": "var:goal_corrections",
+      "relation": "selects",
+      "path": "critical"
+    },
+    {
+      "source": "var:raw_search_dist_xy",
+      "target": "var:goal_corrections",
+      "relation": "selects",
+      "path": "critical"
+    },
+    {
+      "source": "var:goal_corrections",
+      "target": "var:target_pos",
+      "relation": "may_overwrite",
+      "path": "critical"
+    },
+    {
+      "source": "var:goal_corrections",
+      "target": "var:dist_xy",
+      "relation": "recomputes",
+      "path": "critical"
+    },
+    {
+      "source": "var:target_pos",
+      "target": "call:self.engine.set_target_pos@L594",
+      "relation": "sent_to_engine",
+      "path": "critical"
+    },
+    {
+      "source": "var:terrain_id",
+      "target": "call:_landing_params@L593",
+      "relation": "selects_profile",
+      "path": "critical"
+    },
+    {
+      "source": "call:_landing_params@L593",
+      "target": "var:landing_params",
+      "relation": "produces",
+      "path": "critical"
+    },
+    {
+      "source": "var:landing_params",
+      "target": "call:self.engine.set_flight_params@L593",
+      "relation": "sent_to_engine",
+      "path": "critical"
+    },
+    {
+      "source": "var:target_pos",
+      "target": "call:self.engine.process_sensor_data@L595",
+      "relation": "input",
+      "path": "critical"
+    },
+    {
+      "source": "call:self.engine.update@L608",
+      "target": "var:control_output",
+      "relation": "produces",
+      "path": "critical"
+    },
+    {
+      "source": "var:control_output",
+      "target": "call:_action_from_velocity@L616",
+      "relation": "input",
+      "path": "critical"
+    },
+    {
+      "source": "call:_action_from_velocity@L616",
+      "target": "var:action",
+      "relation": "produces",
+      "path": "critical"
+    },
+    {
+      "source": "var:goal_corrections",
+      "target": "goal_corr:city",
+      "relation": "contains"
+    },
+    {
+      "source": "var:initial_dist_xy",
+      "target": "goal_corr:city",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "var:raw_search_dist_xy",
+      "target": "goal_corr:city",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "goal_corr:city",
+      "target": "var:target_pos",
+      "relation": "writes_if_selected"
+    },
+    {
+      "source": "goal_corr:city",
+      "target": "var:dist_xy",
+      "relation": "recomputes_if_selected"
+    },
+    {
+      "source": "var:goal_corrections",
+      "target": "goal_corr:open",
+      "relation": "contains"
+    },
+    {
+      "source": "var:initial_dist_xy",
+      "target": "goal_corr:open",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "var:raw_search_dist_xy",
+      "target": "goal_corr:open",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "goal_corr:open",
+      "target": "var:target_pos",
+      "relation": "writes_if_selected"
+    },
+    {
+      "source": "goal_corr:open",
+      "target": "var:dist_xy",
+      "relation": "recomputes_if_selected"
+    },
+    {
+      "source": "var:goal_corrections",
+      "target": "goal_corr:forest",
+      "relation": "contains"
+    },
+    {
+      "source": "var:initial_dist_xy",
+      "target": "goal_corr:forest",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "var:raw_search_dist_xy",
+      "target": "goal_corr:forest",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "goal_corr:forest",
+      "target": "var:target_pos",
+      "relation": "writes_if_selected"
+    },
+    {
+      "source": "goal_corr:forest",
+      "target": "var:dist_xy",
+      "relation": "recomputes_if_selected"
+    },
+    {
+      "source": "var:goal_corrections",
+      "target": "goal_corr:mountain",
+      "relation": "contains"
+    },
+    {
+      "source": "var:initial_dist_xy",
+      "target": "goal_corr:mountain",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "var:raw_search_dist_xy",
+      "target": "goal_corr:mountain",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "goal_corr:mountain",
+      "target": "var:target_pos",
+      "relation": "writes_if_selected"
+    },
+    {
+      "source": "goal_corr:mountain",
+      "target": "var:dist_xy",
+      "relation": "recomputes_if_selected"
+    },
+    {
+      "source": "var:goal_corrections",
+      "target": "goal_corr:village",
+      "relation": "contains"
+    },
+    {
+      "source": "var:initial_dist_xy",
+      "target": "goal_corr:village",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "var:raw_search_dist_xy",
+      "target": "goal_corr:village",
+      "relation": "predicate_input"
+    },
+    {
+      "source": "goal_corr:village",
+      "target": "var:target_pos",
+      "relation": "writes_if_selected"
+    },
+    {
+      "source": "goal_corr:village",
+      "target": "var:dist_xy",
+      "relation": "recomputes_if_selected"
+    },
+    {
+      "source": "diff_hunk:hunk_1",
+      "target": "func:act",
+      "relation": "affects_likely"
+    },
+    {
+      "source": "diff_hunk:hunk_2",
+      "target": "func:act",
+      "relation": "affects_likely"
+    },
+    {
+      "source": "disconnect:VILLAGE_GAIN_WITH_NEUTRAL_VILLAGE_BLOCK",
+      "target": "concept:score_village_gain",
+      "relation": "may_explain"
+    },
+    {
+      "source": "disconnect:MOUNTAIN_CORRECTION_NOT_ACTUAL_PLATFORM",
+      "target": "concept:mountain_fail",
+      "relation": "may_explain"
+    },
+    {
+      "source": "disconnect:MOUNTAIN_CORRECTION_NOT_ACTUAL_PLATFORM",
+      "target": "var:goal_corrections",
+      "relation": "involves"
+    },
+    {
+      "source": "disconnect:MOUNTAIN_CLASSIFIER_START_Z_GAP",
+      "target": "concept:mountain_fail",
+      "relation": "may_explain"
+    },
+    {
+      "source": "disconnect:TARGET_ESTIMATE_Z_CLAMP",
+      "target": "var:goal_corrections",
+      "relation": "involves"
+    },
+    {
+      "source": "disconnect:LOCAL_TARGET_POS_NOT_PERSISTED_TO_TARGET_EST",
+      "target": "var:goal_corrections",
+      "relation": "involves"
+    },
+    {
+      "source": "disconnect:GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "target": "var:goal_corrections",
+      "relation": "involves"
+    },
+    {
+      "source": "disconnect:GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "target": "var:goal_corrections",
+      "relation": "involves"
+    }
+  ],
+  "disconnects": [
+    {
+      "code": "VILLAGE_GAIN_WITH_NEUTRAL_VILLAGE_BLOCK",
+      "severity": "high",
+      "finding": "The candidate comments say Village is neutral, but the confirmed score improvement is on Village.",
+      "evidence": "village correction line 558 offset=np.array([0.0, 0.0, 0.0], dtype=np.float64) z_floor=None"
+    },
+    {
+      "code": "MOUNTAIN_CORRECTION_NOT_ACTUAL_PLATFORM",
+      "severity": "high",
+      "finding": "Mountain correction only adds z +2 / z_floor 2.20, but the adjusted Mountain platform is around z=28.10.",
+      "evidence": "mountain correction line 545 offset=np.array([0.0, 0.0, 2.0], dtype=np.float64) z_floor=2.2"
+    },
+    {
+      "code": "MOUNTAIN_CLASSIFIER_START_Z_GAP",
+      "severity": "medium",
+      "finding": "Candidate v1 classifier still uses spawn_z > 18.0, while adjusted Mountain start is z\u224810.72.",
+      "evidence": "terrain classifier line contains `if self.spawn_z > 18.0 or agl > 7.0:`"
+    },
+    {
+      "code": "TARGET_ESTIMATE_Z_CLAMP",
+      "severity": "medium",
+      "finding": "Initial target estimate clamps z near ground, so Mountain's high adjusted platform altitude cannot be inferred through _estimate_target.",
+      "evidence": "lines near _estimate_target clamp raw_target[2] to 0.20 or >=0.10"
+    },
+    {
+      "code": "LOCAL_TARGET_POS_NOT_PERSISTED_TO_TARGET_EST",
+      "severity": "medium",
+      "finding": "Goal corrections overwrite local target_pos but do not persist it into self.target_est; correction must re-trigger every step.",
+      "evidence": "target_pos is sent to engine, but self.target_est is not updated in the correction block"
+    },
+    {
+      "code": "GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "severity": "low",
+      "finding": "Correction predicates overlap: open and forest. First match wins.",
+      "evidence": "open L525 vs forest L535"
+    },
+    {
+      "code": "GOAL_CORRECTION_PREDICATE_OVERLAP",
+      "severity": "low",
+      "finding": "Correction predicates overlap: forest and open. First match wins.",
+      "evidence": "forest L535 vs open L525"
+    }
+  ],
+  "goal_corrections": [
+    {
+      "name": "city",
+      "init_min": -1.0,
+      "init_max": 8.5,
+      "raw_min": -1.0,
+      "raw_max": 3.5,
+      "step_min": 0,
+      "offset": "np.array([-0.25, -1.42, -1.02], dtype=np.float64)",
+      "z_floor": null,
+      "_line": 515
+    },
+    {
+      "name": "open",
+      "init_min": 14.0,
+      "init_max": 19.5,
+      "raw_min": -1.0,
+      "raw_max": 9.0,
+      "step_min": 250,
+      "offset": "np.array([1.73, -6.25, 0.20], dtype=np.float64)",
+      "z_floor": 0.2,
+      "_line": 525
+    },
+    {
+      "name": "forest",
+      "init_min": 18.0,
+      "init_max": 30.0,
+      "raw_min": -1.0,
+      "raw_max": 8.5,
+      "step_min": 250,
+      "offset": "np.array([6.51, -3.53, 1.63], dtype=np.float64)",
+      "z_floor": 1.83,
+      "_line": 535
+    },
+    {
+      "name": "mountain",
+      "init_min": 40.0,
+      "init_max": 50.0,
+      "raw_min": 20.0,
+      "raw_max": 999.0,
+      "step_min": 250,
+      "offset": "np.array([0.0, 0.0, 2.0], dtype=np.float64)",
+      "z_floor": 2.2,
+      "_line": 545
+    },
+    {
+      "name": "village",
+      "init_min": 40.0,
+      "init_max": 50.0,
+      "raw_min": 10.0,
+      "raw_max": 20.0,
+      "step_min": 250,
+      "offset": "np.array([0.0, 0.0, 0.0], dtype=np.float64)",
+      "z_floor": null,
+      "_line": 558
+    }
+  ]
+}

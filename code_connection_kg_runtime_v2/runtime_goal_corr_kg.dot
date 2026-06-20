@@ -1,0 +1,32 @@
+digraph RuntimeGoalCorrKG {
+  rankdir=LR;
+  node [shape=box, fontsize=10];
+  goal_corrections [label="goal_corrections predicate", style=filled, fillcolor="palegreen"];
+  target_pos [label="target_pos rewrite", style=filled, fillcolor="lightyellow"];
+  engine [label="engine target/control path", style=filled, fillcolor="lightblue"];
+  score [label="benchmark score", style=filled, fillcolor="white"];
+  type1_city [label="type1_city\nscore=0.704674175603987\nfirst_corr=None", style=filled, fillcolor="mistyrose" if "mountain" in "type1_city" else "white"];
+  type1_city -> goal_corrections [label="evaluates"];
+  target_pos -> engine [label="feeds"];
+  engine -> score [label="produces"];
+  type2_open [label="type2_open\nscore=0.5308846204871644\nfirst_corr=None", style=filled, fillcolor="mistyrose" if "mountain" in "type2_open" else "white"];
+  type2_open -> goal_corrections [label="evaluates"];
+  target_pos -> engine [label="feeds"];
+  engine -> score [label="produces"];
+  type3_mountain [label="type3_mountain\nscore=0.01\nfirst_corr=None", style=filled, fillcolor="mistyrose" if "mountain" in "type3_mountain" else "white"];
+  type3_mountain -> goal_corrections [label="evaluates"];
+  target_pos -> engine [label="feeds"];
+  engine -> score [label="produces"];
+  type4_village [label="type4_village\nscore=0.7241622049100852\nfirst_corr=None", style=filled, fillcolor="mistyrose" if "mountain" in "type4_village" else "white"];
+  type4_village -> goal_corrections [label="evaluates"];
+  target_pos -> engine [label="feeds"];
+  engine -> score [label="produces"];
+  type5_warehouse [label="type5_warehouse\nscore=0.7973229294698024\nfirst_corr=None", style=filled, fillcolor="mistyrose" if "mountain" in "type5_warehouse" else "white"];
+  type5_warehouse -> goal_corrections [label="evaluates"];
+  target_pos -> engine [label="feeds"];
+  engine -> score [label="produces"];
+  type6_forest [label="type6_forest\nscore=0.571807716360089\nfirst_corr=None", style=filled, fillcolor="mistyrose" if "mountain" in "type6_forest" else "white"];
+  type6_forest -> goal_corrections [label="evaluates"];
+  target_pos -> engine [label="feeds"];
+  engine -> score [label="produces"];
+}
